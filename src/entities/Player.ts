@@ -67,11 +67,6 @@ export class Player {
   
   // 🧪 TEST MODE - Unlimited health for testing 🧪
   private isTestMode: boolean = false
-  
-  // 🎲 ROGUE MODE MUTATIONS 🎲
-  private movementSpeedMultiplier: number = 1.0
-  private shieldCapacityBonus: number = 0 // Additional shields beyond base
-  private isRogueMode: boolean = false // Track if in Rogue mode for boundary behavior
 
   constructor() {
     this.position = new THREE.Vector3(0, 0, 0)
@@ -407,9 +402,9 @@ export class Player {
     // 🎮 ANALOG MOVEMENT INPUT - Smooth acceleration! 🎮
     const movement = inputManager.getMovementVector()
     
-    // Calculate target velocity based on input (with rogue mutations)
+    // Calculate target velocity based on input
     const baseSpeed = this.isDashing ? this.dashSpeed : this.speed
-    const currentSpeed = baseSpeed * this.movementSpeedMultiplier
+    const currentSpeed = baseSpeed
     this.targetVelocity.x = movement.x * currentSpeed
     this.targetVelocity.y = movement.y * currentSpeed
     
@@ -446,43 +441,34 @@ export class Player {
     this.position.y += this.velocity.y * deltaTime
 
     // 🔘 CIRCULAR BOUNDARY COLLISION & BOUNCE 🔘
-    // Skip boundary in Rogue mode - infinite vertical space!
-    if (!this.isRogueMode) {
-      // World size is 60, so radius is 30. We use 29.5 to account for player size.
-      const boundaryRadius = 29.5
-      const distFromOrigin = Math.sqrt(this.position.x * this.position.x + this.position.y * this.position.y)
-      
-      if (distFromOrigin > boundaryRadius) {
-        // Normal vector from origin to player
-        const normal = this.position.clone().normalize()
-        
-        // Keep player inside boundary
-        this.position.copy(normal.clone().multiplyScalar(boundaryRadius))
-        
-        // 💥 SMOOTH BOUNCE LOGIC 💥
-        const dot = this.velocity.dot(normal)
-        if (dot > 0) { // Only bounce if moving outwards
-          // We use a bounce factor of 1.4 (soft bounce) instead of 2.0 (hard reflection)
-          // This reduces oscillation jitter when pressing keys against the wall
-          const bounceFactor = 1.4
-          const reflection = normal.clone().multiplyScalar(dot * bounceFactor)
-          this.velocity.sub(reflection)
-          
-          // Add a smaller repulsion force
-          this.velocity.add(normal.clone().multiplyScalar(-3.0))
-          
-          // Visual/Audio feedback for hitting the barrier (only for significant hits)
-          if (this.effectsSystem && dot > 1.0) {
-            this.effectsSystem.createWeaponImpact(this.position.clone())
-          }
+    // World size is 60, so radius is 30. We use 29.5 to account for player size.
+    const boundaryRadius = 29.5
+    const distFromOrigin = Math.sqrt(this.position.x * this.position.x + this.position.y * this.position.y)
+
+    if (distFromOrigin > boundaryRadius) {
+      // Normal vector from origin to player
+      const normal = this.position.clone().normalize()
+
+      // Keep player inside boundary
+      this.position.copy(normal.clone().multiplyScalar(boundaryRadius))
+
+      // 💥 SMOOTH BOUNCE LOGIC 💥
+      const dot = this.velocity.dot(normal)
+      if (dot > 0) { // Only bounce if moving outwards
+        // We use a bounce factor of 1.4 (soft bounce) instead of 2.0 (hard reflection)
+        // This reduces oscillation jitter when pressing keys against the wall
+        const bounceFactor = 1.4
+        const reflection = normal.clone().multiplyScalar(dot * bounceFactor)
+        this.velocity.sub(reflection)
+
+        // Add a smaller repulsion force
+        this.velocity.add(normal.clone().multiplyScalar(-3.0))
+
+        // Visual/Audio feedback for hitting the barrier (only for significant hits)
+        if (this.effectsSystem && dot > 1.0) {
+          this.effectsSystem.createWeaponImpact(this.position.clone())
         }
       }
-    } else {
-      // 🎲 ROGUE MODE: Keep player horizontally centered-ish but allow free vertical movement
-      // Soft horizontal boundaries
-      const maxX = 25
-      if (this.position.x > maxX) this.position.x = maxX
-      if (this.position.x < -maxX) this.position.x = -maxX
     }
 
     // Update mesh position (ensure z=0 for top-down view)
@@ -1565,10 +1551,6 @@ export class Player {
   setTestMode(enabled: boolean): void {
     this.isTestMode = enabled
   }
-  
-  setRogueMode(enabled: boolean): void {
-    this.isRogueMode = enabled
-  }
 
   // 🎬 SET ZOOM COMPENSATION - Callback to get zoom scale from SceneManager! 🎬
   setZoomCompensationCallback(callback: () => number): void {
@@ -1650,30 +1632,7 @@ export class Player {
     return this.invulnerableTimer
   }
   
-  // 🎲 ROGUE MODE: APPLY STAT MUTATION 🎲
-  applyRogueStatMutation(statModifier: {
-    movementSpeed?: number
-    shieldCapacity?: number
-  }): void {
-    if (statModifier.movementSpeed !== undefined) {
-      this.movementSpeedMultiplier *= statModifier.movementSpeed
-      // Recalculate speed with new multiplier
-      this.updateSpeed()
-    }
-    
-    if (statModifier.shieldCapacity !== undefined) {
-      this.shieldCapacityBonus += statModifier.shieldCapacity
-    }
-  }
-  
-  // 🎲 ROGUE MODE: GET SHIELD CAPACITY (base + bonus) 🎲
   getShieldCapacity(): number {
-    return 1 + this.shieldCapacityBonus // Base 1 shield + bonus
-  }
-  
-  // 🎲 ROGUE MODE: RESET MUTATIONS (for new run) 🎲
-  resetRogueMutations(): void {
-    this.movementSpeedMultiplier = 1.0
-    this.shieldCapacityBonus = 0
+    return 1 // Base 1 shield
   }
 }

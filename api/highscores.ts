@@ -5,7 +5,7 @@
  * ✅ Setup Complete: @vercel/kv installed, environment variables configured
  * 
  * Endpoints:
- * - GET /api/highscores?mode=original|rogue|test - Get high scores for a mode
+ * - GET /api/highscores?mode=original|test - Get high scores for a mode
  * - GET /api/highscores?stats=true - Get play count statistics
  * - POST /api/highscores - Save a new high score
  */
@@ -21,14 +21,13 @@ interface HighScoreEntry {
   level: number
   date: string
   location: string
-  gameMode: 'original' | 'rogue' | 'test'
+  gameMode: 'original' | 'test'
   timestamp?: number // For sorting ties
 }
 
 interface StatsResponse {
   playCount: number
   playCountOriginal: number
-  playCountRogue: number
   playCountTest: number
 }
 
@@ -37,7 +36,6 @@ const MAX_NAME_LENGTH = 20
 const KV_KEY = 'neural_break_highscores'
 const PLAY_COUNT_KEY = 'neural_break_play_count_total'
 const PLAY_COUNT_ORIGINAL_KEY = 'neural_break_play_count_original'
-const PLAY_COUNT_ROGUE_KEY = 'neural_break_play_count_rogue'
 const PLAY_COUNT_TEST_KEY = 'neural_break_play_count_test'
 
 // ═══════════════════════════════════════════════════════════════════
@@ -106,9 +104,6 @@ async function incrementPlayCount(gameMode: string): Promise<number> {
       case 'original':
         modeKey = PLAY_COUNT_ORIGINAL_KEY
         break
-      case 'rogue':
-        modeKey = PLAY_COUNT_ROGUE_KEY
-        break
       case 'test':
         modeKey = PLAY_COUNT_TEST_KEY
         break
@@ -134,23 +129,20 @@ async function getPlayCountStats(): Promise<StatsResponse> {
     return {
       playCount: 0,
       playCountOriginal: 0,
-      playCountRogue: 0,
       playCountTest: 0
     }
   }
-  
+
   try {
-    const [total, original, rogue, test] = await Promise.all([
+    const [total, original, test] = await Promise.all([
       kv.get<number>(PLAY_COUNT_KEY),
       kv.get<number>(PLAY_COUNT_ORIGINAL_KEY),
-      kv.get<number>(PLAY_COUNT_ROGUE_KEY),
       kv.get<number>(PLAY_COUNT_TEST_KEY)
     ])
-    
+
     return {
       playCount: total || 0,
       playCountOriginal: original || 0,
-      playCountRogue: rogue || 0,
       playCountTest: test || 0
     }
   } catch (error) {
@@ -158,7 +150,6 @@ async function getPlayCountStats(): Promise<StatsResponse> {
     return {
       playCount: 0,
       playCountOriginal: 0,
-      playCountRogue: 0,
       playCountTest: 0
     }
   }
@@ -199,7 +190,7 @@ function validateEntry(entry: any): entry is HighScoreEntry {
   if (!entry.date || typeof entry.date !== 'string') return false
   
   // Validate gameMode
-  const validModes = ['original', 'rogue', 'test']
+  const validModes = ['original', 'test']
   if (!entry.gameMode || !validModes.includes(entry.gameMode)) {
     return false
   }
@@ -326,14 +317,11 @@ export default async function handler(
       const originalScores = allScores
         .filter(s => s.gameMode === 'original')
         .slice(0, MAX_SCORES_PER_MODE)
-      const rogueScores = allScores
-        .filter(s => s.gameMode === 'rogue')
-        .slice(0, MAX_SCORES_PER_MODE)
       const testScores = allScores
         .filter(s => s.gameMode === 'test')
         .slice(0, MAX_SCORES_PER_MODE)
-      
-      const trimmedScores = [...originalScores, ...rogueScores, ...testScores]
+
+      const trimmedScores = [...originalScores, ...testScores]
       
       // Save to storage
       const saved = await saveAllScores(trimmedScores)

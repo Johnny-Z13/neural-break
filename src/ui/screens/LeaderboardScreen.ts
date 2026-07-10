@@ -1,4 +1,4 @@
-import { ScoreManager } from '../../core/GameState'
+import { ScoreManager, GameMode } from '../../core/GameState'
 import { AudioManager } from '../../audio/AudioManager'
 import { StarfieldManager } from '../../graphics/StarfieldManager'
 
@@ -14,7 +14,6 @@ export class LeaderboardScreen {
   private static gamepadInterval: number | null = null
   private static lastGamepadInput = 0
   private static inputCooldown = 200 // ms between inputs
-  private static currentMode: 'original' | 'rogue' = 'original' // Track which leaderboard is shown
 
   static async create(
     audioManager: AudioManager | null,
@@ -250,30 +249,9 @@ export class LeaderboardScreen {
           ">
             ◀ BACK TO MENU
           </button>
-          
-          <!-- MODE TOGGLE BUTTON -->
-          <button id="modeToggleButton" class="arcade-button" style="
-            background: var(--color-bg-panel, rgba(0, 0, 0, 0.85));
-            border: var(--border-thick, 4px) solid var(--color-cyan, #00FFFF);
-            color: var(--color-cyan, #00FFFF);
-            font-family: inherit;
-            font-size: clamp(0.6rem, 1.5vw, 0.8rem);
-            font-weight: bold;
-            padding: var(--space-xs, 0.5rem) var(--space-md, 1.5rem);
-            cursor: pointer;
-            text-transform: uppercase;
-            letter-spacing: 0.1em;
-            text-shadow: 0 0 10px var(--color-cyan, #00FFFF);
-            box-shadow: 
-              0 0 20px var(--color-cyan-glow, rgba(0, 255, 255, 0.4)),
-              var(--shadow-pixel, 4px 4px 0) var(--color-cyan-dark, #006666);
-            transition: all 0.1s step-end;
-          ">
-            SWITCH TO ROGUE MODE
-          </button>
         </div>
       </div>
-      
+
       <!-- CONTROLS HINT -->
       <div style="
         position: fixed;
@@ -289,7 +267,7 @@ export class LeaderboardScreen {
       ">
         <div style="margin-bottom: 0.3rem;">▲ TOP NEURAL HACKERS ▲</div>
         <div style="font-size: 0.6em; color: var(--color-cyan, #00FFFF); text-shadow: 0 0 8px var(--color-cyan, #00FFFF);">
-          TAB/ARROWS TO TOGGLE • SPACE/ESC TO RETURN
+          SPACE/ESC TO RETURN
         </div>
       </div>
     `
@@ -432,64 +410,7 @@ export class LeaderboardScreen {
 
     // Get element references
     const backButton = leaderboardScreen.querySelector('#backButton') as HTMLButtonElement
-    const modeToggleButton = leaderboardScreen.querySelector('#modeToggleButton') as HTMLButtonElement
-    const titleElement = leaderboardScreen.querySelector('#leaderboardTitle') as HTMLElement
-    const decorativeLine = leaderboardScreen.querySelector('#decorativeLine') as HTMLElement
-    
-    // Mode toggle function
-    const toggleMode = async () => {
-      LeaderboardScreen.currentMode = LeaderboardScreen.currentMode === 'original' ? 'rogue' : 'original'
-      
-      // Update title, decorative line, and scores container
-      if (LeaderboardScreen.currentMode === 'rogue') {
-        // ROGUE MODE - Purple vibes
-        titleElement.textContent = '★ ROGUE HIGH SCORES ★'
-        modeToggleButton.textContent = 'SWITCH TO ARCADE MODE'
-        titleElement.style.color = '#AA00FF' // Purple
-        titleElement.style.textShadow = '4px 4px 0 #FF00FF, -2px -2px 0 #8800DD, 0 0 30px #AA00FF'
-        
-        // Purple decorative line
-        decorativeLine.style.background = 'linear-gradient(90deg, transparent 0%, #AA00FF 20%, #FF00FF 40%, #AA00FF 60%, #FF00FF 80%, transparent 100%)'
-        
-        // Purple-themed scores container
-        if (scoresContainer) {
-          scoresContainer.style.border = '4px solid #AA00FF'
-          scoresContainer.style.boxShadow = '0 0 28px rgba(170, 0, 255, 0.5), 4px 4px 0 #660099, inset 0 0 25px rgba(170, 0, 255, 0.12)'
-          scoresContainer.style.background = 'linear-gradient(180deg, rgba(20, 0, 30, 0.9) 0%, rgba(30, 0, 40, 0.9) 100%)'
-        }
-      } else {
-        // ARCADE MODE - Yellow vibes
-        titleElement.textContent = '★ ARCADE HIGH SCORES ★'
-        modeToggleButton.textContent = 'SWITCH TO ROGUE MODE'
-        titleElement.style.color = '#FFFF00' // Yellow
-        titleElement.style.textShadow = '4px 4px 0 #FF6600, -2px -2px 0 #FF00FF, 0 0 30px #FFFF00'
-        
-        // Yellow decorative line
-        decorativeLine.style.background = 'linear-gradient(90deg, transparent 0%, #FFFF00 20%, #FF6600 40%, #FFFF00 60%, #FF6600 80%, transparent 100%)'
-        
-        // Cyan-themed scores container
-        if (scoresContainer) {
-          scoresContainer.style.border = '4px solid #00FFFF'
-          scoresContainer.style.boxShadow = '0 0 28px rgba(0, 255, 255, 0.35), 4px 4px 0 #006666, inset 0 0 25px rgba(0, 255, 255, 0.08)'
-          scoresContainer.style.background = 'linear-gradient(180deg, rgba(0, 0, 0, 0.9) 0%, rgba(0, 10, 20, 0.9) 100%)'
-        }
-      }
-      
-      // Refresh scores
-      if (scoresContainer) {
-        await LeaderboardScreen.displayHighScoresInElement(scoresContainer, isExpanded)
-      }
-    }
-    
-    // Mouse event listeners - Toggle Button
-    modeToggleButton.addEventListener('mouseenter', () => {
-      if (audioManager) audioManager.playButtonHoverSound()
-    })
-    modeToggleButton.addEventListener('click', async () => {
-      if (audioManager) audioManager.playButtonPressSound()
-      await toggleMode()
-    })
-    
+
     // Mouse event listeners - Back Button
     backButton.addEventListener('mouseenter', () => {
       if (audioManager) audioManager.playButtonHoverSound()
@@ -504,15 +425,9 @@ export class LeaderboardScreen {
     // 🎮 KEYBOARD NAVIGATION
     LeaderboardScreen.keyboardListener = (e: KeyboardEvent) => {
       const key = e.code.toLowerCase()
-      
-      // Toggle mode with Tab or Left/Right arrows
-      if (key === 'tab' || key === 'arrowleft' || key === 'arrowright' || key === 'keya' || key === 'keyd') {
-        e.preventDefault()
-        if (audioManager) audioManager.playButtonPressSound()
-        toggleMode()
-      }
+
       // Go back (Space/Enter/Escape)
-      else if (key === 'space' || key === 'enter' || key === 'escape') {
+      if (key === 'space' || key === 'enter' || key === 'escape') {
         e.preventDefault()
         if (audioManager) audioManager.playButtonPressSound()
         cleanupFullscreen()
@@ -520,32 +435,19 @@ export class LeaderboardScreen {
         onBack()
       }
     }
-    
+
     document.addEventListener('keydown', LeaderboardScreen.keyboardListener)
 
     // 🎮 GAMEPAD NAVIGATION
     LeaderboardScreen.gamepadInterval = window.setInterval(() => {
       const gamepads = navigator.getGamepads()
       const gamepad = gamepads[0] // Use first connected gamepad
-      
+
       if (!gamepad) return
-      
+
       const now = Date.now()
       if (now - LeaderboardScreen.lastGamepadInput < LeaderboardScreen.inputCooldown) return
-      
-      // Shoulder buttons (LB/RB or L1/R1) or D-pad left/right to toggle mode
-      const leftBumper = gamepad.buttons[4]?.pressed  // LB/L1
-      const rightBumper = gamepad.buttons[5]?.pressed // RB/R1
-      const dpadLeft = gamepad.buttons[14]?.pressed
-      const dpadRight = gamepad.buttons[15]?.pressed
-      
-      if (leftBumper || rightBumper || dpadLeft || dpadRight) {
-        if (audioManager) audioManager.playButtonPressSound()
-        toggleMode()
-        LeaderboardScreen.lastGamepadInput = now
-        return
-      }
-      
+
       // A button (Xbox) / X button (PlayStation) or B button to go back
       const aButton = gamepad.buttons[0]?.pressed // A/X - Select
       const bButton = gamepad.buttons[1]?.pressed // B/Circle - Back
@@ -578,8 +480,8 @@ export class LeaderboardScreen {
 
   private static async displayHighScoresInElement(container: HTMLElement, expanded: boolean = false): Promise<void> {
     try {
-      // Get scores for the current mode
-      const highScores = await ScoreManager.getHighScores(LeaderboardScreen.currentMode as import('../../core/GameState').GameMode)
+      // Get scores for Arcade mode
+      const highScores = await ScoreManager.getHighScores(GameMode.ORIGINAL)
       
       if (highScores.length === 0) {
         container.innerHTML = `
@@ -725,6 +627,5 @@ export class LeaderboardScreen {
 
     // Reset state
     LeaderboardScreen.lastGamepadInput = 0
-    LeaderboardScreen.currentMode = 'original' // Reset to Arcade mode
   }
 }

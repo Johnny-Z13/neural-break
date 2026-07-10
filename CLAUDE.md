@@ -180,7 +180,7 @@ Neural Break features a distinctive retro-futuristic UI inspired by 80s arcade c
 - Configurable animation timings in ScreenTransitions.ts
 
 **Menu System:**
-- Vertical arcade-style list navigation (ARCADE, ROGUE, TEST, HI SCORES)
+- Vertical arcade-style list navigation (START GAME, OPTIONS, HI SCORES, TEST)
 - Color-coded menu items with individual neon glows
 - Keyboard (WASD/Arrows), Gamepad, and mouse support
 - Selection indicator with border-left shift effect
@@ -234,7 +234,6 @@ vercel env pull .env.local     # Pull environment variables
 ### Game Design Context
 Based on comprehensive PRD in `docs/neural_escape_prd.md` - an epic 99-level cyberpunk survival experience:
 - **99 levels** in Arcade mode with objective-based progression
-- **99 layers** in Rogue mode with wormhole advancement
 - Escalating difficulty from tutorial to brutal finale
 - **Surprise levels every 5 levels** with unique themed challenges
 - **Victory screen** when beating all 99 levels

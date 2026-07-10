@@ -328,17 +328,6 @@ export class UIManager {
     this.queueNotification(notification, 2000, 8) // High priority - level events
   }
 
-  // ROGUE MODE LAYER NOTIFICATION
-  showRogueLayerNotification(layer: number): void {
-    const notification = this.createNotification(
-      `LAYER ${layer} STARTED!`,
-      'notification-level-up'
-    )
-    notification.style.color = '#00ff00' // Green for Rogue mode
-    notification.style.textShadow = '0 0 40px rgba(0, 255, 0, 1.0), 0 0 80px rgba(0, 255, 0, 0.6), 3px 3px 0 #006600'
-    this.queueNotification(notification, 2000, 8) // High priority - level events
-  }
-
   // LEVEL COMPLETE NOTIFICATION
   showLevelCompleteNotification(): void {
     const notification = this.createNotification('LEVEL COMPLETE!', 'notification-level-up')

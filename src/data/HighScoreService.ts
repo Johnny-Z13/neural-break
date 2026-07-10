@@ -57,9 +57,8 @@ export class LocalStorageHighScoreService implements IHighScoreService {
       
       // Keep top MAX_SCORES per game mode
       const arcadeScores = highScores.filter(s => s.gameMode === 'original').slice(0, this.MAX_SCORES)
-      const rogueScores = highScores.filter(s => s.gameMode === 'rogue').slice(0, this.MAX_SCORES)
       const testScores = highScores.filter(s => s.gameMode === 'test').slice(0, this.MAX_SCORES)
-      const trimmedScores = [...arcadeScores, ...rogueScores, ...testScores]
+      const trimmedScores = [...arcadeScores, ...testScores]
       
       // Save to localStorage
       if (this.isLocalStorageAvailable()) {
@@ -185,7 +184,7 @@ export class LocalStorageHighScoreService implements IHighScoreService {
       return false
     }
 
-    const validModes = ['original', 'rogue', 'test']
+    const validModes = ['original', 'test']
     if (!validModes.includes(entry.gameMode)) {
       return false
     }

@@ -37,19 +37,6 @@ export class WeaponSystem {
   // 🎯 WEAPON TYPE SYSTEM 🎯
   private currentWeaponType: WeaponType = WeaponType.BULLETS
   private weaponTypeChangeCallback: ((weaponType: WeaponType) => void) | null = null
-  
-  // 🎲 ROGUE MODE: FIRING MODE MUTATIONS 🎲
-  private firingModes: {
-    sideFire?: boolean
-    rearFire?: boolean
-    spiralShot?: boolean
-    burstPulse?: boolean
-    chargeShot?: boolean
-  } = {}
-  private fireRateMultiplier: number = 1.0
-  private projectileSpeedMultiplier: number = 1.0
-  private heatDecayMultiplier: number = 1.0
-  private spiralRotation: number = 0 // For spiral shot rotation
 
   initialize(player: Player, sceneManager: SceneManager, audioManager: AudioManager): void {
     this.player = player
@@ -67,9 +54,9 @@ export class WeaponSystem {
     if (isFiringInput && !this.isOverheated) {
       // Heat is handled in fireInDirection for each shot
     } else {
-      // Cool down when not firing or when overheated (with rogue mutations)
+      // Cool down when not firing or when overheated
       const coolingMultiplier = this.isOverheated ? 1.2 : 1.0 // Cool slightly faster when overheated to get back in action
-      this.heat = Math.max(0, this.heat - this.coolingRate * coolingMultiplier * this.heatDecayMultiplier * deltaTime)
+      this.heat = Math.max(0, this.heat - this.coolingRate * coolingMultiplier * deltaTime)
       
       // Reset overheated state once cooled down completely
       if (this.isOverheated && this.heat <= 0) {
@@ -83,9 +70,8 @@ export class WeaponSystem {
       this.heatChangeCallback(this.heat, this.isOverheated)
     }
 
-    // ASTEROIDS-style firing - fire in movement direction or last movement direction (with rogue fire rate mutation)
-    const effectiveFireRate = this.fireRate / this.fireRateMultiplier
-    if (isFiringInput && this.fireTimer >= effectiveFireRate && !this.isOverheated) {
+    // ASTEROIDS-style firing - fire in movement direction or last movement direction
+    if (isFiringInput && this.fireTimer >= this.fireRate && !this.isOverheated) {
       this.fireInDirection()
       this.fireTimer = 0
     }
@@ -111,56 +97,37 @@ export class WeaponSystem {
     // Get power-up level from player
     const powerUpLevel = this.player.getPowerUpLevel()
     
-    // Calculate weapon stats based on power-up level (with rogue mutations)
+    // Calculate weapon stats based on power-up level
     const bulletCount = 1 + powerUpLevel // 1 bullet at level 0, 11 at level 10
-    const speedMultiplier = (1 + powerUpLevel * 0.1) * this.projectileSpeedMultiplier // +10% per level + rogue mutation
+    const speedMultiplier = 1 + powerUpLevel * 0.1 // +10% per level
     const damageMultiplier = 1 + powerUpLevel * BALANCE_CONFIG.PLAYER.POWER_UP_DAMAGE_MULTIPLIER
     const sizeMultiplier = 1 + powerUpLevel * 0.1 // +10% per level
-    
+
     // Calculate spread pattern
     const maxSpread = 30 * (Math.PI / 180) // 30 degrees in radians
     const spreadAngle = maxSpread * (1 - powerUpLevel / 10) // Narrows as level increases
-    
-    // 🎲 ROGUE MODE: Update spiral rotation 🎲
-    if (this.firingModes.spiralShot) {
-      this.spiralRotation += 0.3 // Rotate spiral each shot
-    }
-    
+
     // Fire multiple bullets
     for (let i = 0; i < bulletCount; i++) {
       let bulletDirection: THREE.Vector3
-      
+
       if (bulletCount === 1) {
-        // Single bullet - fire straight (or with spiral offset)
-        if (this.firingModes.spiralShot) {
-          const spiralOffset = this.spiralRotation
-          const cos = Math.cos(spiralOffset)
-          const sin = Math.sin(spiralOffset)
-          bulletDirection = new THREE.Vector3(
-            firingDirection.x * cos - firingDirection.y * sin,
-            firingDirection.x * sin + firingDirection.y * cos,
-            0
-          ).normalize()
-        } else {
-          bulletDirection = firingDirection.clone()
-        }
+        // Single bullet - fire straight
+        bulletDirection = firingDirection.clone()
       } else {
         // Multiple bullets - spread pattern
         const angleOffset = (i - (bulletCount - 1) / 2) * (spreadAngle / (bulletCount - 1))
-        
-        // Add spiral rotation if active
-        const finalOffset = angleOffset + (this.firingModes.spiralShot ? this.spiralRotation : 0)
-        
+
         // Rotate firing direction by angle offset
-        const cos = Math.cos(finalOffset)
-        const sin = Math.sin(finalOffset)
+        const cos = Math.cos(angleOffset)
+        const sin = Math.sin(angleOffset)
         bulletDirection = new THREE.Vector3(
           firingDirection.x * cos - firingDirection.y * sin,
           firingDirection.x * sin + firingDirection.y * cos,
           0
         ).normalize()
       }
-      
+
       // Create projectile with scaled stats, weapon type, AND POWER LEVEL for VFX scaling!
       const projectile = new Projectile(
         playerPos.clone().add(bulletDirection.clone().multiplyScalar(0.5)), // Start slightly in front of player
@@ -179,54 +146,6 @@ export class WeaponSystem {
 
       this.projectiles.push(projectile)
       this.sceneManager.addToScene(projectile.getMesh())
-    }
-    
-    // 🎲 ROGUE MODE: SIDE FIRE - Fire at ±90° 🎲
-    if (this.firingModes.sideFire) {
-      const sideDirections = [
-        new THREE.Vector3(-firingDirection.y, firingDirection.x, 0).normalize(), // Left 90°
-        new THREE.Vector3(firingDirection.y, -firingDirection.x, 0).normalize()   // Right 90°
-      ]
-      
-      for (const sideDir of sideDirections) {
-        const sideProjectile = new Projectile(
-          playerPos.clone().add(sideDir.clone().multiplyScalar(0.5)),
-          sideDir,
-          this.projectileSpeed * speedMultiplier,
-          this.damage * damageMultiplier,
-          sizeMultiplier,
-          this.currentWeaponType,
-          powerUpLevel
-        )
-        
-        if (this.effectsSystem) {
-          sideProjectile.setEffectsSystem(this.effectsSystem)
-        }
-        
-        this.projectiles.push(sideProjectile)
-        this.sceneManager.addToScene(sideProjectile.getMesh())
-      }
-    }
-    
-    // 🎲 ROGUE MODE: REAR FIRE - Fire backward 🎲
-    if (this.firingModes.rearFire) {
-      const rearDirection = firingDirection.clone().multiplyScalar(-1)
-      const rearProjectile = new Projectile(
-        playerPos.clone().add(rearDirection.clone().multiplyScalar(0.5)),
-        rearDirection,
-        this.projectileSpeed * speedMultiplier * 0.8, // Slightly slower rear shots
-        this.damage * damageMultiplier,
-        sizeMultiplier,
-        this.currentWeaponType,
-        powerUpLevel
-      )
-      
-      if (this.effectsSystem) {
-        rearProjectile.setEffectsSystem(this.effectsSystem)
-      }
-      
-      this.projectiles.push(rearProjectile)
-      this.sceneManager.addToScene(rearProjectile.getMesh())
     }
 
     // 🔥 Audio feedback for firing - NOW WITH POWER SCALING! 🔥
@@ -434,56 +353,4 @@ export class WeaponSystem {
     this.setWeaponType(weaponTypes[nextIndex])
   }
   
-  // 🎲 ROGUE MODE: APPLY STAT MUTATION 🎲
-  applyRogueStatMutation(statModifier: {
-    fireRate?: number
-    projectileSpeed?: number
-    heatDecay?: number
-  }): void {
-    if (statModifier.fireRate !== undefined) {
-      this.fireRateMultiplier *= statModifier.fireRate
-    }
-    
-    if (statModifier.projectileSpeed !== undefined) {
-      this.projectileSpeedMultiplier *= statModifier.projectileSpeed
-    }
-    
-    if (statModifier.heatDecay !== undefined) {
-      this.heatDecayMultiplier *= statModifier.heatDecay
-    }
-  }
-  
-  // 🎲 ROGUE MODE: APPLY FIRING MODE MUTATION 🎲
-  applyRogueFiringMode(firingMode: {
-    sideFire?: boolean
-    rearFire?: boolean
-    spiralShot?: boolean
-    burstPulse?: boolean
-    chargeShot?: boolean
-  }): void {
-    if (firingMode.sideFire !== undefined) {
-      this.firingModes.sideFire = firingMode.sideFire
-    }
-    if (firingMode.rearFire !== undefined) {
-      this.firingModes.rearFire = firingMode.rearFire
-    }
-    if (firingMode.spiralShot !== undefined) {
-      this.firingModes.spiralShot = firingMode.spiralShot
-    }
-    if (firingMode.burstPulse !== undefined) {
-      this.firingModes.burstPulse = firingMode.burstPulse
-    }
-    if (firingMode.chargeShot !== undefined) {
-      this.firingModes.chargeShot = firingMode.chargeShot
-    }
-  }
-  
-  // 🎲 ROGUE MODE: RESET MUTATIONS (for new run) 🎲
-  resetRogueMutations(): void {
-    this.firingModes = {}
-    this.fireRateMultiplier = 1.0
-    this.projectileSpeedMultiplier = 1.0
-    this.heatDecayMultiplier = 1.0
-    this.spiralRotation = 0
-  }
 }

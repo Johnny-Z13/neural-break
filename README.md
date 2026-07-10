@@ -36,10 +36,6 @@ vercel
   - Dynamic difficulty scaling
   - Surprise themed levels every 5 levels
   - Victory screen when beating level 99!
-- **Rogue Mode**: 99-layer vertical ascent roguelite
-  - Wormhole advancement system
-  - Power-up choices between layers
-  - Layer-specific themed challenges
 
 ### 🏆 Global Leaderboards
 - Separate top 10 for each game mode
@@ -164,7 +160,7 @@ vercel --prod
 
 ✅ **Global Leaderboards**: All players see same scores  
 ✅ **Automatic Fallback**: Uses localStorage if API fails  
-✅ **Mode Separation**: Original and Rogue have own top 10  
+✅ **Mode Separation**: Original and Test have own top 10  
 ✅ **Free Hosting**: Vercel free tier is perfect for indie games  
 
 ### Storage Options
@@ -267,7 +263,6 @@ ISC License - see LICENSE file
 ## 🎯 Development Roadmap
 
 - [ ] Progressive Web App support
-- [ ] More Rogue mode abilities
 - [ ] Social features (share scores)
 - [ ] Achievements system
 - [ ] Mobile controls

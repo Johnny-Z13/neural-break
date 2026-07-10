@@ -30,10 +30,7 @@ export class EnemyManager {
   
   // 🎯 SPAWNING CONTROL (for transitions)
   private spawningPaused: boolean = false
-  
-  // 🎲 ROGUE MODE - Vertical spawning above player
-  private isRogueMode: boolean = false
-  
+
   // 🎲 SPAWN RANDOMNESS (add variety to spawn times)
   private spawnVariance: number = 0.2  // ±20% variance on spawn rates
   
@@ -56,10 +53,6 @@ export class EnemyManager {
 
   setLevelManager(levelManager: LevelManager): void {
     this.levelManager = levelManager
-  }
-  
-  setRogueMode(enabled: boolean): void {
-    this.isRogueMode = enabled
   }
 
   setAudioManager(audioManager: AudioManager): void {
@@ -593,20 +586,6 @@ export class EnemyManager {
   }
 
   private getSpawnPosition(): THREE.Vector3 {
-    // 🎲 ROGUE MODE: SCRAMBLE-style vertical spawning above player! 🎲
-    if (this.isRogueMode) {
-      const playerPos = this.player.getPosition()
-      
-      // Spawn in a horizontal band above the player
-      const spawnHeight = 20 // Spawn 20 units above player
-      const spawnWidth = 20 // Horizontal spread
-      
-      const x = playerPos.x + (Math.random() - 0.5) * spawnWidth
-      const y = playerPos.y + spawnHeight + Math.random() * 5 // Some vertical variance
-      
-      return new THREE.Vector3(x, y, 0)
-    }
-    
     // 🔘 CIRCULAR SPAWN LOGIC (Original mode) 🔘
     // Spawn enemies at random positions around the circular edge
     const boundaryRadius = 29.5
