@@ -86,7 +86,9 @@ export class AttractMode {
 
       // Update enemy animation (but catch any errors from missing game systems)
       try {
-        // @ts-expect-error - attract mode has no Player; enemies fall back to their own movement
+        // @ts-expect-error - attract mode has no Player; the surrounding try/catch is
+        // load-bearing (enemy AI throws on the missing player and no-ops). A typed fix
+        // requires guarding player access in all subclass updateAI overrides — deferred.
         attractEnemy.enemy.update(deltaTime, undefined)
       } catch {
         // Silently handle errors from enemies trying to access missing game systems
