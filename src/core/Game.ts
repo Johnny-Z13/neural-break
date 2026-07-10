@@ -7,7 +7,7 @@ import { WeaponSystem, WeaponType } from '../weapons/WeaponSystem'
 import { UIManager } from '../ui/UIManager'
 import { GameTimer } from './GameTimer'
 import { AudioManager } from '../audio/AudioManager'
-import { GameStateType, GameStats, ScoreManager, KILL_POINTS, GameMode } from './GameState'
+import { GameStateType, GameStats, ScoreManager, GameMode } from './GameState'
 import { GameScreens } from '../ui/GameScreens'
 import { RogueChoiceScreen } from '../ui/screens/RogueChoiceScreen'
 import { RogueSpecial } from './RogueSpecial'
@@ -57,7 +57,6 @@ export class Game {
   private comboTimer: number = 0
   private comboDecayMultiplier: number = 1.0 // 🎲 ROGUE MODE: Combo decay speed multiplier
   private lastDamageTaken: number = 0
-  private isTestMode: boolean = false // Unlimited health test mode
   private isPaused: boolean = false
   
   // 🎲 ROGUE MODE STATE 🎲
@@ -66,7 +65,6 @@ export class Game {
   private rogueLayerCompleting: boolean = false // Guard against multiple layer completion calls
   private rogueChoiceScreenTimeoutId: ReturnType<typeof setTimeout> | null = null // Track setTimeout to cancel stale callbacks
   private rogueVerticalPosition: number = 0 // Current vertical ascent position
-  private rogueScrollSpeed: number = 3.0 // Units per second - continuous upward flow
   private rogueWormholeExit: WormholeExit | null = null // End-of-layer portal
   private rogueExitDistance: number = 180 // Distance to exit (60 seconds @ 3.0 speed)
   private rogueSideBarriers: RogueSideBarriers | null = null // Left/right boundaries
@@ -88,7 +86,6 @@ export class Game {
   private isLevelTransitioning: boolean = false
   private transitionPhase: 'clearing' | 'displaying' | 'complete' = 'clearing'
   private transitionTimer: number = 0
-  private transitionDuration: number = 6.0 // Total transition time
   private clearingDuration: number = 3.0 // Time for death animations to play (was 1.0)
   private displayDuration: number = 3.0 // Time to show level complete screen
   
@@ -103,7 +100,6 @@ export class Game {
   // Legacy - kept for compatibility
   private recentEnemyDeaths: number[] = []
   private clusterWindow: number = 0.8
-  private lastScore: number = 0
   private lastHighScoreMoment: number = 0
   private highScoreMomentCooldown: number = 2.0
 
@@ -201,7 +197,7 @@ export class Game {
       // 🎵 RESUME AUDIO ON FIRST USER INTERACTION 🎵
       // Browsers require user gesture before audio can play
       const resumeAudioOnce = () => {
-        this.audioManager.resumeAudio().catch(e => {
+        this.audioManager.resumeAudio().catch(() => {
           // Ignore errors - audio will resume when available
         })
         document.removeEventListener('click', resumeAudioOnce)
@@ -351,7 +347,6 @@ export class Game {
 
     // Reset game state - CRITICAL: Must be PLAYING for updates to work!
     this.gameState = GameStateType.PLAYING
-    this.isTestMode = true // Enable unlimited health
     if (DEBUG_MODE) console.log('✅ Game state set to PLAYING (TEST MODE):', this.gameState)
 
     // Show HUD when game starts
@@ -368,7 +363,6 @@ export class Game {
     this.lastKillTime = 0
     this.lastMultiplierShown = 0
     this.recentEnemyDeaths = []
-    this.lastScore = 0
     this.lastHighScoreMoment = 0
     
     // Start the level manager with TEST level
@@ -569,7 +563,6 @@ export class Game {
     this.gameState = GameStateType.PLAYING
     this.gameMode = GameMode.ROGUE
     this.gameModeManager.setMode(GameMode.ROGUE) // Update mode manager
-    this.isTestMode = false
     this.levelManager.setRogueLayer(1) // Initialize layer tracking in LevelManager
     this.rogueLayersCompleted = 0
     this.rogueLayerCompleting = false // Reset layer completion flag
@@ -617,7 +610,6 @@ export class Game {
     this.lastKillTime = 0
     this.lastMultiplierShown = 0
     this.recentEnemyDeaths = []
-    this.lastScore = 0
     this.lastHighScoreMoment = 0
     
     // Start ambient soundscape
@@ -846,7 +838,6 @@ export class Game {
     
     // Reset game state - CRITICAL: Must be PLAYING for updates to work!
     this.gameState = GameStateType.PLAYING
-    this.isTestMode = false // Ensure test mode is disabled
     if (DEBUG_MODE) console.log('✅ Game state set to PLAYING (NORMAL MODE):', this.gameState)
 
     // Show HUD when game starts
@@ -863,7 +854,6 @@ export class Game {
     this.lastKillTime = 0
     this.lastMultiplierShown = 0
     this.recentEnemyDeaths = []
-    this.lastScore = 0
     this.lastHighScoreMoment = 0
     
     // Start ambient soundscape
@@ -1340,7 +1330,6 @@ export class Game {
     this.lastMultiplierShown = 0
     this.lastDamageTaken = 0
     this.recentEnemyDeaths = []
-    this.lastScore = 0
     this.lastHighScoreMoment = 0
     
     // 🎲 Reset game mode to ORIGINAL
@@ -1486,7 +1475,7 @@ export class Game {
       
       // 🎆 KEEP ENEMIES UPDATING FOR DEATH ANIMATIONS & PROJECTILES 🎆
       if (this.enemyManager) {
-        this.enemyManager.update(deltaTime, this.levelManager.getTotalElapsedTime())
+        this.enemyManager.update(deltaTime)
       }
       
       // 🚀 KEEP PROJECTILES MOVING DURING TRANSITION 🚀
@@ -1651,7 +1640,7 @@ export class Game {
     
     // Update enemies (using level manager instead of raw time)
     if (this.enemyManager) {
-      this.enemyManager.update(deltaTime, this.levelManager.getTotalElapsedTime())
+      this.enemyManager.update(deltaTime)
     }
     
     // Update power-ups
@@ -1735,8 +1724,6 @@ export class Game {
       this.audioManager.playHighScoreMomentSound(this.gameStats.score, this.combo)
       this.lastHighScoreMoment = currentTime
     }
-    
-    this.lastScore = this.gameStats.score
   }
   
   // 🎯 CONVERT WORLD POSITION TO SCREEN POSITION 🎯
@@ -1791,7 +1778,6 @@ export class Game {
       return
     }
     
-    const playerPosition = this.player.getPosition()
     const enemies = this.enemyManager.getEnemies()
     
     // Check player-enemy collisions (skip if player is invulnerable during dash)
@@ -2082,9 +2068,7 @@ export class Game {
     for (const medPack of medPacks) {
       if (medPack.isAlive() && this.player.isCollidingWith(medPack)) {
         // Restore health
-        const oldHealth = this.player.getHealth()
         this.player.heal(medPack.getHealthRestore())
-        const newHealth = this.player.getHealth()
         
         medPack.collect()
         this.medPackManager.removeMedPack(medPack)

@@ -135,7 +135,8 @@ export class ScoreManager {
       survivedTime: 180, // 3 minutes
       level: 5,
       date: '12/29/2025',
-      location: 'UK'
+      location: 'UK',
+      gameMode: GameMode.TEST
     }
     const saved = await this.saveHighScore(testEntry)
     console.log('🧪 Test high score added:', testEntry, saved ? '✅' : '❌')

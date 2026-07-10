@@ -446,12 +446,12 @@ export class CrystalShardSwarm extends Enemy {
     }
   }
 
-  private updateDeathAnimation(deltaTime: number): void {
+  private updateCrystalSwarmDeathAnimation(deltaTime: number): void {
     if (!this.isDying) return
     
     this.deathTimer += deltaTime
     const progress = this.deathTimer / this.deathDuration
-    
+
     // Phase 1: Shards fly outward, rainbow colors (0-0.3s)
     if (progress < 0.3) {
       const phaseProgress = progress / 0.3
@@ -648,7 +648,7 @@ export class CrystalShardSwarm extends Enemy {
 
     // Custom death animation system (legacy - kept for dramatic effect)
     if (this.isDying) {
-      this.updateDeathAnimation(deltaTime)
+      this.updateCrystalSwarmDeathAnimation(deltaTime)
       return
     }
 

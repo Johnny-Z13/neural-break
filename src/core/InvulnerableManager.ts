@@ -1,4 +1,3 @@
-import * as THREE from 'three'
 import { Invulnerable } from '../entities/Invulnerable'
 import { Player } from '../entities/Player'
 import { SceneManager } from '../graphics/SceneManager'

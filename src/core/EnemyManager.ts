@@ -11,8 +11,8 @@ import { DEBUG_MODE } from '../config'
 
 export class EnemyManager {
   private enemies: Enemy[] = []
-  private sceneManager: SceneManager
-  private player: Player
+  private sceneManager!: SceneManager // Initialized in initialize() method
+  private player!: Player // Initialized in initialize() method
   private spawnTimer: number = 0
   private scanDroneTimer: number = 0
   private chaosWormTimer: number = 0
@@ -80,7 +80,7 @@ export class EnemyManager {
     return baseRate + (Math.random() - 0.5) * 2 * variance
   }
 
-  update(deltaTime: number, gameTime: number): void {
+  update(deltaTime: number): void {
     // Skip spawning if paused (during transitions)
     if (!this.spawningPaused) {
       // Update spawn timers
@@ -170,7 +170,7 @@ export class EnemyManager {
     }
 
     // Resolve enemy-enemy collisions using spatial grid
-    this.resolveEnemyCollisions(deltaTime)
+    this.resolveEnemyCollisions()
 
     // Remove dead enemies
     this.cleanupDeadEnemies()
@@ -233,7 +233,7 @@ export class EnemyManager {
   }
   
   // 🔷 SEPARATION LOGIC - Soft collision resolution 🔷
-  private resolveEnemyCollisions(deltaTime: number): void {
+  private resolveEnemyCollisions(): void {
     // Only process if we have enemies
     if (this.enemies.length < 2) return
     
@@ -295,50 +295,6 @@ export class EnemyManager {
         enemy.setVelocity(blendedVel)
       }
     }
-  }
-
-  // Legacy time-based methods (kept for fallback compatibility)
-  private getMiteSpawnRate(gameTime: number): number {
-    // Spawn Data Mites much more frequently - every 0.5 seconds!
-    return 0.5
-  }
-
-  private getDroneSpawnRate(gameTime: number): number {
-    // 1 every 10 seconds, increasing to every 6 seconds
-    const minutes = gameTime / 60
-    const baseRate = 10
-    const scalingFactor = Math.min(minutes / 8, 1)
-    return baseRate * (1 - scalingFactor * 0.4) // 10s to 6s
-  }
-
-  private getChaosWormSpawnRate(gameTime: number): number {
-    // Start spawning after 1 minute, every 25 seconds, scaling to every 15 seconds
-    const minutes = gameTime / 60
-    if (minutes < 1) return Infinity // Don't spawn until 1 minute in
-    
-    const baseRate = 25
-    const scalingFactor = Math.min((minutes - 1) / 10, 1)
-    return baseRate * (1 - scalingFactor * 0.4) // 25s to 15s
-  }
-
-  private getVoidSphereSpawnRate(gameTime: number): number {
-    // Start spawning after 3 minutes, every 45 seconds, scaling to every 30 seconds
-    const minutes = gameTime / 60
-    if (minutes < 3) return Infinity // Don't spawn until 3 minutes in
-    
-    const baseRate = 45
-    const scalingFactor = Math.min((minutes - 3) / 15, 1)
-    return baseRate * (1 - scalingFactor * 0.33) // 45s to 30s
-  }
-
-  private getCrystalSwarmSpawnRate(gameTime: number): number {
-    // Start spawning after 2 minutes, every 35 seconds, scaling to every 20 seconds
-    const minutes = gameTime / 60
-    if (minutes < 2) return Infinity // Don't spawn until 2 minutes in
-    
-    const baseRate = 35
-    const scalingFactor = Math.min((minutes - 2) / 12, 1)
-    return baseRate * (1 - scalingFactor * 0.43) // 35s to 20s
   }
 
   private spawnDataMite(): void {

@@ -366,7 +366,7 @@ export class UFO extends Enemy {
     }
   }
 
-  private updateDeathAnimation(deltaTime: number): void {
+  private updateUFODeathAnimation(deltaTime: number): void {
     if (!this.isDying) return
     
     this.deathTimer += deltaTime
@@ -582,7 +582,7 @@ export class UFO extends Enemy {
   // Override update to handle death animation
   update(deltaTime: number, player: Player): void {
     if (this.isDying) {
-      this.updateDeathAnimation(deltaTime)
+      this.updateUFODeathAnimation(deltaTime)
       // Still update position during death
       this.position.add(this.velocity.clone().multiplyScalar(deltaTime))
       this.mesh.position.set(this.position.x, this.position.y, 0)

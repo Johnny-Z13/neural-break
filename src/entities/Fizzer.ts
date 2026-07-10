@@ -237,7 +237,7 @@ export class Fizzer extends Enemy {
     }
   }
 
-  private updateDeathAnimation(deltaTime: number): void {
+  private updateFizzerDeathAnimation(deltaTime: number): void {
     if (!this.isDying) return
     
     this.deathTimer += deltaTime
@@ -423,7 +423,7 @@ export class Fizzer extends Enemy {
     this.updateProjectiles(deltaTime)
     
     if (this.isDying) {
-      this.updateDeathAnimation(deltaTime)
+      this.updateFizzerDeathAnimation(deltaTime)
       return
     }
     

@@ -12,7 +12,7 @@ import { MedPackManager } from './MedPackManager'
 import { SpeedUpManager } from './SpeedUpManager'
 import { ShieldManager } from './ShieldManager'
 import { InvulnerableManager } from './InvulnerableManager'
-import { GameStateType, GameStats } from './GameState'
+import { GameStateType } from './GameState'
 import { DEBUG_MODE } from '../config'
 
 /**

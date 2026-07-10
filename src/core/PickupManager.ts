@@ -14,8 +14,8 @@ import { DEBUG_MODE } from '../config'
  */
 export abstract class PickupManager<T extends { getMesh(): THREE.Mesh, isAlive(): boolean, update(deltaTime: number, playerPosition?: THREE.Vector3): void, setEffectsSystem(effectsSystem: EffectsSystem): void }> {
   protected pickups: T[] = []
-  protected sceneManager: SceneManager
-  protected player: Player
+  protected sceneManager!: SceneManager // Initialized in initialize() method
+  protected player!: Player // Initialized in initialize() method
   protected spawnTimer: number = 0
   protected effectsSystem: EffectsSystem | null = null
   protected levelManager: LevelManager | null = null
