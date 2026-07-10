@@ -105,8 +105,9 @@ Sizes below reuse each entity's current visual scale; collision radii unchanged.
 `AttractMode` (`src/core/AttractMode.ts`) already runs real enemy entities behind the title
 screen but only spawns 3 Fizzers. Changes:
 
-1. Expand the attract roster to all 8 enemy types (Boss rare/singleton, large enemies capped)
-   drifting with their idle animations — the "living threat database" behind the menu.
+1. Expand the attract roster to all regular enemy types (large enemies capped at one each;
+   Boss excluded — a 7-unit hex would dominate the backdrop) drifting with their idle
+   animations — the "living threat database" behind the menu.
 2. Replace the CSS-approximation glyphs in the THREAT DATABASE cards
    (`StartScreen.ts:createEnemyCard`) with small inline SVGs generated from the same shape
    definitions and `ENTITY_PALETTE` colors used in-game. Card layout, names, and point values
