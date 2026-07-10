@@ -8,7 +8,6 @@
 
 ### Objective-Based Progression
 - ✅ **99 total levels** in Arcade mode
-- ✅ **99 layers** in Rogue mode
 - ✅ Each level has specific kill objectives
 - ✅ Clear goals displayed on HUD
 - ✅ Must complete objectives to advance
@@ -83,22 +82,6 @@ Spawn Rates:
 - **Level 50**: Neural Meltdown - Massive mixed enemy assault
 - **Level 75**: Extreme difficulty, all enemies maxed out
 - **Level 99**: Final challenge before victory!
-
-### Rogue Mode: 99 Layers
-
-**Layer Themes** (Cycles every 6 layers):
-1. **SWARM ASSAULT** - Lots of basic enemies
-2. **CHAOS STORM** - Worms and void spheres
-3. **CRYSTAL FIELD** - Crystal swarm focus
-4. **NEURAL MAZE** - Balanced variety
-5. **ELITE GAUNTLET** - Tough enemies (UFOs, Void)
-6. **SECTOR GUARDIAN** - Boss encounter
-
-**Scaling:**
-- Difficulty increases 15% per layer
-- Objectives scale with layer number
-- Spawn rates get progressively faster
-- Layer 99 is the final victory!
 
 ---
 
@@ -253,8 +236,7 @@ Potential additions:
 ## 🏆 Victory Condition
 
 **Beating Neural Break:**
-- Complete all 99 levels in Arcade mode OR
-- Complete all 99 layers in Rogue mode
+- Complete all 99 levels in Arcade mode
 
 **Victory Rewards:**
 - 🎉 Epic victory screen with gold effects
@@ -275,7 +257,6 @@ Potential additions:
 | Aspect | Value |
 |--------|-------|
 | Total Levels (Arcade) | 99 |
-| Total Layers (Rogue) | 99 |
 | Shortest Level | Level 1 (~2-3 min) |
 | Mid-game Levels | Levels 30-50 (~4-6 min each) |
 | Late-game Levels | Levels 70-99 (~7-12 min each) |

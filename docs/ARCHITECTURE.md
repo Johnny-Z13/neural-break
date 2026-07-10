@@ -152,7 +152,6 @@ Parallax scrolling background.
 - `GameOverScreen` - End screen with stats
 - `LeaderboardScreen` - High score display
 - `PauseScreen` - In-game pause
-- `RogueChoiceScreen` - Rogue mode upgrades
 
 ### UIManager - HUD
 

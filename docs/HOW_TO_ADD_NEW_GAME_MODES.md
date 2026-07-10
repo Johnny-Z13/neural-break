@@ -1,14 +1,19 @@
 # 🎮 HOW TO ADD NEW GAME MODES
 
-**Last Updated:** 2026-01-12  
-**Current Modes:** ARCADE, ROGUE, TEST  
+**Last Updated:** 2026-07-10
+**Current Modes:** ARCADE (`original`), TEST (`test`)
 **Ease of Adding:** 🟢 EASY (follow this guide)
+
+> **Note:** Rogue mode was removed in July 2026 (game is now Arcade-only, plus the TEST debug mode).
+> This guide's worked example previously used Rogue; it has been rewritten below around a
+> hypothetical **MIRROR** mode. The `GameModeManager` / `modes.config.ts` system it teaches
+> is unchanged and still supports adding new modes the same way.
 
 ---
 
 ## 📋 OVERVIEW
 
-Neural Break uses a **mode-based architecture** that makes adding new game modes straightforward. This guide will walk you through adding a 4th, 5th, or any new game mode.
+Neural Break uses a **mode-based architecture** that makes adding new game modes straightforward. This guide will walk you through adding a 3rd, 4th, or any new game mode.
 
 **Time Estimate:** 1-3 hours per new mode (depending on complexity)
 
@@ -23,19 +28,17 @@ Neural Break uses a **mode-based architecture** that makes adding new game modes
 ```typescript
 export enum GameMode {
   ORIGINAL = 'original',
-  ROGUE = 'rogue',
   TEST = 'test',
   YOUR_NEW_MODE = 'your_new_mode'  // ⬅️ ADD THIS
 }
 ```
 
-**Example for a "SURVIVAL" mode:**
+**Example for a hypothetical "MIRROR" mode:**
 ```typescript
 export enum GameMode {
   ORIGINAL = 'original',
-  ROGUE = 'rogue',
   TEST = 'test',
-  SURVIVAL = 'survival'  // ⬅️ NEW MODE
+  MIRROR = 'mirror'  // ⬅️ NEW MODE
 }
 ```
 
@@ -45,135 +48,105 @@ export enum GameMode {
 
 **File:** `src/core/GameModeManager.ts`
 
-Add your mode configuration to `GAME_MODE_CONFIGS`:
+Add your mode configuration to `GAME_MODE_CONFIGS`. The `GameModeConfig` interface currently defines these fields:
+
+```typescript
+export interface GameModeConfig {
+  name: string
+  description: string
+
+  // Level system
+  usesObjectiveSystem: boolean      // Does this mode use kill objectives?
+  usesLevelProgression: boolean     // Does this mode advance through numbered levels?
+  startingLevel: number             // What level does this mode start at?
+
+  // Boundaries
+  usesCircularBoundary: boolean     // Does this mode use the circular energy barrier?
+  usesSideBoundaries: boolean       // Does this mode use left/right walls?
+  boundaryWidthMultiplier: number   // Multiplier for side boundary width (1.0 = full screen)
+
+  // Scrolling
+  scrollSpeed: number               // Units per second (0 = no scroll)
+  cameraVerticalOffset: number      // Offset camera above player (positive = player at bottom of screen)
+
+  // Enemy spawning
+  enemySpawnMode: 'circular' | 'vertical' | 'custom'  // How enemies spawn
+
+  // Special features
+  starfieldFlowsDown: boolean       // Does the starfield flow downward?
+
+  // UI
+  showLevelNumber: boolean          // Show "Level X"?
+  levelLabel: string                // e.g. "Level"
+}
+```
+
+Add your mode to `GAME_MODE_CONFIGS`:
 
 ```typescript
 export const GAME_MODE_CONFIGS: Record<GameMode, GameModeConfig> = {
-  // ... existing modes ...
-  
+  // ... existing modes (ORIGINAL, TEST) ...
+
   // ═══════════════════════════════════════════════════════════════════════════
   // 🆕 YOUR NEW MODE - Description here
   // ═══════════════════════════════════════════════════════════════════════════
   [GameMode.YOUR_NEW_MODE]: {
     name: 'YOUR MODE NAME',
     description: 'Brief description of gameplay',
-    
+
     // Level system
-    usesObjectiveSystem: true/false,      // Kill objectives?
-    usesLevelProgression: true/false,     // Level-based progression?
+    usesObjectiveSystem: true,            // Kill objectives?
+    usesLevelProgression: true,           // Level-based progression?
     startingLevel: 1,                     // Starting level number
-    
+
     // Boundaries
-    usesCircularBoundary: true/false,     // Circular energy barrier?
-    usesSideBoundaries: true/false,       // Side walls?
+    usesCircularBoundary: true,           // Circular energy barrier?
+    usesSideBoundaries: false,            // Side walls?
     boundaryWidthMultiplier: 1.0,         // Width multiplier (1.0 = full screen)
-    
+
     // Scrolling
-    hasVerticalScroll: true/false,        // Camera scrolls?
     scrollSpeed: 0,                       // Units/second (0 = no scroll)
     cameraVerticalOffset: 0,              // Camera offset (0 = centered)
-    
+
     // Enemy spawning
     enemySpawnMode: 'circular',           // 'circular', 'vertical', or 'custom'
-    
+
     // Special features
-    hasWormholeExit: false,               // Wormhole exits?
-    hasSpecialChoices: false,             // Power-up choices?
     starfieldFlowsDown: false,            // Starfield direction
-    
+
     // UI
     showLevelNumber: true,
-    levelLabel: 'Level'                   // "Level" or "Layer" or "Wave"
+    levelLabel: 'Level'                   // e.g. "Level" or "Wave"
   }
 }
 ```
 
-#### 🎨 Configuration Templates
+#### 🎨 Configuration Example: "MIRROR" Mode
 
-**Radial Arena Mode (like Arcade):**
+A hypothetical mode where the arena is mirrored and enemies spawn faster — same boundary/spawn shape as Arcade, just re-themed:
+
 ```typescript
-[GameMode.SURVIVAL]: {
-  name: 'SURVIVAL MODE',
-  description: 'Survive endless waves in the arena',
-  
-  usesObjectiveSystem: false,       // No objectives - just survive
-  usesLevelProgression: false,      // Endless
-  startingLevel: 997,               // Special ID for survival
-  
+[GameMode.MIRROR]: {
+  name: 'MIRROR MODE',
+  description: 'Arcade gameplay in a mirrored arena with faster spawns',
+
+  usesObjectiveSystem: true,        // Same kill-objective system as Arcade
+  usesLevelProgression: true,
+  startingLevel: 1,
+
   usesCircularBoundary: true,       // Circular arena
   usesSideBoundaries: false,
   boundaryWidthMultiplier: 1.0,
-  
-  hasVerticalScroll: false,         // Static camera
-  scrollSpeed: 0,
+
+  scrollSpeed: 0,                   // Static camera
   cameraVerticalOffset: 0,
-  
+
   enemySpawnMode: 'circular',
-  
-  hasWormholeExit: false,
-  hasSpecialChoices: false,
-  starfieldFlowsDown: false,
-  
-  showLevelNumber: false,           // Show time survived instead
-  levelLabel: 'Wave'
-}
-```
 
-**Vertical Shooter Mode (like Rogue):**
-```typescript
-[GameMode.ASCENT]: {
-  name: 'ASCENT MODE',
-  description: 'Climb through vertical sectors',
-  
-  usesObjectiveSystem: false,
-  usesLevelProgression: false,
-  startingLevel: 996,
-  
-  usesCircularBoundary: false,
-  usesSideBoundaries: true,
-  boundaryWidthMultiplier: 0.7,     // Narrower corridor
-  
-  hasVerticalScroll: true,
-  scrollSpeed: 5.0,                 // Faster scroll
-  cameraVerticalOffset: 10,
-  
-  enemySpawnMode: 'vertical',
-  
-  hasWormholeExit: true,
-  hasSpecialChoices: true,
-  starfieldFlowsDown: true,
-  
-  showLevelNumber: true,
-  levelLabel: 'Sector'
-}
-```
-
-**Hybrid Mode:**
-```typescript
-[GameMode.BOSS_RUSH]: {
-  name: 'BOSS RUSH',
-  description: 'Battle bosses in sequence',
-  
-  usesObjectiveSystem: true,        // Kill the boss
-  usesLevelProgression: true,       // Boss 1, Boss 2, etc.
-  startingLevel: 1,
-  
-  usesCircularBoundary: true,
-  usesSideBoundaries: false,
-  boundaryWidthMultiplier: 1.0,
-  
-  hasVerticalScroll: false,
-  scrollSpeed: 0,
-  cameraVerticalOffset: 0,
-  
-  enemySpawnMode: 'custom',         // Boss-specific spawning
-  
-  hasWormholeExit: false,
-  hasSpecialChoices: true,          // Choose power-up after each boss
   starfieldFlowsDown: false,
-  
+
   showLevelNumber: true,
-  levelLabel: 'Boss'
+  levelLabel: 'Level'
 }
 ```
 
@@ -189,7 +162,7 @@ Add your mode to each config section:
 ```typescript
 export const STARFIELD_CONFIG = {
   // ... existing modes ...
-  
+
   YOUR_NEW_MODE: {
     horizontalDriftMin: -0.2,
     horizontalDriftMax: 0.2,
@@ -204,11 +177,10 @@ export const STARFIELD_CONFIG = {
 ```typescript
 export const CAMERA_CONFIG = {
   // ... existing modes ...
-  
+
   YOUR_NEW_MODE: {
     verticalOffset: 0,
     followSmoothing: 5.0,
-    scrollSpeed: 0,  // If applicable
     description: 'Your camera behavior'
   }
 }
@@ -218,11 +190,10 @@ export const CAMERA_CONFIG = {
 ```typescript
 export const BOUNDARY_CONFIG = {
   // ... existing modes ...
-  
+
   YOUR_NEW_MODE: {
-    type: 'circular' as const,  // or 'corridor'
+    type: 'circular' as const,  // or another shape if you add one
     radius: 29.5,               // if circular
-    widthMultiplier: 1.0,       // if corridor
     description: 'Your boundary setup'
   }
 }
@@ -232,14 +203,10 @@ export const BOUNDARY_CONFIG = {
 ```typescript
 export const ENEMY_SPAWN_CONFIG = {
   // ... existing modes ...
-  
+
   YOUR_NEW_MODE: {
     mode: 'circular' as const,  // or 'vertical' or 'custom'
     spawnRadius: 31.5,          // if circular
-    // OR
-    spawnHeightMin: 20,         // if vertical
-    spawnHeightVariance: 5,
-    horizontalSpread: 20,
     description: 'Your spawn behavior'
   }
 }
@@ -249,7 +216,7 @@ export const ENEMY_SPAWN_CONFIG = {
 ```typescript
 export const PICKUP_SPAWN_CONFIG = {
   // ... existing modes ...
-  
+
   YOUR_NEW_MODE: {
     mode: 'circular' as const,
     spawnRadius: 28,
@@ -263,10 +230,10 @@ export const PICKUP_SPAWN_CONFIG = {
 ```typescript
 export const PROGRESSION_CONFIG = {
   // ... existing modes ...
-  
+
   YOUR_NEW_MODE: {
-    usesObjectives: true/false,
-    usesLevelProgression: true/false,
+    usesObjectives: true,
+    usesLevelProgression: true,
     startingLevel: 1,
     levelLabel: 'Level',
     description: 'Your progression system'
@@ -278,11 +245,9 @@ export const PROGRESSION_CONFIG = {
 ```typescript
 export const VISUAL_MODE_CONFIG = {
   // ... existing modes ...
-  
+
   YOUR_NEW_MODE: {
-    showCircularBoundary: true/false,
-    showSideBarriers: true/false,
-    showWormholeExit: true/false,
+    showCircularBoundary: true,
     backgroundColor: '#000011',
     description: 'Your visual setup'
   }
@@ -303,7 +268,7 @@ static getLevelConfig(level: number): LevelConfig {
   if (level === 995) {  // Choose a unique level number
     return this.getYourNewModeConfig()
   }
-  
+
   // ... existing modes ...
 }
 
@@ -342,44 +307,30 @@ static getYourNewModeConfig(): LevelConfig {
 
 ---
 
-### Step 5: Add Start Screen Button (30 mins)
+### Step 5: Add Start Screen Menu Item (30-60 mins)
 
 **File:** `src/ui/screens/StartScreen.ts`
 
-Add a button to launch your mode:
+The current start screen is a single hardcoded HTML template (a vertical arcade-style menu), not a reusable button-factory function. The menu order is fixed: **START GAME (`arcadeButton`) / OPTIONS (`optionsButton`) / HI SCORES (`leaderboardButton`) / TEST (`testButton`)**, each with its own `id` and inline neon color styling, plus index-based keyboard/gamepad navigation (`0` = START GAME, `1` = OPTIONS, `2` = HI SCORES, `3` = TEST).
+
+`StartScreen.create()` currently has this signature:
 
 ```typescript
-// Find the createModeButtons() method and add your mode:
-
-const yourModeButton = this.createModeButton(
-  'YOUR MODE',
-  'Brief description of your mode',
-  () => {
-    cleanup()
-    onStartYourMode()  // ⬅️ You'll define this callback
-  },
-  audioManager
-)
-
-// Add to button container
-buttonContainer.appendChild(arcadeButton)
-buttonContainer.appendChild(rogueButton)
-buttonContainer.appendChild(testButton)
-buttonContainer.appendChild(yourModeButton)  // ⬅️ ADD THIS
+static create(
+  audioManager: AudioManager | null,
+  onStartGame: () => void,
+  onShowLeaderboard: () => void,
+  onStartTestMode?: () => void,
+  onShowOptions?: () => void
+): HTMLElement
 ```
 
-**Then update the create() signature:**
-```typescript
-static async create(
-  onStartArcade: () => void,
-  onStartRogue: () => void,
-  onStartTest: () => void,
-  onStartYourMode: () => void,  // ⬅️ ADD THIS
-  audioManager: AudioManager | null
-): Promise<HTMLElement> {
-  // ...
-}
-```
+To add a new mode's menu entry you must, by hand:
+1. Add a new `<button id="yourModeButton" class="menu-item" ...>` block to the template string, styled to match the existing neon buttons.
+2. Extend `create()`'s parameter list with a new callback (e.g. `onStartYourMode?: () => void`).
+3. Update the index-based keyboard/gamepad select handlers (`~line 1108` and `~line 1165` in the current file) to include the new button in the navigation order and wire its click/select action to the new callback.
+
+There is no `createModeButton()` helper to call — every menu item is written out directly in the template. Read the existing `arcadeButton`/`optionsButton`/`leaderboardButton`/`testButton` blocks in the file first and copy their structure exactly.
 
 ---
 
@@ -387,15 +338,17 @@ static async create(
 
 **File:** `src/core/Game.ts`
 
+`Game.ts` currently wires up modes via `startNewGame()` (Arcade) and `startTestMode()` (Test). Follow the same pattern for your mode.
+
 #### A. Add mode start method
 
 ```typescript
 private startYourMode(): void {
   if (DEBUG_MODE) console.log('🆕 startYourMode() called')
-  
+
   // Cleanup
   this.cleanupGameObjects()
-  
+
   // Delay and initialize
   setTimeout(() => {
     this.isRunning = false
@@ -410,53 +363,42 @@ private startYourMode(): void {
 ```typescript
 private initializeYourMode(): void {
   if (DEBUG_MODE) console.log('🆕 Starting Your Mode...')
-  
+
   // Set game state
   this.gameState = GameStateType.PLAYING
   this.gameMode = GameMode.YOUR_NEW_MODE
   this.gameModeManager.setMode(GameMode.YOUR_NEW_MODE)
   this.isTestMode = false  // Unless your mode uses invincibility
-  
+
   // Apply mode-specific settings
   const config = this.gameModeManager.getConfig()
-  
+
   // Boundaries
   this.sceneManager.setEnergyBarrierVisible(config.usesCircularBoundary)
-  this.sceneManager.setStarfieldDownwardFlow(config.starfieldFlowsDown)
-  
-  // Side barriers (if needed)
-  if (config.usesSideBoundaries) {
-    const aspect = window.innerWidth / window.innerHeight
-    const frustumSize = 30
-    const screenWidth = frustumSize * aspect
-    const barrierWidth = screenWidth * config.boundaryWidthMultiplier
-    this.rogueSideBarriers = new RogueSideBarriers(barrierWidth)
-    this.sceneManager.addToScene(this.rogueSideBarriers.getLeftWall())
-    this.sceneManager.addToScene(this.rogueSideBarriers.getRightWall())
-  }
-  
+  this.sceneManager.setStarfieldDownwardFlow('arcade')  // or 'test' — takes a mode string, see SceneManager.ts
+
   // Show HUD
   this.uiManager.setHUDVisibility(true)
-  
+
   // Reset stats
   this.gameStats = this.createEmptyStats()
   this.combo = 0
   this.comboTimer = 0
   this.scoreMultiplier = 1
   this.multiplierTimer = 0
-  
+
   // Start audio
   this.audioManager.startAmbientSoundscape()
-  
+
   // Start level manager
   const startingLevel = this.gameModeManager.getStartingLevel()
   this.levelManager.startAtLevel(startingLevel)
-  
+
   // Initialize player
   this.player = new Player()
   this.player.initialize(this.audioManager)
   this.player.setTestMode(false)  // Unless needed
-  
+
   // Set player callbacks
   this.player.setShieldCallbacks(
     () => this.uiManager.showShieldActivated(),
@@ -466,80 +408,72 @@ private initializeYourMode(): void {
     () => this.uiManager.showInvulnerableActivated(),
     () => this.uiManager.showInvulnerableDeactivated()
   )
-  
+
   // Add player to scene
   const playerMesh = this.player.getMesh()
   this.sceneManager.addToScene(playerMesh)
-  
+
   // Camera setup
   const playerPos = this.player.getPosition()
   const cameraOffset = this.gameModeManager.getCameraVerticalOffset()
   const cameraTargetY = playerPos.y + cameraOffset
   this.sceneManager.setCameraTarget(new THREE.Vector3(playerPos.x, cameraTargetY, 0))
-  
+
   // Initialize weapon system
   this.weaponSystem = new WeaponSystem()
   this.weaponSystem.initialize(this.player, this.sceneManager, this.audioManager)
-  
+
   // Connect effects
   const effectsSystem = this.sceneManager.getEffectsSystem()
   this.weaponSystem.setEffectsSystem(effectsSystem)
   this.player.setEffectsSystem(effectsSystem)
-  
+
   // Initialize enemy manager
   this.enemyManager = new EnemyManager()
   this.enemyManager.initialize(this.sceneManager, this.player)
   this.enemyManager.setLevelManager(this.levelManager)
   this.enemyManager.setEffectsSystem(effectsSystem)
   this.enemyManager.setAudioManager(this.audioManager)
-  
-  // Set spawn mode
-  const spawnMode = this.gameModeManager.getEnemySpawnMode()
-  if (spawnMode === 'vertical') {
-    this.enemyManager.setRogueMode(true)
-  }
-  
+
   // Initialize pickup managers
   this.powerUpManager = new PowerUpManager()
   this.powerUpManager.initialize(this.sceneManager, this.player)
   this.powerUpManager.setLevelManager(this.levelManager)
   this.powerUpManager.setEffectsSystem(effectsSystem)
-  
+
   // Similar for other pickup managers...
-  
+
   // Start game loop
   if (!this.isRunning) {
     this.start()
   }
-  
+
   if (DEBUG_MODE) console.log('✅ Your Mode initialization complete!')
 }
 ```
 
 #### C. Connect to start screen
 
-```typescript
-// In initialize() method, update GameScreens.showStartScreen() call:
+The real integration point is `GameScreens.showStartScreen()`, called from `Game.ts`'s `showStartScreen()` method:
 
+```typescript
+// src/core/Game.ts — showStartScreen()
 GameScreens.showStartScreen(
   () => this.startNewGame(),
-  () => this.startRogueMode(),
-  () => this.startTestMode(),
-  () => this.startYourMode(),  // ⬅️ ADD THIS
-  this.audioManager
-).catch(err => {
-  console.error('Error showing start screen:', err)
-})
+  () => this.startTestMode()
+)
 ```
+
+`GameScreens.showStartScreen()` (in `src/ui/GameScreens.ts`) forwards these callbacks into `StartScreen.create()`, along with its own internally-wired leaderboard/options callbacks. To add a new mode, extend both signatures — `GameScreens.showStartScreen(onStartGame, onStartTestMode, onStartYourMode?)` and the corresponding `StartScreen.create()` parameter — then pass `() => this.startYourMode()` from `Game.ts`'s call site above.
 
 #### D. Update mode-specific logic (if needed)
 
-If your mode has unique behavior (like Rogue's wormhole system), add it to the `update()` method:
+If your mode has unique per-frame behavior, add it to the `update()` method:
 
 ```typescript
 update(deltaTime: number): void {
   // ... existing update logic ...
-  
+
   // Mode-specific updates
   if (this.gameModeManager.getMode() === GameMode.YOUR_NEW_MODE) {
     this.updateYourModeLogic(deltaTime)
@@ -603,15 +537,13 @@ if (DEBUG_MODE) {
 
 ### Boss Rush Mode
 - Fight bosses back-to-back
-- Choose power-up between bosses
 - Limited continues
 - Track fastest clear time
 
-### Maze Runner Mode
-- Procedurally generated maze
-- Find exit portal
-- Enemies patrol corridors
-- Time pressure
+### Mirror Mode
+- Same arena shape as Arcade, mirrored visuals
+- Faster spawn rates for extra challenge
+- Shared leaderboard or its own — your call
 
 ### Chaos Mode
 - Random enemy types
@@ -623,48 +555,7 @@ if (DEBUG_MODE) {
 
 ## 🔧 ADVANCED: CUSTOM ENEMY SPAWNING
 
-If your mode needs custom enemy spawning logic:
-
-**File:** `src/core/EnemyManager.ts`
-
-```typescript
-// Add method to set custom spawn mode
-setCustomSpawnMode(customLogic: (player: Vector3) => Vector3): void {
-  this.customSpawnLogic = customLogic
-}
-
-// In spawn methods, check for custom logic:
-private spawnEnemy(enemyType: string): void {
-  let position: THREE.Vector3
-  
-  const spawnMode = this.getCurrentSpawnMode()
-  
-  if (spawnMode === 'custom' && this.customSpawnLogic) {
-    position = this.customSpawnLogic(this.player.getPosition())
-  } else if (spawnMode === 'vertical') {
-    // Vertical spawn logic
-  } else {
-    // Circular spawn logic
-  }
-  
-  // Create enemy at position...
-}
-```
-
-**In your mode initialization:**
-```typescript
-// Set custom spawn logic
-this.enemyManager.setCustomSpawnMode((playerPos) => {
-  // Your custom spawn position calculation
-  const angle = Math.random() * Math.PI * 2
-  const distance = 25 + Math.random() * 10
-  return new THREE.Vector3(
-    playerPos.x + Math.cos(angle) * distance,
-    playerPos.y + Math.sin(angle) * distance,
-    0
-  )
-})
-```
+`GameModeConfig.enemySpawnMode` currently accepts `'circular' | 'vertical' | 'custom'` and `GameModeManager.getEnemySpawnMode()` exposes it, but **`EnemyManager.ts` does not currently read this value** — Arcade and Test both spawn enemies around the circular boundary unconditionally. If your new mode needs different spawn geometry, you'll need to add that branching logic to `EnemyManager` yourself (it doesn't exist yet to copy from). Read `src/core/EnemyManager.ts`'s spawn methods first to see the current (circular-only) implementation before adding a branch.
 
 ---
 
@@ -676,17 +567,7 @@ this.enemyManager.setCustomSpawnMode((playerPos) => {
 - Enemies spawn around edge
 - Objective-based progression
 
-### Pattern 2: Vertical Scroller (Rogue)
-- Side barriers
-- Camera scrolls upward
-- Player at bottom
-- Wormhole exit as goal
-- Special choices between layers
-
-### Pattern 3: Hybrid
-- Mix elements from both patterns
-- Example: Vertical scroller with objectives
-- Example: Arena with wormhole exit
+This is the only pattern currently implemented. `usesSideBoundaries`, `scrollSpeed`, and `enemySpawnMode: 'vertical' | 'custom'` exist in the config shape for future modes but have no consuming logic in `EnemyManager`/`Game.ts` today — treat them as scaffolding, not proven paths.
 
 ---
 
@@ -712,64 +593,60 @@ Before releasing your new mode:
 
 ---
 
-## 🚀 EXAMPLE: ADDING "SURVIVAL MODE"
+## 🚀 EXAMPLE: ADDING "MIRROR MODE"
 
-Here's a complete example of adding a wave-based survival mode:
+Here's a complete example of adding a hypothetical Mirror mode:
 
 ### 1. GameState.ts
 ```typescript
 export enum GameMode {
   ORIGINAL = 'original',
-  ROGUE = 'rogue',
   TEST = 'test',
-  SURVIVAL = 'survival'  // ⬅️ NEW
+  MIRROR = 'mirror'  // ⬅️ NEW
 }
 ```
 
 ### 2. GameModeManager.ts
 ```typescript
-[GameMode.SURVIVAL]: {
-  name: 'SURVIVAL MODE',
-  description: 'Survive endless waves of enemies',
-  usesObjectiveSystem: false,
-  usesLevelProgression: false,
-  startingLevel: 997,
+[GameMode.MIRROR]: {
+  name: 'MIRROR MODE',
+  description: 'Arcade gameplay in a mirrored arena with faster spawns',
+  usesObjectiveSystem: true,
+  usesLevelProgression: true,
+  startingLevel: 1,
   usesCircularBoundary: true,
   usesSideBoundaries: false,
   boundaryWidthMultiplier: 1.0,
-  hasVerticalScroll: false,
   scrollSpeed: 0,
   cameraVerticalOffset: 0,
   enemySpawnMode: 'circular',
-  hasWormholeExit: false,
-  hasSpecialChoices: false,
   starfieldFlowsDown: false,
-  showLevelNumber: false,
-  levelLabel: 'Wave'
+  showLevelNumber: true,
+  levelLabel: 'Level'
 }
 ```
 
 ### 3. LevelManager.ts
 ```typescript
-if (level === 997) {
-  return this.getSurvivalModeConfig()
+if (level === 995) {
+  return this.getMirrorModeConfig()
 }
 
-static getSurvivalModeConfig(): LevelConfig {
+static getMirrorModeConfig(): LevelConfig {
   return {
-    level: 997,
-    name: "SURVIVAL MODE",
+    level: 995,
+    name: "MIRROR MODE",
     objectives: {
-      dataMites: 99999,    // Endless
-      scanDrones: 99999,
-      chaosWorms: 99999,
-      voidSpheres: 99999,
-      crystalSwarms: 99999,
-      fizzers: 99999,
-      ufos: 99999,
-      bosses: 99999
+      dataMites: 25,
+      scanDrones: 8,
+      chaosWorms: 1,
+      voidSpheres: 1,
+      crystalSwarms: 1,
+      fizzers: 0,
+      ufos: 1,
+      bosses: 0
     },
-    // Fast spawn rates - constant pressure
+    // Faster spawn rates than Arcade
     miteSpawnRate: 1.0,
     droneSpawnRate: 5.0,
     wormSpawnRate: 30.0,
@@ -777,65 +654,42 @@ static getSurvivalModeConfig(): LevelConfig {
     crystalSpawnRate: 35.0,
     fizzerSpawnRate: 15.0,
     ufoSpawnRate: 50.0,
-    bossSpawnRate: 120.0  // Boss every 2 minutes
+    bossSpawnRate: Infinity
   }
 }
 ```
 
 ### 4. Game.ts
 ```typescript
-private startSurvivalMode(): void {
+private startMirrorMode(): void {
   this.cleanupGameObjects()
   setTimeout(() => {
     this.isRunning = false
-    this.initializeSurvivalMode()
+    this.initializeMirrorMode()
   }, 100)
 }
 
-private initializeSurvivalMode(): void {
+private initializeMirrorMode(): void {
   // Standard initialization (copy from initializeNewGame)
   this.gameState = GameStateType.PLAYING
-  this.gameMode = GameMode.SURVIVAL
-  this.gameModeManager.setMode(GameMode.SURVIVAL)
-  
-  // ... rest of initialization ...
-  
-  // Track survival time
-  this.survivalStartTime = Date.now()
-}
+  this.gameMode = GameMode.MIRROR
+  this.gameModeManager.setMode(GameMode.MIRROR)
 
-// Add survival-specific update logic
-private updateSurvivalMode(deltaTime: number): void {
-  // Increase difficulty over time
-  const survivalTime = (Date.now() - this.survivalStartTime) / 1000
-  const difficultyMultiplier = 1 + (survivalTime / 60) * 0.1 // +10% per minute
-  
-  // Apply to enemy managers...
+  // ... rest of initialization ...
 }
 ```
 
 ### 5. StartScreen.ts
-```typescript
-const survivalButton = this.createModeButton(
-  'SURVIVAL',
-  'Survive endless waves',
-  () => {
-    cleanup()
-    onStartSurvival()
-  },
-  audioManager
-)
-buttonContainer.appendChild(survivalButton)
-```
+Add a `<button id="mirrorButton" class="menu-item" ...>MIRROR</button>` block to the template (copy the `testButton` block's structure/styling), extend `create()`'s signature with `onStartMirrorMode?: () => void`, and add it to the index-based menu navigation alongside START GAME / OPTIONS / HI SCORES / TEST.
 
-Done! Your Survival mode is now playable.
+Done! Your Mirror mode is now playable.
 
 ---
 
 ## 💡 TIPS & BEST PRACTICES
 
 1. **Start Simple** - Copy an existing mode and modify it
-2. **Use Unique Level Numbers** - 998 (Rogue), 997 (Survival), 996 (next), etc.
+2. **Use Unique Level Numbers** - 995, 994, 993, etc. (Arcade uses 1-99; TEST reuses 1-99 too)
 3. **Test Early** - Get the mode loading before adding custom logic
 4. **Debug Logging** - Add console.log statements liberally
 5. **Reuse Systems** - Don't reinvent the wheel (enemy spawning, pickups, etc.)
@@ -849,7 +703,7 @@ Done! Your Survival mode is now playable.
 ### Mode doesn't appear on start screen
 - Check GameState.ts enum is updated
 - Check StartScreen.ts has button
-- Check callback is passed to GameScreens.showStartScreen()
+- Check callback is passed to `StartScreen.create()`
 
 ### Mode crashes on start
 - Check all configs are added (GameModeManager, modes.config, LevelManager)
@@ -859,12 +713,10 @@ Done! Your Survival mode is now playable.
 ### Enemies spawn in wrong locations
 - Check ENEMY_SPAWN_CONFIG in modes.config.ts
 - Check enemySpawnMode in GameModeManager.ts
-- Verify EnemyManager.setRogueMode() is called if using vertical spawning
 
 ### Boundaries don't work
 - Check usesCircularBoundary and usesSideBoundaries in config
 - Check sceneManager.setEnergyBarrierVisible() is called
-- Check RogueSideBarriers are created if using side boundaries
 
 ### Camera is positioned wrong
 - Check cameraVerticalOffset in GameModeManager config
