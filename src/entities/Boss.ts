@@ -1,5 +1,5 @@
 import * as THREE from 'three'
-import { Enemy, EnemyState, SpawnConfig, DeathConfig } from './Enemy'
+import { Enemy } from './Enemy'
 import { Player } from './Player'
 import { EnemyProjectile } from '../weapons/EnemyProjectile'
 import { SceneManager } from '../graphics/SceneManager'
@@ -14,7 +14,7 @@ export class Boss extends Enemy {
   private projectiles: EnemyProjectile[] = []
   private sceneManager: SceneManager | null = null // Will be set from outside
   private armorPlates: THREE.Mesh[] = []
-  private coreMesh: THREE.Mesh
+  private coreMesh!: THREE.Mesh
   private energyRings: THREE.Mesh[] = []
   private weaponTurrets: THREE.Mesh[] = []
   private pulseTime: number = 0
@@ -25,8 +25,7 @@ export class Boss extends Enemy {
   private isDying: boolean = false
   private deathTimer: number = 0
   private deathDuration: number = 3.0 // 3 second epic death sequence
-  private deathPhase: number = 0
-  
+
   // 🌈 COLOR THROB STATE 🌈
   private colorPhase: number = 0
 
@@ -338,7 +337,7 @@ export class Boss extends Enemy {
   }
   
   // 💀 EPIC DREADNOUGHT DEATH ANIMATION 💀
-  private updateDeathAnimation(deltaTime: number): void {
+  protected override updateDeathAnimation(deltaTime: number): void {
     this.deathTimer += deltaTime
     const progress = this.deathTimer / this.deathDuration
     
@@ -955,8 +954,7 @@ export class Boss extends Enemy {
     // 💀 START EPIC DEATH ANIMATION 💀
     this.isDying = true
     this.deathTimer = 0
-    this.deathPhase = 0
-    
+
     // Keep alive during death animation
     this.alive = true
     

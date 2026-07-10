@@ -3,18 +3,19 @@ import { Enemy, EnemyState, SpawnConfig, DeathConfig } from './Enemy'
 import { Player } from './Player'
 import { EnemyProjectile } from '../weapons/EnemyProjectile'
 import { AudioManager } from '../audio/AudioManager'
+import { SceneManager } from '../graphics/SceneManager'
 import { BALANCE_CONFIG } from '../config'
 
 export class ScanDrone extends Enemy {
-  private scanBeamMesh: THREE.Mesh
+  private scanBeamMesh!: THREE.Mesh
   private alertState: boolean = false
   private patrolTarget: THREE.Vector3
   private patrolRadius: number = BALANCE_CONFIG.SCAN_DRONE.PATROL_RANGE
 
   private fireTimer: number = 0
   private fireRate: number = BALANCE_CONFIG.SCAN_DRONE.FIRE_RATE
-  private sceneManager: any = null // Will be set by EnemyManager
-  private projectiles: any[] = []
+  private sceneManager: SceneManager | null = null // Will be set by EnemyManager
+  private projectiles: EnemyProjectile[] = []
   
   // 📡 Scan sound timer
   private scanSoundTimer: number = 0
@@ -47,15 +48,15 @@ export class ScanDrone extends Enemy {
     this.deathDamageAmount = stats.DEATH_DAMAGE
   }
 
-  setSceneManager(sceneManager: any): void {
+  setSceneManager(sceneManager: SceneManager): void {
     this.sceneManager = sceneManager
   }
-  
+
   setAudioManager(audioManager: AudioManager): void {
     this.audioManager = audioManager
   }
 
-  getProjectiles(): any[] {
+  getProjectiles(): EnemyProjectile[] {
     return this.projectiles
   }
 

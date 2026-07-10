@@ -2,7 +2,7 @@ import * as THREE from 'three'
 import { EffectsSystem } from '../graphics/EffectsSystem'
 
 export class Shield {
-  private mesh: THREE.Mesh
+  private mesh!: THREE.Mesh
   private position: THREE.Vector3
   private radius: number = 0.625 // Increased by 25% from 0.5
   private alive: boolean = true
@@ -11,8 +11,7 @@ export class Shield {
   private rotationSpeed: number = 3.5 // Faster for "fizz"
   private trailTimer: number = 0
   private trailInterval: number = 0.07 // Faster for "fizz"
-  private letterMesh: THREE.Mesh | null = null
-  
+
   // 🧲 MAGNETISM SYSTEM 🧲
   private static readonly MAGNET_RADIUS = 4.0        // Distance at which magnetism kicks in
   private static readonly MAGNET_STRENGTH = 12.0     // Acceleration towards player
@@ -140,7 +139,6 @@ export class Shield {
     letterGroup.add(bottomCurve)
     
     this.mesh.add(letterGroup)
-    this.letterMesh = topCurve // Reference for animation
   }
 
   update(deltaTime: number, playerPosition?: THREE.Vector3): void {

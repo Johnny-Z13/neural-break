@@ -55,8 +55,7 @@ export class Player {
   
   // 🎬 ZOOM COMPENSATION - Keep ship visually consistent during camera zoom! 🎬
   private zoomCompensationCallback: (() => number) | null = null
-  private baseShipScale: number = 1.0 // Base scale before zoom compensation
-  
+
   // 🛡️ SHIELD NOTIFICATION CALLBACKS 🛡️
   private onShieldActivatedCallback: (() => void) | null = null
   private onShieldDeactivatedCallback: (() => void) | null = null
@@ -808,7 +807,7 @@ export class Player {
   }
 
   private updateFragments(deltaTime: number): void {
-    this.fragments.forEach((frag, index) => {
+    this.fragments.forEach((frag) => {
       // Update position
       frag.mesh.position.add(frag.velocity.clone().multiplyScalar(deltaTime))
       
@@ -1429,9 +1428,6 @@ export class Player {
   }
 
   collectPowerUp(): boolean {
-    // Store old level for verification
-    const oldLevel = this.powerUpLevel
-    
     if (this.powerUpLevel < 10) {
       this.powerUpLevel++
       
@@ -1494,8 +1490,6 @@ export class Player {
   
   // ⚡ SPEED-UP SYSTEM - 5% faster per pickup, max 20 levels (100% max boost) ⚡
   collectSpeedUp(): boolean {
-    const oldLevel = this.speedUpLevel
-    
     if (this.speedUpLevel < Player.MAX_SPEED_LEVEL) {
       this.speedUpLevel++
       
@@ -1525,7 +1519,6 @@ export class Player {
     // Calculate speed: base speed * (1 + boost percentage)
     // Each level adds 5% of base speed (20 levels max = 100% boost = 2x speed!)
     const boostMultiplier = 1 + (this.speedUpLevel * Player.SPEED_BOOST_PER_LEVEL)
-    const oldSpeed = this.speed
     this.speed = this.baseSpeed * boostMultiplier
     
     // Also scale dash speed proportionally

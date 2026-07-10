@@ -2,7 +2,7 @@ import * as THREE from 'three'
 import { EffectsSystem } from '../graphics/EffectsSystem'
 
 export class SpeedUp {
-  private mesh: THREE.Mesh
+  private mesh!: THREE.Mesh
   private position: THREE.Vector3
   private radius: number = 0.5 // Increased by 25% from 0.4
   private alive: boolean = true

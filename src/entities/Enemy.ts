@@ -1,7 +1,6 @@
 import * as THREE from 'three'
 import { Player } from './Player'
 import { EffectsSystem } from '../graphics/EffectsSystem'
-import { EnemyProjectile } from '../weapons/EnemyProjectile'
 import { AudioManager } from '../audio/AudioManager'
 
 // 🌟 ENEMY LIFECYCLE STATE MACHINE 🌟
@@ -52,15 +51,15 @@ export interface DeathConfig {
 }
 
 export abstract class Enemy {
-  protected mesh: THREE.Mesh
+  protected mesh!: THREE.Mesh
   protected position: THREE.Vector3
   protected velocity: THREE.Vector3
-  protected health: number
-  protected maxHealth: number
-  protected speed: number
-  protected damage: number
-  protected xpValue: number
-  protected radius: number
+  protected health!: number
+  protected maxHealth!: number
+  protected speed!: number
+  protected damage!: number
+  protected xpValue!: number
+  protected radius!: number
   protected alive: boolean = true
   protected effectsSystem: EffectsSystem | null = null
   protected audioManager: AudioManager | null = null
@@ -212,7 +211,7 @@ export abstract class Enemy {
   }
   
   // 💀 DEATH ANIMATION HANDLER 💀
-  private updateDeathAnimation(deltaTime: number): void {
+  protected updateDeathAnimation(deltaTime: number): void {
     const config = this.getDeathConfig()
     this.animTimer += deltaTime
     const progress = config.duration > 0 
@@ -231,6 +230,7 @@ export abstract class Enemy {
   }
 
   protected updateVisuals(deltaTime: number): void {
+    void deltaTime // Unused in base implementation; kept for override signature compatibility
     // Default pulsing effect (only when alive)
     if (this.state === EnemyState.ALIVE) {
       const pulse = Math.sin(Date.now() * 0.005) * 0.1 + 1
@@ -359,49 +359,50 @@ export abstract class Enemy {
     
     // Safety check - ensure material has color property
     if (!material || !material.color) return
-    
-    const originalColor = material.color.clone()
+
+    const color = material.color
+    const originalColor = color.clone()
     const originalEmissive = material.emissive?.clone() // May be undefined for BasicMaterial
     const originalScale = this.mesh.scale.clone()
-    
+
     // BRIGHT RED FLASH! (same as player)
     if (material.emissive) {
       material.emissive.setHex(0xFF0000) // Pure red glow (if material supports it)
     }
-    material.color.setHex(0xFF0000)    // Full red
-    
+    color.setHex(0xFF0000)    // Full red
+
     // Scale up for impact effect
     this.mesh.scale.multiplyScalar(1.3)
-    
+
     // Flash sequence: Red → White → Red → Normal
     setTimeout(() => {
       if (material.emissive) {
         material.emissive.setHex(0xFFFFFF) // White flash
       }
-      material.color.setHex(0xFFAAAA)    // Light red
+      color.setHex(0xFFAAAA)    // Light red
     }, 50)
-    
+
     setTimeout(() => {
       if (material.emissive) {
         material.emissive.setHex(0xFF0000) // Back to red
       }
-      material.color.setHex(0xFF4444)    
+      color.setHex(0xFF4444)
       this.mesh.scale.copy(originalScale) // Reset scale
     }, 100)
-    
+
     setTimeout(() => {
       if (material.emissive) {
         material.emissive.setHex(0xFF6666) // Fading red
       }
-      material.color.setHex(0xFF8888)    
+      color.setHex(0xFF8888)
     }, 150)
-    
+
     setTimeout(() => {
       // Restore original colors
       if (material.emissive && originalEmissive) {
         material.emissive.copy(originalEmissive)
       }
-      material.color.copy(originalColor)
+      color.copy(originalColor)
     }, 200)
   }
 
@@ -411,74 +412,7 @@ export abstract class Enemy {
   protected createDeathEffect(): void {
     // No-op - death effects are now triggered in startDeathSequence()
   }
-  
-  private createOldDeathEffect(): void {
-    // Original death effect code as fallback
-    const particleCount = 15
-    const geometry = new THREE.BufferGeometry()
-    const positions = new Float32Array(particleCount * 3)
-    const velocities = new Float32Array(particleCount * 3)
-    const colors = new Float32Array(particleCount * 3)
 
-    for (let i = 0; i < particleCount; i++) {
-      const i3 = i * 3
-      
-      positions[i3] = this.position.x
-      positions[i3 + 1] = this.position.y
-      positions[i3 + 2] = this.position.z
-      
-      const angle = (Math.PI * 2 * i) / particleCount + Math.random() * 0.5
-      const speed = 3 + Math.random() * 2
-      velocities[i3] = Math.cos(angle) * speed
-      velocities[i3 + 1] = Math.sin(angle) * speed
-      velocities[i3 + 2] = (Math.random() - 0.5) * 2
-      
-      colors[i3] = 1
-      colors[i3 + 1] = Math.random() * 0.5
-      colors[i3 + 2] = 0
-    }
-
-    geometry.setAttribute('position', new THREE.BufferAttribute(positions, 3))
-    geometry.setAttribute('color', new THREE.BufferAttribute(colors, 3))
-
-    const material = new THREE.PointsMaterial({
-      size: 0.2,
-      vertexColors: true,
-      transparent: true,
-      opacity: 1.0,
-      blending: THREE.AdditiveBlending
-    })
-
-    const particles = new THREE.Points(geometry, material)
-    
-    if (this.mesh.parent) {
-      this.mesh.parent.add(particles)
-      
-      let time = 0
-      const animate = () => {
-        time += 0.016
-        
-        const positions = particles.geometry.attributes.position.array as Float32Array
-        for (let i = 0; i < particleCount; i++) {
-          const i3 = i * 3
-          positions[i3] += velocities[i3] * 0.016
-          positions[i3 + 1] += velocities[i3 + 1] * 0.016
-          positions[i3 + 2] += velocities[i3 + 2] * 0.016
-        }
-        particles.geometry.attributes.position.needsUpdate = true
-        
-        material.opacity = Math.max(0, 1 - time * 2)
-        
-        if (time < 0.5) {
-          requestAnimationFrame(animate)
-        } else {
-          this.mesh.parent?.remove(particles)
-        }
-      }
-      animate()
-    }
-  }
-  
   protected updateTrails(deltaTime: number): void {
     if (!this.effectsSystem) return
     
