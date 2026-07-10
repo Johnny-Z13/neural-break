@@ -6,9 +6,9 @@ import * as THREE from 'three'
 
 export class WormholeExit {
   private mesh: THREE.Group
-  private innerRing: THREE.Mesh
-  private outerRing: THREE.Mesh
-  private particles: THREE.Points
+  private innerRing!: THREE.Mesh
+  private outerRing!: THREE.Mesh
+  private particles!: THREE.Points
   private exitText: THREE.Sprite | null = null
   private time: number = 0
   private radius: number = 8 // Collision radius

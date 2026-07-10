@@ -268,7 +268,7 @@ export class Game {
     StarfieldManager.getInstance().stop()
     
     // Initialize 3D starfield with attract mode - fast multi-directional movement!
-    this.sceneManager.setStarfieldDownwardFlow(false, 'attract')
+    this.sceneManager.setStarfieldDownwardFlow('attract')
     console.log('🌌 3D Starfield initialized with ATTRACT mode - fast movement!')
     
     if (!this.attractMode) {
@@ -582,7 +582,7 @@ export class Game {
     
     // Boundaries
     this.sceneManager.setEnergyBarrierVisible(config.usesCircularBoundary)
-    this.sceneManager.setStarfieldDownwardFlow(config.starfieldFlowsDown, this.gameMode)
+    this.sceneManager.setStarfieldDownwardFlow(this.gameMode)
     
     // Side barriers (if mode uses them)
     if (config.usesSideBoundaries) {
@@ -1364,7 +1364,7 @@ export class Game {
     
     // Restore energy barrier visibility
     this.sceneManager.setEnergyBarrierVisible(true)
-    this.sceneManager.setStarfieldDownwardFlow(false, 'arcade') // Restore arcade starfield
+    this.sceneManager.setStarfieldDownwardFlow('arcade') // Restore arcade starfield
     
     // Reset rogue mutations on player and weapon system
     if (this.player) {
@@ -1480,7 +1480,7 @@ export class Game {
       
       // 🚀 KEEP PROJECTILES MOVING DURING TRANSITION 🚀
       if (this.weaponSystem && this.enemyManager) {
-        this.weaponSystem.update(deltaTime, this.enemyManager.getEnemies(), this.inputManager)
+        this.weaponSystem.update(deltaTime, this.inputManager)
       }
       
       return
@@ -1670,7 +1670,7 @@ export class Game {
     
     // Update weapons
     if (this.weaponSystem && this.enemyManager) {
-      this.weaponSystem.update(deltaTime, this.enemyManager.getEnemies(), this.inputManager)
+      this.weaponSystem.update(deltaTime, this.inputManager)
     }
     
     // Check collisions
@@ -1681,7 +1681,7 @@ export class Game {
     
     // Update UI
     if (this.uiManager && this.player && this.gameTimer) {
-      this.uiManager.update(this.player, this.gameTimer, this.gameStats, this.combo, this.levelManager)
+      this.uiManager.update(this.player, this.gameStats, this.combo, this.levelManager)
     }
   }
 

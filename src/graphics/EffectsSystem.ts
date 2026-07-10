@@ -1,5 +1,5 @@
 import * as THREE from 'three'
-import { ParticlePool, Particle, Effect } from './effects/ParticlePool'
+import { ParticlePool, Effect } from './effects/ParticlePool'
 import { VectorParticlePool } from './effects/VectorParticles'
 import { ScreenEffects } from './effects/ScreenEffects'
 import { ExplosionEffects } from './effects/ExplosionEffects'
@@ -64,7 +64,7 @@ export class EffectsSystem {
     this.particlePools.set('electric', new ParticlePool(400, 'electric'))
     
     // Vector-style particles (Asteroids style)
-    this.vectorParticlePool = new VectorParticlePool(500, 'vector')
+    this.vectorParticlePool = new VectorParticlePool(500)
     
     // 🎆 SPECIALIZED PARTICLE SYSTEMS (using factory functions) 🎆
     this.nebulaPool = createNebulaPool(200)
@@ -95,8 +95,8 @@ export class EffectsSystem {
   }
 
   // ⚡ ELECTRIC DEATH EFFECT ⚡ - With saturated colors
-  createElectricDeath(position: THREE.Vector3, enemyType: string): void {
-    this.explosionEffects.createElectricDeath(position, enemyType)
+  createElectricDeath(position: THREE.Vector3): void {
+    this.explosionEffects.createElectricDeath(position)
   }
 
   // 🌟 ENEMY TRAILS 🌟
@@ -146,8 +146,8 @@ export class EffectsSystem {
   }
 
   // 💫 WEAPON IMPACT EFFECTS 💫 - With saturated colors
-  createWeaponImpact(position: THREE.Vector3, normal?: THREE.Vector3): void {
-    this.explosionEffects.createWeaponImpact(position, normal)
+  createWeaponImpact(position: THREE.Vector3): void {
+    this.explosionEffects.createWeaponImpact(position)
   }
 
   // ✨ SPARKLE PARTICLES (for power-ups and effects) ✨

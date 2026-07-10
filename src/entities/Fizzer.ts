@@ -403,7 +403,7 @@ export class Fizzer extends Enemy {
     // Final VFX
     if (this.effectsSystem) {
       const deathColor = new THREE.Color(0xFFFF00)
-      this.effectsSystem.createElectricDeath(this.position, 'Fizzer')
+      this.effectsSystem.createElectricDeath(this.position)
       this.effectsSystem.createExplosion(this.position, 1.0, deathColor)
     }
     

@@ -312,8 +312,7 @@ export abstract class Enemy {
       
       // Electric death
       if (config.electricDeath) {
-        const enemyType = this.constructor.name
-        this.effectsSystem.createElectricDeath(this.position, enemyType)
+        this.effectsSystem.createElectricDeath(this.position)
       }
       
       // Vector death particles

@@ -13,7 +13,6 @@ export class LeaderboardScreen {
   private static keyboardListener: ((e: KeyboardEvent) => void) | null = null
   private static gamepadInterval: number | null = null
   private static lastGamepadInput = 0
-  private static gamepadDeadzone = 0.5
   private static inputCooldown = 200 // ms between inputs
   private static currentMode: 'original' | 'rogue' = 'original' // Track which leaderboard is shown
 

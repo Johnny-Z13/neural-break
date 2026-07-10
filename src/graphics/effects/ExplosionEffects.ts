@@ -158,7 +158,7 @@ export class ExplosionEffects {
     }
   }
 
-  createElectricDeath(position: THREE.Vector3, enemyType: string): void {
+  createElectricDeath(position: THREE.Vector3): void {
     const electricPool = this.particlePools.get('electric')!
     const sparkPool = this.particlePools.get('spark')!
     
@@ -355,7 +355,7 @@ export class ExplosionEffects {
     }
   }
 
-  createWeaponImpact(position: THREE.Vector3, normal?: THREE.Vector3): void {
+  createWeaponImpact(position: THREE.Vector3): void {
     const impactPool = this.particlePools.get('impact')!
     const sparkPool = this.particlePools.get('spark')!
     

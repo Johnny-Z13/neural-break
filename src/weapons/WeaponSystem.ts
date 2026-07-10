@@ -1,6 +1,5 @@
 import * as THREE from 'three'
 import { Player } from '../entities/Player'
-import { Enemy } from '../entities/Enemy'
 import { Projectile } from './Projectile'
 import { SceneManager } from '../graphics/SceneManager'
 import { InputManager } from '../core/InputManager'
@@ -17,15 +16,14 @@ export enum WeaponType {
 
 export class WeaponSystem {
   private projectiles: Projectile[] = []
-  private player: Player
-  private sceneManager: SceneManager
-  private audioManager: AudioManager
+  private player!: Player
+  private sceneManager!: SceneManager
+  private audioManager!: AudioManager
   private fireTimer: number = 0
   private fireRate: number = BALANCE_CONFIG.WEAPONS.BASE_FIRE_RATE
   private damage: number = BALANCE_CONFIG.WEAPONS.BASE_DAMAGE
   private projectileSpeed: number = BALANCE_CONFIG.WEAPONS.BASE_PROJECTILE_SPEED
   private range: number = BALANCE_CONFIG.WEAPONS.BASE_RANGE
-  private lastFiringDirection: THREE.Vector3 = new THREE.Vector3(0, 1, 0) // Default up (matches player initial facing)
   private effectsSystem: EffectsSystem | null = null
   
   // 🔥 HEAT SYSTEM 🔥
@@ -59,7 +57,7 @@ export class WeaponSystem {
     this.audioManager = audioManager
   }
 
-  update(deltaTime: number, enemies: Enemy[], inputManager: InputManager): void {
+  update(deltaTime: number, inputManager: InputManager): void {
     // Update fire timer
     this.fireTimer += deltaTime
 
@@ -88,7 +86,7 @@ export class WeaponSystem {
     // ASTEROIDS-style firing - fire in movement direction or last movement direction (with rogue fire rate mutation)
     const effectiveFireRate = this.fireRate / this.fireRateMultiplier
     if (isFiringInput && this.fireTimer >= effectiveFireRate && !this.isOverheated) {
-      this.fireInDirection(inputManager)
+      this.fireInDirection()
       this.fireTimer = 0
     }
 
@@ -103,35 +101,13 @@ export class WeaponSystem {
     this.cleanupProjectiles()
   }
 
-  private findClosestEnemy(enemies: Enemy[]): Enemy | null {
-    let closestEnemy: Enemy | null = null
-    let closestDistance = this.range
-
-    const playerPos = this.player.getPosition()
-
-    for (const enemy of enemies) {
-      if (enemy.isAlive()) {
-        const distance = playerPos.distanceTo(enemy.getPosition())
-        if (distance < closestDistance) {
-          closestDistance = distance
-          closestEnemy = enemy
-        }
-      }
-    }
-
-    return closestEnemy
-  }
-
-  private fireInDirection(inputManager: InputManager): void {
+  private fireInDirection(): void {
     const playerPos = this.player.getPosition()
     
     // 🎯 ALWAYS fire in the direction the ship is VISUALLY facing! 🎯
     // This ensures bullets come out of the nose of the ship, not based on input lag
     const firingDirection = this.player.getFacingDirection()
-    
-    // Update last firing direction for reference
-    this.lastFiringDirection = firingDirection.clone()
-    
+
     // Get power-up level from player
     const powerUpLevel = this.player.getPowerUpLevel()
     
@@ -362,8 +338,7 @@ export class WeaponSystem {
     
     // Reset firing state
     this.fireTimer = 0
-    this.lastFiringDirection = new THREE.Vector3(0, 1, 0) // Reset to default up
-    
+
     console.log('🧹 WeaponSystem cleaned up and reset')
   }
 

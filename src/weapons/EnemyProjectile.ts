@@ -5,7 +5,7 @@ import { EffectsSystem } from '../graphics/EffectsSystem'
  * Enemy Projectile - Red/orange projectiles fired by enemies
  */
 export class EnemyProjectile {
-  private mesh: THREE.Mesh
+  private mesh!: THREE.Mesh
   private position: THREE.Vector3
   private velocity: THREE.Vector3
   private damage: number

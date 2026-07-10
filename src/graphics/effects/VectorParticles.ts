@@ -36,7 +36,7 @@ export class VectorParticlePool {
   private activeCount: number = 0
   private poolSize: number
 
-  constructor(poolSize: number, effectType: string) {
+  constructor(poolSize: number) {
     this.poolSize = poolSize
     
     // Initialize geometry for line segments (each particle = 2 points for a line)

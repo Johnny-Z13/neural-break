@@ -318,7 +318,7 @@ export class SpeedUp {
       this.effectsSystem.createExplosion(this.position, 0.8, new THREE.Color(0x009933)) // Forest green
 
       // Electric burst with deep emerald tint
-      this.effectsSystem.createElectricDeath(this.position, 'SpeedUp')
+      this.effectsSystem.createElectricDeath(this.position)
     }
   }
 

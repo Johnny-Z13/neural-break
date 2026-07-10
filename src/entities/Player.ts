@@ -473,7 +473,7 @@ export class Player {
           
           // Visual/Audio feedback for hitting the barrier (only for significant hits)
           if (this.effectsSystem && dot > 1.0) {
-            this.effectsSystem.createWeaponImpact(this.position.clone(), normal.clone().negate())
+            this.effectsSystem.createWeaponImpact(this.position.clone())
           }
         }
       }

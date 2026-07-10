@@ -5,20 +5,10 @@ import { EnergyBarrier } from './EnergyBarrier'
 import { PostProcessingManager } from './PostProcessingManager'
 import { DEBUG_MODE } from '../config'
 
-// 💫 SHOOTING STAR INTERFACE 💫
-interface ShootingStar {
-  position: THREE.Vector3
-  velocity: THREE.Vector3
-  life: number
-  maxLife: number
-  mesh: THREE.Mesh
-  trail: THREE.Line | null
-}
-
 export class SceneManager {
-  private scene: THREE.Scene
-  private camera: THREE.OrthographicCamera
-  private renderer: THREE.WebGLRenderer
+  private scene!: THREE.Scene
+  private camera!: THREE.OrthographicCamera
+  private renderer!: THREE.WebGLRenderer
   private canvas: HTMLCanvasElement
   private cameraTarget: THREE.Vector3 = new THREE.Vector3(0, 0, 0)
   private cameraLerpSpeed: number = 5.0
@@ -27,7 +17,7 @@ export class SceneManager {
   private shakeDecay: number = 0.9
   
   // 🔘 ENERGY BARRIER 🔘
-  private energyBarrier: EnergyBarrier
+  private energyBarrier!: EnergyBarrier
   
   // 💎 BACKGROUND GRID - For dynamic color updates! 💎
   private backgroundGrid: THREE.GridHelper | null = null
@@ -50,10 +40,10 @@ export class SceneManager {
   private transitionType: 'fade' | 'zoom' | 'slide' | 'particle' = 'fade'
   
   // 🌟 SUPER CRAZY EFFECTS! 🌟
-  private backgroundParticles: THREE.Points
+  private backgroundParticles!: THREE.Points
   private neuralLines: THREE.Line[] = []
   private dataStreams: THREE.Line[] = []
-  private glitchEffect: THREE.Mesh
+  private glitchEffect!: THREE.Mesh
   private chromaticAberration: number = 0
   private bloomPulse: number = 0
   private timeOffset: number = 0
@@ -63,16 +53,11 @@ export class SceneManager {
   private starfieldVelocities: Float32Array | null = null
   private starfieldSpeedLayers: Float32Array | null = null  // Parallax depth layers (0-1, higher = faster/closer)
   
-  // 💫 SHOOTING STARS 💫
-  private shootingStars: ShootingStar[] = []
-  private shootingStarTimer: number = 0
-  private shootingStarInterval: number = 3 + Math.random() * 4 // 3-7 seconds between shooting stars
-  
   // 🚀 SUPER JUICY EFFECTS SYSTEM! 🚀
-  private effectsSystem: EffectsSystem
-  
+  private effectsSystem!: EffectsSystem
+
   // 🎨🎵 AUDIO-VISUAL REACTIVE SYSTEM! 🎵🎨
-  private audioVisualSystem: AudioVisualReactiveSystem
+  private audioVisualSystem!: AudioVisualReactiveSystem
 
   // 🎨 POST-PROCESSING SYSTEM! 🎨
   private postProcessing: PostProcessingManager | null = null
@@ -286,7 +271,6 @@ export class SceneManager {
     const positions = new Float32Array(particleCount * 3)
     const colors = new Float32Array(particleCount * 3)
     const sizes = new Float32Array(particleCount)
-    const halfSize = worldSize / 2
 
     for (let i = 0; i < particleCount; i++) {
       const i3 = i * 3
@@ -637,7 +621,7 @@ export class SceneManager {
 
     // 🎨 UPDATE POST-PROCESSING! 🎨
     if (this.postProcessing) {
-      this.postProcessing.update(deltaTime)
+      this.postProcessing.update()
     }
 
     // Apply screen shake from effects system
@@ -770,7 +754,7 @@ export class SceneManager {
 
   private updateCosmicStarfield(deltaTime: number): void {
     // ✨ UPDATE COSMIC STARFIELD - Mode-specific behavior ✨
-    if (this.cosmicStarfield && this.starfieldVelocities) {
+    if (this.cosmicStarfield && this.starfieldVelocities && this.starfieldSpeedLayers) {
       const positions = this.cosmicStarfield.geometry.attributes.position.array as Float32Array
       const starCount = positions.length / 3
       
@@ -1167,7 +1151,7 @@ export class SceneManager {
   // 🎲 MODE-SPECIFIC STARFIELD: Set starfield behavior per game mode 🎲
   // Creates different visual experiences for each mode
   // See src/config/modes.config.ts for configuration values
-  setStarfieldDownwardFlow(enabled: boolean, mode: 'arcade' | 'rogue' | 'test' | 'attract' = 'arcade'): void {
+  setStarfieldDownwardFlow(mode: 'arcade' | 'rogue' | 'test' | 'attract' = 'arcade'): void {
     if (!this.starfieldVelocities || !this.starfieldSpeedLayers || !this.cosmicStarfield) {
       console.warn('⚠️ Starfield arrays not initialized - cannot set flow mode!')
       return
@@ -1285,9 +1269,6 @@ export class SceneManager {
 
   private updateTransition(deltaTime: number): void {
     const t = this.transitionProgress
-    const easeInOut = t < 0.5 
-      ? 2 * t * t 
-      : 1 - Math.pow(-2 * t + 2, 2) / 2
 
     switch (this.transitionType) {
       case 'fade':

@@ -1,6 +1,5 @@
 import { AudioManager } from '../../audio/AudioManager'
 import { StarfieldManager } from '../../graphics/StarfieldManager'
-import { OptionsScreen } from './OptionsScreen'
 
 /**
  * NEURAL BREAK - Start Screen
@@ -1175,7 +1174,7 @@ export class StartScreen {
           }
         } else {
           // Fallback for local dev: Show localStorage count
-          const playCountEl = startScreen.querySelector('#totalPlayCount')
+          const playCountEl = startScreen.querySelector('#totalPlayCount') as HTMLElement
           if (playCountEl) {
             playCountEl.textContent = 'LOCAL'
             playCountEl.style.fontSize = 'clamp(0.6rem, 1.2vw, 0.9rem)'
@@ -1186,7 +1185,7 @@ export class StartScreen {
         // Silently handle in local dev - API only works in production
         console.log('💾 Running in local development mode')
         // Fallback for local dev
-        const playCountEl = startScreen.querySelector('#totalPlayCount')
+        const playCountEl = startScreen.querySelector('#totalPlayCount') as HTMLElement
         if (playCountEl) {
           playCountEl.textContent = 'LOCAL'
           playCountEl.style.fontSize = 'clamp(0.6rem, 1.2vw, 0.9rem)'
