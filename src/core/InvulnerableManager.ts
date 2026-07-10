@@ -29,6 +29,7 @@ export class InvulnerableManager {
       const invulnerable = this.invulnerables[i]
       
       if (!invulnerable.isAlive()) {
+        invulnerable.destroy()
         this.invulnerables.splice(i, 1)
         continue
       }

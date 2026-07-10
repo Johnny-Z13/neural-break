@@ -998,6 +998,22 @@ export class Player {
     }
   }
 
+  /**
+   * 🧹 Dispose GPU resources - call after removing the mesh from the scene
+   */
+  dispose(): void {
+    this.mesh.traverse((child) => {
+      if (child instanceof THREE.Mesh) {
+        child.geometry.dispose()
+        if (Array.isArray(child.material)) {
+          child.material.forEach(m => m.dispose())
+        } else {
+          child.material.dispose()
+        }
+      }
+    })
+  }
+
   private updateJetVFX(deltaTime: number): void {
     if (!this.effectsSystem) return
     

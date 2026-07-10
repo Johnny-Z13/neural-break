@@ -187,11 +187,22 @@ export class Projectile {
 
   destroy(): void {
     this.alive = false
-    
+
     // Create impact effect when projectile is destroyed by collision
     if (this.effectsSystem) {
       this.effectsSystem.createWeaponImpact(this.position)
     }
+  }
+
+  // 🧹 DISPOSE GPU RESOURCES - call after removing the mesh from the scene! 🧹
+  dispose(): void {
+    this.mesh.traverse((child) => {
+      const m = child as THREE.Mesh
+      if (m.geometry) m.geometry.dispose()
+      if (m.material) {
+        (Array.isArray(m.material) ? m.material : [m.material]).forEach(mat => mat.dispose())
+      }
+    })
   }
 
   // Collision detection

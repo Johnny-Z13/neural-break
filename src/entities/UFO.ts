@@ -1016,6 +1016,10 @@ export class UFO extends Enemy {
    * 🧹 CLEANUP - Remove laser beam and jet trails from scene
    */
   destroy(): void {
+    // Dispose geometries/materials while the tree is still intact (base destroy
+    // traverses this.mesh), then run the pre-existing detach/cleanup below.
+    super.destroy()
+
     // Remove laser beam if it exists
     if (this.laserBeam && this.laserBeam.parent) {
       this.laserBeam.parent.remove(this.laserBeam)

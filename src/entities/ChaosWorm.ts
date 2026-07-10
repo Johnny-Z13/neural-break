@@ -308,6 +308,7 @@ export class ChaosWorm extends Enemy {
         if (this.sceneManager) {
           this.sceneManager.removeFromScene(projectile.getMesh())
         }
+        projectile.dispose()
         this.deathProjectiles.splice(i, 1)
       }
     }
@@ -524,6 +525,7 @@ export class ChaosWorm extends Enemy {
         if (this.sceneManager) {
           this.sceneManager.removeFromScene(projectile.getMesh())
         }
+        projectile.dispose()
       }
       this.deathProjectiles = []
     }

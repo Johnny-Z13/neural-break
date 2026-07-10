@@ -231,6 +231,7 @@ export class WeaponSystem {
       const projectile = this.projectiles[i]
       if (!projectile.isAlive()) {
         this.sceneManager.removeFromScene(projectile.getMesh())
+        projectile.dispose()
         this.projectiles.splice(i, 1)
       }
     }
@@ -240,6 +241,7 @@ export class WeaponSystem {
     const index = this.projectiles.indexOf(projectile)
     if (index !== -1) {
       this.sceneManager.removeFromScene(projectile.getMesh())
+      projectile.dispose()
       this.projectiles.splice(index, 1)
     }
   }
@@ -252,6 +254,7 @@ export class WeaponSystem {
     // Remove all projectiles from scene and clear array
     for (const projectile of this.projectiles) {
       this.sceneManager.removeFromScene(projectile.getMesh())
+      projectile.dispose()
     }
     this.projectiles = []
     
@@ -268,6 +271,7 @@ export class WeaponSystem {
   clearAllProjectiles(): void {
     for (const projectile of this.projectiles) {
       this.sceneManager.removeFromScene(projectile.getMesh())
+      projectile.dispose()
     }
     this.projectiles = []
     console.log('🧹 All projectiles cleared')

@@ -615,6 +615,7 @@ export class Boss extends Enemy {
     if (this.sceneManager) {
       for (const projectile of this.projectiles) {
         this.sceneManager.removeFromScene(projectile.getMesh())
+        projectile.dispose()
       }
     }
     this.projectiles = []
@@ -784,6 +785,7 @@ export class Boss extends Enemy {
       } else {
         if (this.sceneManager) {
           this.sceneManager.removeFromScene(projectile.getMesh())
+          projectile.dispose()
         }
         this.projectiles.splice(i, 1)
       }
@@ -977,11 +979,14 @@ export class Boss extends Enemy {
     if (this.projectiles.length > 0 && this.sceneManager) {
       for (const projectile of this.projectiles) {
         this.sceneManager.removeFromScene(projectile.getMesh())
+        projectile.dispose()
       }
       this.projectiles = []
     }
     
     console.log('🧹 Boss cleanup complete')
+
+    super.destroy()
   }
 }
 

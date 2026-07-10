@@ -324,6 +324,17 @@ export class SpeedUp {
 
   destroy(): void {
     this.alive = false
+    // Dispose geometries and materials
+    this.mesh.traverse((child) => {
+      if (child instanceof THREE.Mesh) {
+        child.geometry.dispose()
+        if (Array.isArray(child.material)) {
+          child.material.forEach(m => m.dispose())
+        } else {
+          child.material.dispose()
+        }
+      }
+    })
   }
 
   // Collision detection

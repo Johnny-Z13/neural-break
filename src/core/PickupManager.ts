@@ -11,7 +11,7 @@ import { DEBUG_MODE } from '../config'
  * Eliminates code duplication across pickup managers
  * 🧲 Now with magnetism support - pickups get sucked towards player!
  */
-export abstract class PickupManager<T extends { getMesh(): THREE.Mesh, isAlive(): boolean, update(deltaTime: number, playerPosition?: THREE.Vector3): void, setEffectsSystem(effectsSystem: EffectsSystem): void }> {
+export abstract class PickupManager<T extends { getMesh(): THREE.Mesh, isAlive(): boolean, update(deltaTime: number, playerPosition?: THREE.Vector3): void, setEffectsSystem(effectsSystem: EffectsSystem): void, destroy(): void }> {
   protected pickups: T[] = []
   protected sceneManager!: SceneManager // Initialized in initialize() method
   protected player!: Player // Initialized in initialize() method
@@ -134,6 +134,7 @@ export abstract class PickupManager<T extends { getMesh(): THREE.Mesh, isAlive()
       const pickup = this.pickups[i]
       if (!pickup.isAlive()) {
         this.sceneManager.removeFromScene(pickup.getMesh())
+        pickup.destroy()
         this.pickups.splice(i, 1)
       }
     }
@@ -147,6 +148,7 @@ export abstract class PickupManager<T extends { getMesh(): THREE.Mesh, isAlive()
     const index = this.pickups.indexOf(pickup)
     if (index !== -1) {
       this.sceneManager.removeFromScene(pickup.getMesh())
+      pickup.destroy()
       this.pickups.splice(index, 1)
     }
   }
@@ -155,6 +157,7 @@ export abstract class PickupManager<T extends { getMesh(): THREE.Mesh, isAlive()
     // Remove all pickups from scene and clear array
     for (const pickup of this.pickups) {
       this.sceneManager.removeFromScene(pickup.getMesh())
+      pickup.destroy()
     }
     this.pickups = []
     
