@@ -1,7 +1,6 @@
-import { GameStats, HighScoreEntry, ScoreManager } from '../../core/GameState'
+import { GameMode, GameStats, HighScoreEntry, ScoreManager } from '../../core/GameState'
 import { AudioManager } from '../../audio/AudioManager'
 import { StarfieldManager } from '../../graphics/StarfieldManager'
-import { LeaderboardScreen } from './LeaderboardScreen'
 
 /**
  * NEURAL BREAK - Game Over Screen
@@ -18,7 +17,7 @@ export class GameOverScreen {
   private static lastGamepadInput: number = 0
   private static inputCooldown: number = 200 // ms
   private static gamepadDeadzone: number = 0.5
-  private static currentGameMode: import('../../core/GameState').GameMode = 'original' // Store current game mode
+  private static currentGameMode: GameMode = GameMode.ORIGINAL // Store current game mode
 
   static async create(
     stats: GameStats,
@@ -780,7 +779,7 @@ export class GameOverScreen {
 
     // 🎮 KEYBOARD & GAMEPAD NAVIGATION
     // Collect all interactive buttons (excluding Save button and name input)
-    const saveButton = gameOverScreen.querySelector('#saveButton') as HTMLButtonElement | null
+    const saveButton = gameOverScreen.querySelector('#saveScoreButton') as HTMLButtonElement | null
     const buttons: HTMLButtonElement[] = []
     
     // Add Save button if it exists (high score entry)
@@ -806,7 +805,7 @@ export class GameOverScreen {
     // 🎮 KEYBOARD NAVIGATION
     GameOverScreen.keyboardListener = (e: KeyboardEvent) => {
       const key = e.code.toLowerCase()
-      const nameInput = gameOverScreen.querySelector('#nameInput') as HTMLInputElement | null
+      const nameInput = gameOverScreen.querySelector('#playerNameInput') as HTMLInputElement | null
       
       // If name input is focused, don't intercept navigation keys
       if (nameInput && document.activeElement === nameInput) {

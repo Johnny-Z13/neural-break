@@ -3,7 +3,7 @@ import { EffectsSystem } from '../graphics/EffectsSystem'
 import { WeaponType } from './WeaponSystem'
 
 export class Projectile {
-  private mesh: THREE.Mesh
+  private mesh!: THREE.Mesh
   private position: THREE.Vector3
   private velocity: THREE.Vector3
   private damage: number
@@ -16,15 +16,13 @@ export class Projectile {
   private trailInterval: number = 0.05 // Trail every 50ms - optimized for performance
   private weaponType: WeaponType = WeaponType.BULLETS
   private powerLevel: number = 0 // Track power level for VFX scaling
-  private sizeMultiplier: number = 1.0 // Store for trail scaling
 
   constructor(startPos: THREE.Vector3, direction: THREE.Vector3, speed: number, damage: number, sizeMultiplier: number = 1.0, weaponType: WeaponType = WeaponType.BULLETS, powerLevel: number = 0) {
     this.position = startPos.clone()
     this.velocity = direction.normalize().multiplyScalar(speed)
     this.damage = damage
     this.powerLevel = powerLevel
-    this.sizeMultiplier = sizeMultiplier
-    
+
     // 🔥 SCALE BASE RADIUS WITH POWER LEVEL (reduced for balance)! 🔥
     // Power level 0 = normal, Power level 10 = noticeably bigger but not overwhelming
     this.baseRadius = 0.05 + powerLevel * 0.006 // Smaller base scaling
@@ -136,7 +134,7 @@ export class Projectile {
     material.opacity = Math.max(0.2, this.lifeTime / 3.0)
     
     // Update glow layers
-    this.updateGlowLayers(deltaTime)
+    this.updateGlowLayers()
 
     // 🔥 SUPER JUICY visual effects - MORE DRAMATIC AT HIGH POWER! 🔥
     const rotationSpeed = 1 + this.powerLevel * 0.3 // Faster spin at higher power
@@ -175,7 +173,7 @@ export class Projectile {
     }
   }
   
-  private updateGlowLayers(deltaTime: number): void {
+  private updateGlowLayers(): void {
     // 🎯 SIMPLIFIED GLOW ANIMATION - Less CPU overhead! 🎯
     if (this.mesh.children.length >= 1) {
       const glow = this.mesh.children[0] as THREE.Mesh

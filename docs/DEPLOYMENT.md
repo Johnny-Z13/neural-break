@@ -161,7 +161,6 @@ After saving scores:
 Filter by mode:
 ```
 /api/highscores?mode=original
-/api/highscores?mode=rogue
 ```
 
 ---
@@ -271,7 +270,7 @@ Before deploying:
 Retrieve high scores.
 
 **Query Parameters:**
-- `mode` (optional): Filter by game mode (`original`, `rogue`)
+- `mode` (optional): Filter by game mode (`original`, `test`)
 
 **Response:**
 ```json

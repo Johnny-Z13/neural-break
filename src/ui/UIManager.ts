@@ -1,5 +1,4 @@
 import { Player } from '../entities/Player'
-import { GameTimer } from '../core/GameTimer'
 import { GameStats } from '../core/GameState'
 import { LevelManager } from '../core/LevelManager'
 
@@ -17,30 +16,29 @@ interface QueuedNotification {
 
 export class UIManager {
   private healthElement: HTMLElement | null = null
-  private healthBarFill: HTMLElement
-  private healthBarText: HTMLElement
-  private healthBarContainer: HTMLElement
-  private timerElement: HTMLElement
-  private gameLevelElement: HTMLElement
-  private levelElement: HTMLElement
-  private xpElement: HTMLElement
-  private xpNextElement: HTMLElement
-  private scoreElement: HTMLElement
-  private scoreLevelValue: HTMLElement  // New: Level display under score
-  private comboElement: HTMLElement
-  private comboCountElement: HTMLElement
-  private powerUpLevelElement: HTMLElement
-  private powerUpRow: HTMLElement       // New: Power row for animations
-  private weaponTypeElement: HTMLElement
-  private weaponTypeValueElement: HTMLElement
-  private weaponPanel: HTMLElement      // New: Grouped weapon panel
-  private heatHUDElement: HTMLElement
-  private heatBarFill: HTMLElement
-  private heatBarContainer: HTMLElement
-  private heatBarText: HTMLElement      // New: Heat percentage text
+  private healthBarFill!: HTMLElement
+  private healthBarText!: HTMLElement
+  private healthBarContainer!: HTMLElement
+  private timerElement!: HTMLElement
+  private gameLevelElement!: HTMLElement
+  private levelElement!: HTMLElement
+  private xpElement!: HTMLElement
+  private xpNextElement!: HTMLElement
+  private scoreElement!: HTMLElement
+  private scoreLevelValue!: HTMLElement  // New: Level display under score
+  private comboElement!: HTMLElement
+  private comboCountElement!: HTMLElement
+  private powerUpLevelElement!: HTMLElement
+  private powerUpRow!: HTMLElement       // New: Power row for animations
+  private weaponTypeElement!: HTMLElement
+  private weaponTypeValueElement!: HTMLElement
+  private weaponPanel!: HTMLElement      // New: Grouped weapon panel
+  private heatHUDElement!: HTMLElement
+  private heatBarFill!: HTMLElement
+  private heatBarContainer!: HTMLElement
+  private heatBarText!: HTMLElement      // New: Heat percentage text
   private shieldDots: HTMLElement[] = [] // Shield dot elements
   private healthPulseAnimation: number | null = null
-  private lastPowerUpLevel: number = 0  // Track for animation triggers
   private currentShieldCount: number = 1 // Start with 1 shield
 
   // 📬 NOTIFICATION QUEUE MANAGEMENT 📬
@@ -167,7 +165,7 @@ export class UIManager {
     requestAnimationFrame(process)
   }
 
-  update(player: Player, gameTimer: GameTimer, gameStats?: GameStats, combo?: number, levelManager?: LevelManager): void {
+  update(player: Player, gameStats?: GameStats, combo?: number, levelManager?: LevelManager): void {
     // 🎮 HEALTH BAR UPDATE 🎮
     const health = player.getHealth()
     const maxHealth = player.getMaxHealth()
@@ -327,17 +325,6 @@ export class UIManager {
       level ? `LEVEL ${level} STARTED!` : 'LEVEL UP!',
       'notification-level-up'
     )
-    this.queueNotification(notification, 2000, 8) // High priority - level events
-  }
-
-  // ROGUE MODE LAYER NOTIFICATION
-  showRogueLayerNotification(layer: number): void {
-    const notification = this.createNotification(
-      `LAYER ${layer} STARTED!`,
-      'notification-level-up'
-    )
-    notification.style.color = '#00ff00' // Green for Rogue mode
-    notification.style.textShadow = '0 0 40px rgba(0, 255, 0, 1.0), 0 0 80px rgba(0, 255, 0, 0.6), 3px 3px 0 #006600'
     this.queueNotification(notification, 2000, 8) // High priority - level events
   }
 

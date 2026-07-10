@@ -2,7 +2,7 @@ import * as THREE from 'three'
 import { EffectsSystem } from '../graphics/EffectsSystem'
 
 export class PowerUp {
-  private mesh: THREE.Mesh
+  private mesh!: THREE.Mesh
   private position: THREE.Vector3
   private radius: number = 0.5 // Increased by 25% from 0.4
   private alive: boolean = true
@@ -11,8 +11,7 @@ export class PowerUp {
   private rotationSpeed: number = 3.5 // Faster rotation for "fizz"
   private trailTimer: number = 0
   private trailInterval: number = 0.07 // Faster trail for "fizz"
-  private letterMesh: THREE.Mesh | null = null
-  
+
   // 🧲 MAGNETISM SYSTEM 🧲
   private static readonly MAGNET_RADIUS = 4.0        // Distance at which magnetism kicks in
   private static readonly MAGNET_STRENGTH = 12.0     // Acceleration towards player
@@ -134,7 +133,6 @@ export class PowerUp {
     letterGroup.add(rightBar)
     
     this.mesh.add(letterGroup)
-    this.letterMesh = verticalBar // Reference for animation
   }
 
   update(deltaTime: number, playerPosition?: THREE.Vector3): void {
@@ -281,7 +279,7 @@ export class PowerUp {
       this.effectsSystem.createExplosion(this.position, 0.8, new THREE.Color(0x009933)) // Forest green
 
       // Electric burst with deep emerald tint
-      this.effectsSystem.createElectricDeath(this.position, 'PowerUp')
+      this.effectsSystem.createElectricDeath(this.position)
     }
   }
 

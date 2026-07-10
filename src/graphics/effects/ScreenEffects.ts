@@ -6,17 +6,16 @@ import * as TWEEN from '@tweenjs/tween.js'
  */
 export class ScreenEffects {
   private scene: THREE.Scene
-  private screenFlashMesh: THREE.Mesh
-  private distortionMesh: THREE.Mesh
-  private bloomBurstMesh: THREE.Mesh
-  private chromaticMesh: THREE.Mesh
+  private screenFlashMesh!: THREE.Mesh
+  private distortionMesh!: THREE.Mesh
+  private bloomBurstMesh!: THREE.Mesh
+  private chromaticMesh!: THREE.Mesh
   private energyRippleMeshes: THREE.Mesh[] = []
   private shockwaveMeshes: THREE.Mesh[] = []
-  
+
   private chromaticAberrationAmount: number = 0
   private screenShakeAmount: number = 0
   private slowMotionFactor: number = 1.0
-  private bloomIntensity: number = 1.0
   private timeOffset: number = 0
 
   constructor(scene: THREE.Scene) {

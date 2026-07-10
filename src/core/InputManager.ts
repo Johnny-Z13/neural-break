@@ -25,9 +25,6 @@ export class InputManager {
   private deadzone: number = 0.15 // Analog stick deadzone
   private triggerThreshold: number = 0.5 // Trigger press threshold
   
-  // Gamepad button state tracking (for button press detection)
-  private previousButtonStates: boolean[] = []
-  
   // 🎯 Input mode tracking
   private lastInputMethod: 'keyboard' | 'mouse' | 'gamepad' = 'keyboard'
 
@@ -38,8 +35,8 @@ export class InputManager {
     
     // Mouse events
     document.addEventListener('mousemove', (e) => this.onMouseMove(e))
-    document.addEventListener('mousedown', (e) => this.onMouseDown(e))
-    document.addEventListener('mouseup', (e) => this.onMouseUp(e))
+    document.addEventListener('mousedown', () => this.onMouseDown())
+    document.addEventListener('mouseup', () => this.onMouseUp())
     
     // Prevent context menu on right click
     document.addEventListener('contextmenu', (e) => e.preventDefault())
@@ -66,11 +63,11 @@ export class InputManager {
     this.mousePosition.y = event.clientY
   }
 
-  private onMouseDown(event: MouseEvent): void {
+  private onMouseDown(): void {
     this.isMouseDown = true
   }
 
-  private onMouseUp(event: MouseEvent): void {
+  private onMouseUp(): void {
     this.isMouseDown = false
   }
   
@@ -79,8 +76,7 @@ export class InputManager {
     this.gamepad = event.gamepad
     this.gamepadIndex = event.gamepad.index
     this.gamepadConnected = true
-    this.previousButtonStates = new Array(event.gamepad.buttons.length).fill(false)
-    
+
     console.log(`🎮 Gamepad connected: ${event.gamepad.id}`)
     console.log(`   Index: ${event.gamepad.index}`)
     console.log(`   Buttons: ${event.gamepad.buttons.length}`)

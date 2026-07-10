@@ -6,17 +6,22 @@ All notable changes to Neural Break will be documented in this file.
 
 ## [Unreleased]
 
-### Added
-- Global online leaderboards via Vercel API
-- Separate high score tables for Original and Rogue modes
-- Automatic environment detection (local vs production)
-- Smart fallback to localStorage if API fails
-- Comprehensive deployment documentation
+_Nothing pending._
+
+---
+
+## [1.3.0] - 2026-07-10
+
+### Removed
+- **Rogue Mode**: Removed entirely — game is now Arcade-only, plus the TEST debug mode. Valid `gameMode` values are `original` and `test`.
 
 ### Changed
-- Updated README with cleaner structure
-- Organized documentation into `/docs` folder
-- Improved high score system architecture
+- **Main Menu**: Renamed/reordered to START GAME / OPTIONS / HI SCORES / TEST
+- **Leaderboard**: Now a single Arcade-only board (no more mode toggle)
+- Start screen and leaderboard now fit correctly at all window heights
+
+### Added
+- Neon glitched-N favicon
 
 ---
 

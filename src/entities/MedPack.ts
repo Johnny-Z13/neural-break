@@ -3,7 +3,7 @@ import { EffectsSystem } from '../graphics/EffectsSystem'
 import { BALANCE_CONFIG } from '../config'
 
 export class MedPack {
-  private mesh: THREE.Mesh
+  private mesh!: THREE.Mesh
   private position: THREE.Vector3
   private radius: number = 0.5 // Increased by 25% from 0.4
   private alive: boolean = true
@@ -11,8 +11,7 @@ export class MedPack {
   private pulseTime: number = 0
   private rotationSpeed: number = 2.5 // Faster for "fizz"
   private healthRestore: number = BALANCE_CONFIG.PICKUPS.MED_PACK.HEAL_AMOUNT
-  private crossMesh: THREE.Mesh
-  private glowMesh: THREE.Mesh
+  private glowMesh!: THREE.Mesh
   
   // 🧲 MAGNETISM SYSTEM 🧲
   private static readonly MAGNET_RADIUS = BALANCE_CONFIG.PICKUPS.MAGNET_RADIUS
@@ -111,10 +110,7 @@ export class MedPack {
     })
     const wireframe = new THREE.Mesh(wireframeGeometry, wireframeMaterial)
     this.mesh.add(wireframe)
-    
-    // Store cross mesh reference for animation
-    this.crossMesh = verticalBar
-    
+
     // 💫 ENERGY PARTICLES - 10 particles for more "fizz"! 💫
     for (let i = 0; i < 10; i++) {
       const particleGeometry = new THREE.SphereGeometry(0.04, 6, 6) // Scaled up

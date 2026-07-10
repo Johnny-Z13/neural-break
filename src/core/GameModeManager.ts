@@ -3,7 +3,7 @@
  * 🎮 GAME MODE MANAGER
  * ═══════════════════════════════════════════════════════════════════════════
  * 
- * Central system for managing different game modes (Arcade, Rogue, etc.)
+ * Central system for managing different game modes (Arcade, Test, etc.)
  * Makes it easy to add new modes without touching core game logic.
  * 
  * 📋 TO ADD A NEW GAME MODE:
@@ -33,18 +33,15 @@ export interface GameModeConfig {
   usesCircularBoundary: boolean     // Does this mode use the circular energy barrier?
   usesSideBoundaries: boolean       // Does this mode use left/right walls?
   boundaryWidthMultiplier: number   // Multiplier for side boundary width (1.0 = full screen)
-  
+
   // Scrolling
-  hasVerticalScroll: boolean        // Does the camera scroll upward?
   scrollSpeed: number               // Units per second (0 = no scroll)
   cameraVerticalOffset: number      // Offset camera above player (positive = player at bottom of screen)
-  
+
   // Enemy spawning
   enemySpawnMode: 'circular' | 'vertical' | 'custom'  // How enemies spawn
-  
+
   // Special features
-  hasWormholeExit: boolean          // Does this mode have wormhole exits?
-  hasSpecialChoices: boolean        // Does this mode offer power-up choices?
   starfieldFlowsDown: boolean       // Does the starfield flow downward?
   
   // UI
@@ -75,90 +72,49 @@ export const GAME_MODE_CONFIGS: Record<GameMode, GameModeConfig> = {
     usesCircularBoundary: true,
     usesSideBoundaries: false,
     boundaryWidthMultiplier: 1.0,
-    
+
     // Scrolling
-    hasVerticalScroll: false,
     scrollSpeed: 0,
     cameraVerticalOffset: 0,          // Centered camera
-    
+
     // Enemy spawning
     enemySpawnMode: 'circular',
-    
+
     // Special features
-    hasWormholeExit: false,
-    hasSpecialChoices: false,
     starfieldFlowsDown: false,
-    
+
     // UI
     showLevelNumber: true,
     levelLabel: 'Level'
   },
-  
-  // ═══════════════════════════════════════════════════════════════════════════
-  // 🎲 ROGUE MODE - Vertical ascent roguelite
-  // ═══════════════════════════════════════════════════════════════════════════
-  [GameMode.ROGUE]: {
-    name: 'ROGUE MODE',
-    description: 'Vertical ascent roguelite with power-up choices',
-    
-    // Level system
-    usesObjectiveSystem: false,       // No kill objectives - only wormhole exit
-    usesLevelProgression: false,      // Stays at level 998, tracks layers separately
-    startingLevel: 998,               // Special Rogue mode level
-    
-    // Boundaries
-    usesCircularBoundary: false,      // No circular barrier
-    usesSideBoundaries: true,         // Left/right walls
-    boundaryWidthMultiplier: 0.8,     // 80% of screen width (narrower corridor)
-    
-    // Scrolling
-    hasVerticalScroll: true,          // Camera scrolls upward
-    scrollSpeed: 3.0,                 // 3 units per second
-    cameraVerticalOffset: 12,         // Player at bottom of screen (bullet hell style)
-    
-    // Enemy spawning
-    enemySpawnMode: 'vertical',       // Enemies spawn above player
-    
-    // Special features
-    hasWormholeExit: true,            // Wormhole exit at end of layer
-    hasSpecialChoices: true,          // Power-up choices between layers
-    starfieldFlowsDown: true,         // Starfield flows downward (SCRAMBLE-style)
-    
-    // UI
-    showLevelNumber: true,
-    levelLabel: 'Layer'
-  },
-  
+
   // ═══════════════════════════════════════════════════════════════════════════
   // 🧪 TEST MODE - For development and testing
   // ═══════════════════════════════════════════════════════════════════════════
   [GameMode.TEST]: {
     name: 'TEST MODE',
     description: 'Development mode with unlimited health',
-    
+
     // Level system
     usesObjectiveSystem: true,
     usesLevelProgression: true,
     startingLevel: 1,
-    
+
     // Boundaries
     usesCircularBoundary: true,
     usesSideBoundaries: false,
     boundaryWidthMultiplier: 1.0,
-    
+
     // Scrolling
-    hasVerticalScroll: false,
     scrollSpeed: 0,
     cameraVerticalOffset: 0,          // Centered camera
-    
+
     // Enemy spawning
     enemySpawnMode: 'circular',
-    
+
     // Special features
-    hasWormholeExit: false,
-    hasSpecialChoices: false,
     starfieldFlowsDown: false,
-    
+
     // UI
     showLevelNumber: true,
     levelLabel: 'Level'
@@ -216,18 +172,6 @@ export class GameModeManager {
     return this.currentConfig.usesSideBoundaries
   }
   
-  hasVerticalScroll(): boolean {
-    return this.currentConfig.hasVerticalScroll
-  }
-  
-  hasWormholeExit(): boolean {
-    return this.currentConfig.hasWormholeExit
-  }
-  
-  hasSpecialChoices(): boolean {
-    return this.currentConfig.hasSpecialChoices
-  }
-  
   getEnemySpawnMode(): 'circular' | 'vertical' | 'custom' {
     return this.currentConfig.enemySpawnMode
   }
@@ -250,13 +194,6 @@ export class GameModeManager {
   
   getLevelLabel(): string {
     return this.currentConfig.levelLabel
-  }
-  
-  /**
-   * Check if this is Rogue mode (convenience method)
-   */
-  isRogueMode(): boolean {
-    return this.currentMode === GameMode.ROGUE
   }
   
   /**

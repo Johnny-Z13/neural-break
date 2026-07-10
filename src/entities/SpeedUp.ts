@@ -2,7 +2,7 @@ import * as THREE from 'three'
 import { EffectsSystem } from '../graphics/EffectsSystem'
 
 export class SpeedUp {
-  private mesh: THREE.Mesh
+  private mesh!: THREE.Mesh
   private position: THREE.Vector3
   private radius: number = 0.5 // Increased by 25% from 0.4
   private alive: boolean = true
@@ -318,7 +318,7 @@ export class SpeedUp {
       this.effectsSystem.createExplosion(this.position, 0.8, new THREE.Color(0x009933)) // Forest green
 
       // Electric burst with deep emerald tint
-      this.effectsSystem.createElectricDeath(this.position, 'SpeedUp')
+      this.effectsSystem.createElectricDeath(this.position)
     }
   }
 

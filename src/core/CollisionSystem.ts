@@ -1,6 +1,6 @@
 import * as THREE from 'three'
 import { Player } from '../entities/Player'
-import { Enemy, DataMite, ScanDrone, ChaosWorm, VoidSphere, CrystalShardSwarm, Fizzer, UFO, Boss } from '../entities'
+import { Enemy } from '../entities'
 import { EnemyManager } from './EnemyManager'
 import { WeaponSystem } from '../weapons/WeaponSystem'
 import { PowerUpManager } from './PowerUpManager'
@@ -12,7 +12,6 @@ import { SceneManager } from '../graphics/SceneManager'
 import { AudioManager } from '../audio/AudioManager'
 import { InputManager } from './InputManager'
 import { UIManager } from '../ui/UIManager'
-import { LevelManager } from './LevelManager'
 import { GameStats, ScoreManager } from './GameState'
 import { DEBUG_MODE } from '../config'
 
@@ -58,13 +57,11 @@ export class CollisionSystem {
   private audioManager: AudioManager
   private inputManager: InputManager
   private uiManager: UIManager
-  private levelManager: LevelManager
   
   private callbacks: CollisionCallbacks
   
   // 🎯 ARCADE-STYLE MULTIPLIER SYSTEM STATE
   private scoreMultiplier: number = 1
-  private multiplierTimer: number = 0
   private multiplierDecayTime: number = 2.0
   private lastKillTime: number = 0
   private killChainWindow: number = 1.5
@@ -87,7 +84,6 @@ export class CollisionSystem {
     audioManager: AudioManager,
     inputManager: InputManager,
     uiManager: UIManager,
-    levelManager: LevelManager,
     callbacks: CollisionCallbacks
   ) {
     this.player = player
@@ -102,7 +98,6 @@ export class CollisionSystem {
     this.audioManager = audioManager
     this.inputManager = inputManager
     this.uiManager = uiManager
-    this.levelManager = levelManager
     this.callbacks = callbacks
   }
 
@@ -111,7 +106,6 @@ export class CollisionSystem {
    */
   reset(): void {
     this.scoreMultiplier = 1
-    this.multiplierTimer = 0
     this.lastKillTime = 0
     this.lastMultiplierShown = 0
     this.combo = 0
@@ -305,8 +299,6 @@ export class CollisionSystem {
     const screenPos = this.callbacks.worldToScreen(enemy.getPosition())
     this.uiManager.showKillScore(basePoints, this.scoreMultiplier, screenPos.x, screenPos.y)
     
-    // Reset multiplier timer
-    this.multiplierTimer = this.multiplierDecayTime
     this.lastKillTime = currentTime
     
     // Add combo

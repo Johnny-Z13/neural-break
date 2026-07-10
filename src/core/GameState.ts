@@ -1,14 +1,12 @@
 export enum GameMode {
   ORIGINAL = 'original',
-  ROGUE = 'rogue',
   TEST = 'test'
 }
 
 export enum GameStateType {
   START_SCREEN = 'start_screen',
   PLAYING = 'playing',
-  GAME_OVER = 'game_over',
-  ROGUE_CHOICE = 'rogue_choice'
+  GAME_OVER = 'game_over'
 }
 
 export interface GameStats {
@@ -135,7 +133,8 @@ export class ScoreManager {
       survivedTime: 180, // 3 minutes
       level: 5,
       date: '12/29/2025',
-      location: 'UK'
+      location: 'UK',
+      gameMode: GameMode.TEST
     }
     const saved = await this.saveHighScore(testEntry)
     console.log('🧪 Test high score added:', testEntry, saved ? '✅' : '❌')

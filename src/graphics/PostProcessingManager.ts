@@ -143,7 +143,9 @@ export class PostProcessingManager {
       offset: new THREE.Vector2(
         this.config.chromaticAberration.intensity,
         this.config.chromaticAberration.intensity
-      )
+      ),
+      radialModulation: false,
+      modulationOffset: 0.15
     })
 
     // Vignette
@@ -206,7 +208,7 @@ export class PostProcessingManager {
   /**
    * Update - called every frame
    */
-  update(deltaTime: number): void {
+  update(): void {
     // Nothing to update now that glitch is CSS-based
   }
 

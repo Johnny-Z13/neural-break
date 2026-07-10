@@ -3,6 +3,7 @@ import { Enemy, EnemyState, SpawnConfig, DeathConfig } from './Enemy'
 import { Player } from './Player'
 import { EnemyProjectile } from '../weapons/EnemyProjectile'
 import { AudioManager } from '../audio/AudioManager'
+import { SceneManager } from '../graphics/SceneManager'
 import { BALANCE_CONFIG } from '../config'
 
 /**
@@ -14,16 +15,16 @@ import { BALANCE_CONFIG } from '../config'
  */
 export class VoidSphere extends Enemy {
   private voidRings: THREE.Mesh[] = []
-  private distortionField: THREE.Mesh
-  private gravityWaves: THREE.Points
-  private waveGeometry: THREE.BufferGeometry
-  private wavePositions: Float32Array
+  private distortionField!: THREE.Mesh
+  private gravityWaves!: THREE.Points
+  private waveGeometry!: THREE.BufferGeometry
+  private wavePositions!: Float32Array
   private ringCount: number = 7 // More rings for bigger sphere
   private pulseTime: number = 0
   private waveUpdateSkipFrames: number = 0 // Throttle wave updates for performance
   
   // 🔫 PROJECTILE SYSTEM 🔫
-  private sceneManager: any = null
+  private sceneManager: SceneManager | null = null
   private projectiles: EnemyProjectile[] = []
   private fireTimer: number = 0
   private fireRate: number = BALANCE_CONFIG.VOID_SPHERE.FIRE_RATE
@@ -62,7 +63,7 @@ export class VoidSphere extends Enemy {
     this.deathDamageAmount = stats.DEATH_DAMAGE
   }
   
-  setSceneManager(sceneManager: any): void {
+  setSceneManager(sceneManager: SceneManager): void {
     this.sceneManager = sceneManager
   }
   
@@ -607,8 +608,10 @@ export class VoidSphere extends Enemy {
     }
     
     this.projectiles.push(projectile)
-    this.sceneManager.addToScene(projectile.getMesh())
-    
+    if (this.sceneManager) {
+      this.sceneManager.addToScene(projectile.getMesh())
+    }
+
     // 🎵 PLAY VOID FIRE SOUND! 🎵
     if (this.audioManager) {
       this.audioManager.playVoidSphereFireSound()

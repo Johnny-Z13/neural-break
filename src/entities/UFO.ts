@@ -1,7 +1,8 @@
 import * as THREE from 'three'
-import { Enemy, EnemyState, SpawnConfig, DeathConfig } from './Enemy'
+import { Enemy } from './Enemy'
 import { Player } from './Player'
 import { AudioManager } from '../audio/AudioManager'
+import { SceneManager } from '../graphics/SceneManager'
 import { BALANCE_CONFIG } from '../config'
 
 /**
@@ -14,7 +15,7 @@ import { BALANCE_CONFIG } from '../config'
  * - Fires laser BEAMS (not bullets) - 10% damage (reduced for testing)
  */
 export class UFO extends Enemy {
-  private sceneManager: any = null
+  private sceneManager: SceneManager | null = null
   
   // 🛸 ORGANIC MOVEMENT STATE 🛸
   private targetPoint: THREE.Vector3 = new THREE.Vector3()
@@ -79,7 +80,7 @@ export class UFO extends Enemy {
     this.deathDamageAmount = stats.DEATH_DAMAGE
   }
 
-  setSceneManager(sceneManager: any): void {
+  setSceneManager(sceneManager: SceneManager): void {
     this.sceneManager = sceneManager
   }
 
@@ -366,7 +367,7 @@ export class UFO extends Enemy {
     }
   }
 
-  private updateDeathAnimation(deltaTime: number): void {
+  private updateUFODeathAnimation(deltaTime: number): void {
     if (!this.isDying) return
     
     this.deathTimer += deltaTime
@@ -387,7 +388,7 @@ export class UFO extends Enemy {
       this.mesh.rotation.z += deltaTime * this.spinSpeed
       
       // Lights flicker
-      this.domeLights.forEach((light, i) => {
+      this.domeLights.forEach((light) => {
         const material = light.material as THREE.MeshBasicMaterial
         material.opacity = Math.random() > 0.5 ? 0.8 : 0.2
       })
@@ -582,7 +583,7 @@ export class UFO extends Enemy {
   // Override update to handle death animation
   update(deltaTime: number, player: Player): void {
     if (this.isDying) {
-      this.updateDeathAnimation(deltaTime)
+      this.updateUFODeathAnimation(deltaTime)
       // Still update position during death
       this.position.add(this.velocity.clone().multiplyScalar(deltaTime))
       this.mesh.position.set(this.position.x, this.position.y, 0)

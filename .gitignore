@@ -4,6 +4,11 @@ node_modules/
 # Vite
 .vite/
 
+# Playwright
+test-results/
+playwright-report/
+blob-report/
+
 # Build output
 dist/
 build/
@@ -22,3 +27,4 @@ Thumbs.db
 
 # Environment
 .env*.local
+.superpowers/

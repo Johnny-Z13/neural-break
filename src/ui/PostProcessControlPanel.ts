@@ -1,7 +1,6 @@
 import * as THREE from 'three'
 import { PostProcessingManager } from '../graphics/PostProcessingManager'
 import { PostProcessSettings, PostProcessConfig } from '../config/PostProcessSettings'
-import { DEBUG_MODE } from '../config'
 
 /**
  * 🎨 POST-PROCESSING CONTROL PANEL 🎨

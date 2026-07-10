@@ -1,5 +1,5 @@
 import * as THREE from 'three'
-import { Enemy, EnemyState, SpawnConfig, DeathConfig } from './Enemy'
+import { Enemy } from './Enemy'
 import { Player } from './Player'
 import { AudioManager } from '../audio/AudioManager'
 import { EnemyProjectile } from '../weapons/EnemyProjectile'
@@ -15,12 +15,12 @@ import { BALANCE_CONFIG } from '../config'
 export class ChaosWorm extends Enemy {
   private segments: THREE.Mesh[] = []
   private segmentCount: number = BALANCE_CONFIG.CHAOS_WORM.SEGMENT_COUNT
-  private particleSystem: THREE.Points
-  private particleGeometry: THREE.BufferGeometry
-  private particlePositions: Float32Array
-  private particleVelocities: Float32Array
-  private particleColors: Float32Array
-  private particleLifetimes: Float32Array
+  private particleSystem!: THREE.Points
+  private particleGeometry!: THREE.BufferGeometry
+  private particlePositions!: Float32Array
+  private particleVelocities!: Float32Array
+  private particleColors!: Float32Array
+  private particleLifetimes!: Float32Array
   private particleCount: number = 400 // More particles!
   private waveOffset: number = 0
   private sceneManager: any = null
@@ -229,7 +229,7 @@ export class ChaosWorm extends Enemy {
   }
   
   // 💀 BESPOKE DEATH ANIMATION 💀
-  private updateDeathAnimation(deltaTime: number): void {
+  protected override updateDeathAnimation(deltaTime: number): void {
     this.deathTimer += deltaTime
     const progress = this.deathTimer / this.deathDuration
     
@@ -249,7 +249,6 @@ export class ChaosWorm extends Enemy {
     }
     
     // 🦴 ANIMATE BREAKING SEGMENTS 🦴
-    const time = Date.now() * 0.001
     for (let i = 0; i < this.segments.length; i++) {
       const segment = this.segments[i]
       

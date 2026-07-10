@@ -20,13 +20,10 @@ export class AudioVisualReactiveSystem {
   // 🎵 AUDIO REACTIVE PARAMETERS - All configurable! 🎵
   private enemyDeathColorIntensity: number = 0.15 // How much enemy deaths affect color (reduced from 0.3)
   private comboColorIntensity: number = 0.1 // How much combos affect color (reduced from 0.2)
-  private audioPulseIntensity: number = 0.15 // How much audio affects visuals
-  private visualResponseTime: number = 0.1 // How fast visuals respond to audio
-  
+
   // 🌈 COLOR PALETTE SYSTEM - Enemy type colors! 🌈
   private enemyColorMap: Map<string, THREE.Color> = new Map()
-  private colorShiftAmount: number = 0.4 // How much to shift colors
-  
+
   // 💫 EMERGENT SYSTEMS - Gameplay intensity tracking! 💫
   private gameplayIntensity: number = 0 // 0-1 scale
   private intensityDecayRate: number = 0.98 // How fast intensity decays
@@ -165,12 +162,12 @@ export class AudioVisualReactiveSystem {
     
     // Update lighting reactivity
     if (this.lightReactivityEnabled) {
-      this.updateLightingReactivity(deltaTime)
+      this.updateLightingReactivity()
     }
-    
+
     // Update particle system reactivity
     if (this.particleReactivityEnabled) {
-      this.updateParticleReactivity(deltaTime)
+      this.updateParticleReactivity()
     }
   }
   
@@ -180,7 +177,7 @@ export class AudioVisualReactiveSystem {
   }
   
   // ⚡ UPDATE LIGHTING REACTIVITY - Lights pulse with gameplay! ⚡
-  private updateLightingReactivity(deltaTime: number): void {
+  private updateLightingReactivity(): void {
     const time = Date.now() * 0.001
     const intensityMultiplier = 1.0 + this.gameplayIntensity * 0.5 + Math.sin(time * 3) * 0.2
     
@@ -193,7 +190,7 @@ export class AudioVisualReactiveSystem {
   }
   
   // 🎆 UPDATE PARTICLE REACTIVITY - Particles respond to intensity! 🎆
-  private updateParticleReactivity(deltaTime: number): void {
+  private updateParticleReactivity(): void {
     // This affects particle emission rates in EffectsSystem
     // The intensity value is available for use
   }

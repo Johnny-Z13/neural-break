@@ -63,8 +63,9 @@ export class AttractMode {
     
     // Remove all enemies from scene
     for (const attractEnemy of this.enemies) {
-      if (attractEnemy.enemy.mesh) {
-        this.scene.remove(attractEnemy.enemy.mesh)
+      const mesh = attractEnemy.enemy.getMesh()
+      if (mesh) {
+        this.scene.remove(mesh)
       }
       attractEnemy.enemy.destroy()
     }
@@ -85,7 +86,10 @@ export class AttractMode {
 
       // Update enemy animation (but catch any errors from missing game systems)
       try {
-        attractEnemy.enemy.update(deltaTime)
+        // @ts-expect-error - attract mode has no Player; the surrounding try/catch is
+        // load-bearing (enemy AI throws on the missing player and no-ops). A typed fix
+        // requires guarding player access in all subclass updateAI overrides — deferred.
+        attractEnemy.enemy.update(deltaTime, undefined)
       } catch {
         // Silently handle errors from enemies trying to access missing game systems
       }
@@ -94,19 +98,14 @@ export class AttractMode {
       this.updateEnemyMovement(attractEnemy, deltaTime)
 
       // Wrap around screen edges instead of removing
-      const pos = attractEnemy.enemy.position
+      const mesh = attractEnemy.enemy.getMesh()
+      const pos = mesh.position
       const wrapRadius = this.boundaryRadius * 0.8
 
       if (pos.x > wrapRadius) pos.x = -wrapRadius
       if (pos.x < -wrapRadius) pos.x = wrapRadius
       if (pos.y > wrapRadius) pos.y = -wrapRadius
       if (pos.y < -wrapRadius) pos.y = wrapRadius
-
-      // Update mesh position after wrap
-      if (attractEnemy.enemy.mesh) {
-        attractEnemy.enemy.mesh.position.x = pos.x
-        attractEnemy.enemy.mesh.position.y = pos.y
-      }
     }
 
     // Respawn if we somehow lost a fizzer
@@ -143,13 +142,14 @@ export class AttractMode {
     // @ts-ignore - accessing protected property for attract mode
     enemy.state = EnemyState.ALIVE
 
-    if (enemy.mesh) {
-      enemy.mesh.scale.set(1, 1, 1)
-      if (enemy.mesh.material && 'opacity' in enemy.mesh.material) {
-        (enemy.mesh.material as any).opacity = 1
+    const mesh = enemy.getMesh()
+    if (mesh) {
+      mesh.scale.set(1, 1, 1)
+      if (mesh.material && 'opacity' in mesh.material) {
+        (mesh.material as any).opacity = 1
       }
       // Add enemy mesh to scene so it's visible!
-      this.scene.add(enemy.mesh)
+      this.scene.add(mesh)
     }
 
     // Set random initial target
@@ -178,7 +178,7 @@ export class AttractMode {
    */
   private updateEnemyMovement(attractEnemy: AttractEnemy, deltaTime: number): void {
     const enemy = attractEnemy.enemy
-    const pos = enemy.position
+    const pos = enemy.getMesh().position
 
     // Retarget frequently for erratic movement
     attractEnemy.retargetTimer += deltaTime
@@ -228,14 +228,8 @@ export class AttractMode {
     }
 
     // Apply velocity
-    enemy.position.x += attractEnemy.velocity.x * deltaTime
-    enemy.position.y += attractEnemy.velocity.y * deltaTime
-
-    // Update mesh position
-    if (enemy.mesh) {
-      enemy.mesh.position.x = enemy.position.x
-      enemy.mesh.position.y = enemy.position.y
-    }
+    pos.x += attractEnemy.velocity.x * deltaTime
+    pos.y += attractEnemy.velocity.y * deltaTime
   }
 
   /**

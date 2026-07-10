@@ -66,7 +66,6 @@ Complete guide to all controls in Neural Break.
 **Keyboard:**
 - `↑` / `↓` or `W` / `S` - Select option
 - `Enter` / `Space` - Confirm
-- `←` / `→` or `A` / `D` - Change mode (Original ↔ Rogue)
 
 **Mouse:**
 - Hover over button
@@ -75,23 +74,18 @@ Complete guide to all controls in Neural Break.
 **Gamepad:**
 - D-Pad or Left Stick - Navigate
 - `A` / `X` - Confirm
-- `←` / `→` on D-Pad - Change mode
 
 ---
 
 ### High Scores Screen
 
 **Keyboard:**
-- `Tab`, `←` / `→`, or `A` / `D` - Toggle mode (Original ↔ Rogue)
 - `Space` / `Enter` / `Escape` - Return to menu
 
 **Mouse:**
-- Click "SWITCH TO ROGUE MODE" / "SWITCH TO ARCADE MODE"
 - Click "BACK TO MENU"
 
 **Gamepad:**
-- `LB` / `RB` (Shoulder buttons) - Toggle mode
-- D-Pad `←` / `→` - Toggle mode
 - `A` / `B` - Return to menu
 
 ---
@@ -126,24 +120,6 @@ Complete guide to all controls in Neural Break.
 - `A` - Confirm
 - `Start` - Resume game
 - `B` - Back/Resume
-
----
-
-### Rogue Mode - Ability Selection
-
-**Keyboard:**
-- `↑` / `↓` - Highlight ability
-- `Enter` / `Space` - Select
-- Hover over cards for details
-
-**Gamepad:**
-- D-Pad or Left Stick - Navigate cards
-- `A` - Select ability
-
-**Tips:**
-- Read each ability carefully
-- Synergies matter!
-- Can't go back after selection
 
 ---
 

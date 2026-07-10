@@ -152,7 +152,6 @@ Parallax scrolling background.
 - `GameOverScreen` - End screen with stats
 - `LeaderboardScreen` - High score display
 - `PauseScreen` - In-game pause
-- `RogueChoiceScreen` - Rogue mode upgrades
 
 ### UIManager - HUD
 
@@ -381,7 +380,7 @@ Full TypeScript coverage:
 3. Register in `EnemyManager`
 4. Add to spawn logic
 
-See: `HOW_TO_ADD_NEW_GAME_MODES.md`
+See: `HOW_TO_ADD_NEW_GAME_MODES.md` (in this directory)
 
 ### Adding New Pickups
 
@@ -397,7 +396,7 @@ See: `HOW_TO_ADD_NEW_GAME_MODES.md`
 3. Add mode selection to `StartScreen`
 4. Implement mode-specific logic
 
-See: `HOW_TO_ADD_NEW_GAME_MODES.md`
+See: `HOW_TO_ADD_NEW_GAME_MODES.md` (in this directory)
 
 ---
 

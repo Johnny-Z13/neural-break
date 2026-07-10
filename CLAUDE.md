@@ -21,17 +21,6 @@ Creates optimized production build with Three.js chunking
 npm run preview
 ```
 
-**Run Playwright Tests:**
-```bash
-npx playwright test
-```
-Runs end-to-end tests with Playwright across multiple browsers
-
-**Run Playwright Tests in UI Mode:**
-```bash
-npx playwright test --ui
-```
-Interactive test runner with debugging capabilities
 
 ## Development Configuration
 
@@ -150,8 +139,9 @@ src/
 └── audio/                  # Audio system
     └── AudioManager.ts    # Sound management
 
-tests/                      # Playwright E2E tests
-└── e2e/                   # End-to-end test suites
+tests/                      # Test utilities
+├── README.md              # Testing documentation
+└── test_highscore.html    # Manual high score system test
 ```
 
 ### Key Design Patterns
@@ -190,7 +180,7 @@ Neural Break features a distinctive retro-futuristic UI inspired by 80s arcade c
 - Configurable animation timings in ScreenTransitions.ts
 
 **Menu System:**
-- Vertical arcade-style list navigation (ARCADE, ROGUE, TEST, HI SCORES)
+- Vertical arcade-style list navigation (START GAME, OPTIONS, HI SCORES, TEST)
 - Color-coded menu items with individual neon glows
 - Keyboard (WASD/Arrows), Gamepad, and mouse support
 - Selection indicator with border-left shift effect
@@ -232,31 +222,18 @@ vercel env pull .env.local     # Pull environment variables
 
 ### Testing Strategy
 
-**Playwright End-to-End Testing:**
-- Browser automation for UI/UX validation
-- Cross-browser testing (Chromium, Firefox, WebKit)
-- Visual regression testing capabilities
-- Gamepad and keyboard input simulation
+**Current Testing:**
+- Manual test page at `tests/test_highscore.html` for localStorage high score system validation
+- Open in browser, use buttons to test save/load/clear operations
 
-**Test Coverage Areas:**
-- Menu navigation and transitions
-- Game initialization and state management
-- Score submission and leaderboard display
-- Pause/resume functionality
-- Game over flow and restart
-
-**Running Tests:**
-```bash
-npx playwright test           # Run all tests
-npx playwright test --ui      # Interactive mode
-npx playwright test --debug   # Debug mode
-npx playwright codegen        # Generate test code
-```
+**Planned Testing:**
+- Playwright smoke suite to be added at `tests/e2e/` (Task 0.3) with chromium-only config
+- Future Vitest unit tests for game logic (collision detection, scoring, spawning)
+- Future Testing Library tests for UI components
 
 ### Game Design Context
-Based on comprehensive PRD in `Documents/neural_escape_prd.md` - an epic 99-level cyberpunk survival experience:
+Based on comprehensive PRD in `docs/neural_escape_prd.md` - an epic 99-level cyberpunk survival experience:
 - **99 levels** in Arcade mode with objective-based progression
-- **99 layers** in Rogue mode with wormhole advancement
 - Escalating difficulty from tutorial to brutal finale
 - **Surprise levels every 5 levels** with unique themed challenges
 - **Victory screen** when beating all 99 levels
@@ -269,4 +246,4 @@ Based on comprehensive PRD in `Documents/neural_escape_prd.md` - an epic 99-leve
 Players who complete all 99 levels receive a special victory screen with the message:
 "CONGRATULATIONS! YOU HAVE BEATEN NEURAL BREAK!"
 
-When implementing new features, refer to the PRD and `LEVEL_SYSTEM.md` for detailed specifications on level progression, enemy behaviors, and visual effects requirements.
+When implementing new features, refer to the PRD and `docs/LEVEL_SYSTEM.md` for detailed specifications on level progression, enemy behaviors, and visual effects requirements.

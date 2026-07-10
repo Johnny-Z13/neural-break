@@ -6,11 +6,7 @@ Complete guide to leaderboards in Neural Break.
 
 ## Overview
 
-Neural Break features **two separate global leaderboards**:
-- **Original Mode** - Classic arcade survival
-- **Rogue Mode** - Roguelike progression
-
-Each mode maintains its own **Top 10** high scores.
+Neural Break features a **single global leaderboard** for Arcade mode, tracking the **Top 10** high scores.
 
 ---
 
@@ -18,7 +14,7 @@ Each mode maintains its own **Top 10** high scores.
 
 ### Scoring a High Score
 
-1. **Play the game** in Original or Rogue mode
+1. **Play the game** in Arcade mode
 2. **Game Over** screen appears
 3. If your score is in top 10, you see: **"★ NEW HIGH SCORE! ★"**
 4. **Enter your name** (3 letters, arcade style)
@@ -40,7 +36,6 @@ Each mode maintains its own **Top 10** high scores.
 - ✅ Remembers your last name
 - ✅ Auto-filled for convenience
 - ✅ A-Z and 0-9 supported
-- ✅ Same style for both modes
 
 ---
 
@@ -49,13 +44,11 @@ Each mode maintains its own **Top 10** high scores.
 ### From Main Menu
 
 1. Click **"HIGH SCORES"**
-2. Default view: **Original Mode** leaderboard
-3. Click **"SWITCH TO ROGUE MODE"** to toggle
-4. See full top 10 with stats
+2. See full top 10 with stats
 
 ### From Game Over Screen
 
-- Top 5 for **current mode only**
+- Top 5 shown
 - Automatically shown after game
 - Updates after saving score
 
@@ -81,31 +74,6 @@ Each mode maintains its own **Top 10** high scores.
 - **2nd Place** - 🥈 Silver
 - **3rd Place** - 🥉 Bronze
 - **4-10** - Gray
-
----
-
-## Mode Toggle
-
-### How to Switch Modes
-
-**On Leaderboard Screen:**
-
-**Mouse:**
-- Click "SWITCH TO ROGUE MODE" / "SWITCH TO ARCADE MODE"
-
-**Keyboard:**
-- `Tab` - Toggle modes
-- `←` / `→` arrows - Toggle
-- `A` / `D` keys - Toggle
-
-**Gamepad:**
-- `LB` / `RB` (Shoulder buttons)
-- D-Pad `←` / `→`
-
-**Visual Feedback:**
-- Title changes: "ARCADE HIGH SCORES" ↔ "ROGUE HIGH SCORES"
-- Colors change: Yellow theme ↔ Magenta theme
-- Button text updates
 
 ---
 
@@ -338,20 +306,6 @@ See: [`DEPLOYMENT.md`](DEPLOYMENT.md)
 - Ignoring power-ups
 - Poor positioning
 
-### Rogue Mode
-
-**Focus on:**
-- Synergistic ability builds
-- Long-term scaling
-- Risk management
-- Efficient layer completion
-
-**Avoid:**
-- Weak ability combos
-- Taking unnecessary damage
-- Rushing layers
-- Ignoring meta-progression
-
 ---
 
 ## Records to Beat
@@ -363,12 +317,6 @@ See: [`DEPLOYMENT.md`](DEPLOYMENT.md)
 - 🥈 Silver: 100,000 pts
 - 🥇 Gold: 200,000 pts
 - 🏆 Legend: 500,000 pts
-
-**Rogue Mode Goals:**
-- 🥉 Bronze: 3 layers
-- 🥈 Silver: 5 layers
-- 🥇 Gold: 10 layers
-- 🏆 Legend: 15+ layers
 
 ---
 

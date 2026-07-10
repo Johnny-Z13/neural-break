@@ -1,8 +1,9 @@
 import * as THREE from 'three'
-import { Enemy, EnemyState, SpawnConfig, DeathConfig } from './Enemy'
+import { Enemy } from './Enemy'
 import { Player } from './Player'
 import { EnemyProjectile } from '../weapons/EnemyProjectile'
 import { AudioManager } from '../audio/AudioManager'
+import { SceneManager } from '../graphics/SceneManager'
 import { BALANCE_CONFIG } from '../config'
 
 /**
@@ -15,7 +16,7 @@ import { BALANCE_CONFIG } from '../config'
  * - Adds pure chaos to reward skilled players with... more challenge!
  */
 export class Fizzer extends Enemy {
-  private sceneManager: any = null
+  private sceneManager: SceneManager | null = null
   private projectiles: EnemyProjectile[] = []
   
   // ⚡ ERRATIC MOVEMENT STATE ⚡
@@ -34,18 +35,16 @@ export class Fizzer extends Enemy {
   private burstDelay: number = BALANCE_CONFIG.FIZZER.BURST_DELAY
   
   // ✨ VISUAL STATE ✨
-  private glowIntensity: number = 0
-  private trailParticles: THREE.Points
-  private trailPositions: Float32Array
-  private trailColors: Float32Array
+  private trailParticles!: THREE.Points
+  private trailPositions!: Float32Array
+  private trailColors!: Float32Array
   private trailIndex: number = 0
   private maxTrailParticles: number = 30
-  
+
   // 💀 DEATH ANIMATION STATE 💀
   private isDying: boolean = false
   private deathTimer: number = 0
   private deathDuration: number = 0.8
-  private overloadIntensity: number = 0
   private electricBolts: THREE.Line[] = []
 
   constructor(x: number, y: number) {
@@ -65,7 +64,7 @@ export class Fizzer extends Enemy {
     this.deathDamageAmount = stats.DEATH_DAMAGE
   }
 
-  setSceneManager(sceneManager: any): void {
+  setSceneManager(sceneManager: SceneManager): void {
     this.sceneManager = sceneManager
   }
 
@@ -228,7 +227,6 @@ export class Fizzer extends Enemy {
     this.isDying = true
     this.deathTimer = 0
     this.alive = true
-    this.overloadIntensity = 0
     this.velocity.multiplyScalar(0.3) // Slow down
     
     // 🎵 PLAY DEATH SOUND! 🎵
@@ -237,7 +235,7 @@ export class Fizzer extends Enemy {
     }
   }
 
-  private updateDeathAnimation(deltaTime: number): void {
+  private updateFizzerDeathAnimation(deltaTime: number): void {
     if (!this.isDying) return
     
     this.deathTimer += deltaTime
@@ -246,8 +244,7 @@ export class Fizzer extends Enemy {
     // Phase 1: Electric overload buildup (0-0.25s)
     if (progress < 0.25) {
       const phaseProgress = progress / 0.25
-      this.overloadIntensity = phaseProgress
-      
+
       // Increase glow intensity
       const core = this.mesh.children[0] as THREE.Mesh
       if (core) {
@@ -333,8 +330,6 @@ export class Fizzer extends Enemy {
     }
     // Phase 4: Final electric discharge (0.6-1.0s)
     else {
-      const phaseProgress = (progress - 0.6) / 0.4
-      
       // Create electric trails
       if (this.effectsSystem && Math.random() < 0.3) {
         const angle = Math.random() * Math.PI * 2
@@ -408,7 +403,7 @@ export class Fizzer extends Enemy {
     // Final VFX
     if (this.effectsSystem) {
       const deathColor = new THREE.Color(0xFFFF00)
-      this.effectsSystem.createElectricDeath(this.position, 'Fizzer')
+      this.effectsSystem.createElectricDeath(this.position)
       this.effectsSystem.createExplosion(this.position, 1.0, deathColor)
     }
     
@@ -423,7 +418,7 @@ export class Fizzer extends Enemy {
     this.updateProjectiles(deltaTime)
     
     if (this.isDying) {
-      this.updateDeathAnimation(deltaTime)
+      this.updateFizzerDeathAnimation(deltaTime)
       return
     }
     

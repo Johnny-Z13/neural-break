@@ -1,8 +1,9 @@
 import * as THREE from 'three'
-import { Enemy, EnemyState, SpawnConfig, DeathConfig } from './Enemy'
+import { Enemy, EnemyState, SpawnConfig } from './Enemy'
 import { Player } from './Player'
 import { EnemyProjectile } from '../weapons/EnemyProjectile'
 import { AudioManager } from '../audio/AudioManager'
+import { SceneManager } from '../graphics/SceneManager'
 import { BALANCE_CONFIG } from '../config'
 
 /**
@@ -21,7 +22,7 @@ export class CrystalShardSwarm extends Enemy {
   private lightningEffects: THREE.Line[] = []
   
   // 🔫 PROJECTILE SYSTEM 🔫
-  private sceneManager: any = null
+  private sceneManager: SceneManager | null = null
   private projectiles: EnemyProjectile[] = []
   private fireTimer: number = 0
   private fireRate: number = BALANCE_CONFIG.CRYSTAL_SWARM.FIRE_RATE
@@ -67,7 +68,7 @@ export class CrystalShardSwarm extends Enemy {
     this.deathDamageAmount = stats.DEATH_DAMAGE
   }
   
-  setSceneManager(sceneManager: any): void {
+  setSceneManager(sceneManager: SceneManager): void {
     this.sceneManager = sceneManager
   }
   
@@ -446,12 +447,12 @@ export class CrystalShardSwarm extends Enemy {
     }
   }
 
-  private updateDeathAnimation(deltaTime: number): void {
+  private updateCrystalSwarmDeathAnimation(deltaTime: number): void {
     if (!this.isDying) return
     
     this.deathTimer += deltaTime
     const progress = this.deathTimer / this.deathDuration
-    
+
     // Phase 1: Shards fly outward, rainbow colors (0-0.3s)
     if (progress < 0.3) {
       const phaseProgress = progress / 0.3
@@ -490,7 +491,7 @@ export class CrystalShardSwarm extends Enemy {
       
       // Create prism fragments from each shard
       if (phaseProgress < 0.1 && this.prismFragments.length === 0) {
-        this.shards.forEach((shard, i) => {
+        this.shards.forEach((shard) => {
           // Create 3 smaller prisms per shard
           for (let j = 0; j < 3; j++) {
             const fragmentGeometry = new THREE.ConeGeometry(0.1, 0.3, 3)
@@ -648,7 +649,7 @@ export class CrystalShardSwarm extends Enemy {
 
     // Custom death animation system (legacy - kept for dramatic effect)
     if (this.isDying) {
-      this.updateDeathAnimation(deltaTime)
+      this.updateCrystalSwarmDeathAnimation(deltaTime)
       return
     }
 
@@ -763,8 +764,10 @@ export class CrystalShardSwarm extends Enemy {
     }
     
     this.projectiles.push(projectile)
-    this.sceneManager.addToScene(projectile.getMesh())
-    
+    if (this.sceneManager) {
+      this.sceneManager.addToScene(projectile.getMesh())
+    }
+
     // 🎵 PLAY CRYSTAL FIRE SOUND! 🎵
     if (this.audioManager) {
       this.audioManager.playCrystalFireSound()

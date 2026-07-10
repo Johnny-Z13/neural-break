@@ -49,9 +49,6 @@ export class LevelManager {
   private totalElapsedTime: number = 0
   private currentProgress: LevelProgress
   private objectivesComplete: boolean = false
-  
-  // 🎲 Rogue mode layer tracking
-  private rogueCurrentLayer: number = 1
 
   /**
    * 🎯 LEVEL CONFIGURATIONS WITH OBJECTIVES - 99 LEVELS!
@@ -65,11 +62,6 @@ export class LevelManager {
    * 📈 DIFFICULTY RAMPS CONTINUOUSLY
    */
   static getLevelConfig(level: number): LevelConfig {
-    // 🎲 ROGUE MODE - Return Rogue layer configuration
-    if (level === 998) {
-      return this.getRogueLevelConfig()
-    }
-    
     // 🧪 TEST MODE - Return test configuration
     if (level === 999) {
       return this.getTestLevelConfig()
@@ -443,10 +435,6 @@ export class LevelManager {
   }
 
   getCurrentLevelConfig(): LevelConfig {
-    // 🎲 For Rogue mode (level 998), use the current layer number
-    if (this.currentLevel === 998) {
-      return LevelManager.getRogueLevelConfig(this.rogueCurrentLayer)
-    }
     return LevelManager.getLevelConfig(this.currentLevel)
   }
 
@@ -546,33 +534,11 @@ export class LevelManager {
   }
 
   /**
-   * Reset objectives without advancing level (for Rogue mode layers)
+   * Reset objectives without advancing level
    */
   resetObjectives(): void {
     this.currentProgress = this.createEmptyProgress()
     this.objectivesComplete = false
-  }
-  
-  /**
-   * 🎲 Rogue mode: Set the current layer number
-   */
-  setRogueLayer(layerNumber: number): void {
-    this.rogueCurrentLayer = layerNumber
-  }
-  
-  /**
-   * 🎲 Rogue mode: Get the current layer number
-   */
-  getRogueLayer(): number {
-    return this.rogueCurrentLayer
-  }
-  
-  /**
-   * 🎲 Rogue mode: Advance to next layer
-   */
-  advanceRogueLayer(): void {
-    this.rogueCurrentLayer++
-    this.resetObjectives()
   }
 
   /**
@@ -656,194 +622,6 @@ export class LevelManager {
       bosses: 0
     }
     this.objectivesComplete = false
-  }
-  
-  /**
-   * 🧪 Get test level configuration with all enemies
-   */
-  // ═══════════════════════════════════════════════════════
-  // 🎲 ROGUE MODE CONFIGURATION - DYNAMIC LAYER SYSTEM
-  // ═══════════════════════════════════════════════════════
-  /**
-   * 🎲 Generate dynamic layer configuration based on current layer number
-   * Each layer has a unique "theme" with different enemy compositions
-   * Difficulty scales progressively with layer number
-   * 
-   * Layer Themes (cycle every 6 layers):
-   * 1. Swarm - Lots of mites and drones
-   * 2. Chaos - Worms and void spheres
-   * 3. Crystal - Crystal swarms focus
-   * 4. Mixed - All enemy types
-   * 5. Elite - Tougher enemies (UFOs, Void Spheres)
-   * 6. Boss - Boss encounter every 6th layer
-   */
-  static getRogueLevelConfig(layerNumber: number = 1): LevelConfig {
-    // Determine layer theme (cycles every 6 layers)
-    const themeIndex = ((layerNumber - 1) % 6) + 1
-    
-    // Base difficulty multiplier (increases with layer)
-    const difficultyScale = 1 + (layerNumber - 1) * 0.15 // 15% increase per layer
-    
-    // Layer theme configurations
-    let config: LevelConfig
-    
-    switch (themeIndex) {
-      case 1: // 🐛 SWARM LAYER - Lots of basic enemies
-        config = {
-          level: 998,
-          name: `SWARM ASSAULT - LAYER ${layerNumber}`,
-          objectives: {
-            dataMites: Math.floor(40 * difficultyScale),
-            scanDrones: Math.floor(15 * difficultyScale),
-            chaosWorms: 1,
-            voidSpheres: 0,
-            crystalSwarms: 1,
-            fizzers: 2,
-            ufos: 0,
-            bosses: 0
-          },
-          miteSpawnRate: 1.0 / difficultyScale,
-          droneSpawnRate: 5.0 / difficultyScale,
-          wormSpawnRate: 45.0,
-          voidSpawnRate: Infinity,
-          crystalSpawnRate: 40.0,
-          fizzerSpawnRate: 15.0 / difficultyScale,
-          ufoSpawnRate: Infinity,
-          bossSpawnRate: Infinity
-        }
-        break
-        
-      case 2: // 🌀 CHAOS LAYER - Worms and void spheres
-        config = {
-          level: 998,
-          name: `CHAOS STORM - LAYER ${layerNumber}`,
-          objectives: {
-            dataMites: Math.floor(20 * difficultyScale),
-            scanDrones: Math.floor(8 * difficultyScale),
-            chaosWorms: Math.floor(3 * difficultyScale),
-            voidSpheres: Math.floor(2 * difficultyScale),
-            crystalSwarms: 1,
-            fizzers: 1,
-            ufos: 0,
-            bosses: 0
-          },
-          miteSpawnRate: 1.5 / difficultyScale,
-          droneSpawnRate: 7.0,
-          wormSpawnRate: 25.0 / difficultyScale,
-          voidSpawnRate: 35.0 / difficultyScale,
-          crystalSpawnRate: 50.0,
-          fizzerSpawnRate: 20.0,
-          ufoSpawnRate: Infinity,
-          bossSpawnRate: Infinity
-        }
-        break
-        
-      case 3: // 💎 CRYSTAL LAYER - Crystal swarms focus
-        config = {
-          level: 998,
-          name: `CRYSTAL FIELD - LAYER ${layerNumber}`,
-          objectives: {
-            dataMites: Math.floor(25 * difficultyScale),
-            scanDrones: Math.floor(10 * difficultyScale),
-            chaosWorms: 1,
-            voidSpheres: 1,
-            crystalSwarms: Math.floor(3 * difficultyScale),
-            fizzers: 2,
-            ufos: 0,
-            bosses: 0
-          },
-          miteSpawnRate: 1.3 / difficultyScale,
-          droneSpawnRate: 6.5,
-          wormSpawnRate: 50.0,
-          voidSpawnRate: 45.0,
-          crystalSpawnRate: 20.0 / difficultyScale,
-          fizzerSpawnRate: 16.0 / difficultyScale,
-          ufoSpawnRate: Infinity,
-          bossSpawnRate: Infinity
-        }
-        break
-        
-      case 4: // 🎭 MIXED LAYER - Balanced variety
-        config = {
-          level: 998,
-          name: `NEURAL MAZE - LAYER ${layerNumber}`,
-          objectives: {
-            dataMites: Math.floor(30 * difficultyScale),
-            scanDrones: Math.floor(12 * difficultyScale),
-            chaosWorms: Math.floor(2 * difficultyScale),
-            voidSpheres: Math.floor(2 * difficultyScale),
-            crystalSwarms: Math.floor(2 * difficultyScale),
-            fizzers: 3,
-            ufos: 1,
-            bosses: 0
-          },
-          miteSpawnRate: 1.2 / difficultyScale,
-          droneSpawnRate: 6.0 / difficultyScale,
-          wormSpawnRate: 35.0,
-          voidSpawnRate: 40.0,
-          crystalSpawnRate: 38.0,
-          fizzerSpawnRate: 14.0 / difficultyScale,
-          ufoSpawnRate: 55.0,
-          bossSpawnRate: Infinity
-        }
-        break
-        
-      case 5: // ⚡ ELITE LAYER - Tough enemies
-        config = {
-          level: 998,
-          name: `ELITE GAUNTLET - LAYER ${layerNumber}`,
-          objectives: {
-            dataMites: Math.floor(15 * difficultyScale),
-            scanDrones: Math.floor(10 * difficultyScale),
-            chaosWorms: Math.floor(2 * difficultyScale),
-            voidSpheres: Math.floor(3 * difficultyScale),
-            crystalSwarms: Math.floor(2 * difficultyScale),
-            fizzers: 2,
-            ufos: Math.floor(2 * difficultyScale),
-            bosses: 0
-          },
-          miteSpawnRate: 2.0 / difficultyScale,
-          droneSpawnRate: 7.0,
-          wormSpawnRate: 30.0,
-          voidSpawnRate: 28.0 / difficultyScale,
-          crystalSpawnRate: 35.0,
-          fizzerSpawnRate: 18.0,
-          ufoSpawnRate: 40.0 / difficultyScale,
-          bossSpawnRate: Infinity
-        }
-        break
-        
-      case 6: // 👹 BOSS LAYER - Boss encounter
-        config = {
-          level: 998,
-          name: `SECTOR GUARDIAN - LAYER ${layerNumber}`,
-          objectives: {
-            dataMites: Math.floor(20 * difficultyScale),
-            scanDrones: Math.floor(8 * difficultyScale),
-            chaosWorms: 1,
-            voidSpheres: 1,
-            crystalSwarms: 1,
-            fizzers: 1,
-            ufos: 1,
-            bosses: 1  // Boss spawns on layer 6, 12, 18, etc.
-          },
-          miteSpawnRate: 1.5 / difficultyScale,
-          droneSpawnRate: 7.0,
-          wormSpawnRate: 45.0,
-          voidSpawnRate: 50.0,
-          crystalSpawnRate: 45.0,
-          fizzerSpawnRate: 20.0,
-          ufoSpawnRate: 55.0,
-          bossSpawnRate: 30.0  // Boss spawns after 30 seconds
-        }
-        break
-        
-      default:
-        // Fallback (should never happen)
-        config = this.getRogueLevelConfig(1)
-    }
-    
-    return config
   }
 
   // ═══════════════════════════════════════════════════════

@@ -26,7 +26,7 @@ export class GameScreens {
     this.hidePlayerCallback = callback
   }
 
-  static showStartScreen(onStartGame: () => void, onStartTestMode?: () => void, onStartRogueMode?: () => void): void {
+  static showStartScreen(onStartGame: () => void, onStartTestMode?: () => void): void {
     // Start the starfield for menu screens
     StarfieldManager.getInstance().start()
 
@@ -40,12 +40,12 @@ export class GameScreens {
       this.sceneManager,
       () => {
         this.currentScreen = ScreenTransitions.hideCurrentScreen(this.currentScreen)
-        this.showStartScreenContent(onStartGame, onStartTestMode, onStartRogueMode)
+        this.showStartScreenContent(onStartGame, onStartTestMode)
       }
     )
   }
 
-  private static showStartScreenContent(onStartGame: () => void, onStartTestMode?: () => void, onStartRogueMode?: () => void): void {
+  private static showStartScreenContent(onStartGame: () => void, onStartTestMode?: () => void): void {
     const startScreen = StartScreen.create(
       this.audioManager,
       () => {
@@ -57,7 +57,7 @@ export class GameScreens {
       () => {
         // Only cleanup styles, starfield persists between menu screens
         StartScreen.cleanup()
-        this.showLeaderboard(() => this.showStartScreen(onStartGame, onStartTestMode, onStartRogueMode))
+        this.showLeaderboard(() => this.showStartScreen(onStartGame, onStartTestMode))
       },
       onStartTestMode ? () => {
         this.currentScreen = ScreenTransitions.hideCurrentScreen(this.currentScreen)
@@ -65,23 +65,17 @@ export class GameScreens {
           onStartTestMode()
         }, 50)
       } : undefined,
-      onStartRogueMode ? () => {
-        this.currentScreen = ScreenTransitions.hideCurrentScreen(this.currentScreen)
-        setTimeout(() => {
-          onStartRogueMode()
-        }, 50)
-      } : undefined,
       () => {
         // OPTIONS - cleanup and show options screen
         StartScreen.cleanup()
-        this.showOptionsScreen(() => this.showStartScreen(onStartGame, onStartTestMode, onStartRogueMode))
+        this.showOptionsScreen(() => this.showStartScreen(onStartGame, onStartTestMode))
       }
     )
-    
+
     // Add the screen to DOM
     document.body.appendChild(startScreen)
     this.currentScreen = startScreen
-    
+
     // 🎬 MOTION GRAPHICS - Animate in! 🎬
     ScreenTransitions.animateScreenIn(startScreen)
   }

@@ -12,5 +12,5 @@ export * from './game.config'
 export * from './enemy.config'
 export * from './visual.config'
 export * from './balance.config'
-export * from './modes.config'  // Game mode-specific settings (Arcade, Rogue, Test)
+export * from './modes.config'  // Game mode-specific settings (Arcade, Test)
 
