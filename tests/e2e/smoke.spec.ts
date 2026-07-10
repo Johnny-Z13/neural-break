@@ -11,9 +11,9 @@ import { test, expect, Page } from '@playwright/test'
  *  (d) ESC pauses (overlay visible), ESC resumes
  *  (e) leaderboard shows content or empty state with mocked API
  *
- * Known issue (do not assert on this flow): GameOverScreen high-score
- * name entry is broken (tracked as Task 1.1). This suite never drives
- * a player to game-over.
+ * The game-over name-entry flow is covered separately in
+ * tests/e2e/gameover-name-entry.spec.ts; this suite never drives a
+ * player to game-over.
  *
  * Menu buttons are clicked directly: the start screen reserves space for
  * the fixed .controls-legend bar, so no menu item may ever sit behind it.

@@ -38,8 +38,8 @@
 
 **Problem:** CLAUDE.md describes a Playwright suite (`tests/e2e/`, cross-browser, config) that does not exist. `tests/` contains only `README.md` and `test_highscore.html`.
 
-- [ ] **Step 1:** Rewrite the "Testing Strategy" section of CLAUDE.md to describe the actual state: manual test page at `tests/test_highscore.html`; Playwright smoke suite being added at `tests/e2e/` (Task 0.3). Remove claims of existing cross-browser/visual-regression coverage.
-- [ ] **Step 2:** Commit: `docs: fix CLAUDE.md testing section to match reality`
+- [x] **Step 1:** Rewrite the "Testing Strategy" section of CLAUDE.md to describe the actual state: manual test page at `tests/test_highscore.html`; Playwright smoke suite being added at `tests/e2e/` (Task 0.3). Remove claims of existing cross-browser/visual-regression coverage.
+- [x] **Step 2:** Commit: `docs: fix CLAUDE.md testing section to match reality`
 
 ### Task 0.2: Typecheck gate + burn down 227 TS errors 🔵 Sonnet (4 chunks) + 🟣 Fable review
 
@@ -48,22 +48,22 @@
 
 **Problem:** `tsconfig.json` is strict but nothing runs `tsc`; `tsc --noEmit` reports 227 errors. Top offenders: `ui/UIManager.ts` (23), `core/AttractMode.ts` (22), `core/EnemyManager.ts` (17), `graphics/SceneManager.ts` (15), `entities/Enemy.ts` (14).
 
-- [ ] **Step 1:** Add scripts to `package.json`:
+- [x] **Step 1:** Add scripts to `package.json`:
 
 ```json
 "typecheck": "tsc --noEmit",
 "build": "tsc --noEmit && vite build"
 ```
 
-- [ ] **Step 2:** Fix `src/config/index.ts(8)` `import.meta.env` error by adding to `tsconfig.json` compilerOptions: `"types": ["vite/client"]`.
-- [ ] **Step 3 (chunked, one subagent per chunk, commit per chunk):** Fix errors by directory: (a) `src/core/`, (b) `src/entities/`, (c) `src/ui/`, (d) `src/graphics/` + `src/weapons/`. Error classes and required treatment:
+- [x] **Step 2:** Fix `src/config/index.ts(8)` `import.meta.env` error by adding to `tsconfig.json` compilerOptions: `"types": ["vite/client"]`.
+- [x] **Step 3 (chunked, one subagent per chunk, commit per chunk):** Fix errors by directory: (a) `src/core/`, (b) `src/entities/`, (c) `src/ui/`, (d) `src/graphics/` + `src/weapons/`. Error classes and required treatment:
   - `TS6133` unused vars/imports → delete the dead symbol (do NOT `_`-prefix to silence).
   - `TS2445` protected access (`AttractMode.ts` reaching into `Enemy.mesh`/`position`) → add narrow public read-only accessors on `Enemy` (`getMesh(): THREE.Group`, `getPosition(): THREE.Vector3`) and use them; 🟣 Fable reviews this API addition specifically.
   - `TS2564` uninitialized fields (`EnemyManager.ts:14-15`) → definite-assignment via constructor wiring, not `!` unless initialization truly happens in `initialize()` (then `!` with the existing pattern).
   - `TS2322` `Fizzer` vs `Enemy` private-member conflict → move the duplicated private `updateDeathAnimation` up to the base class or rename; Fable reviews.
   - While in `src/entities/`: replace `private sceneManager: any` with `SceneManager` and `getProjectiles(): any[]` with `EnemyProjectile[]` (`Fizzer.ts:18`, `VoidSphere.ts:26`, `CrystalShardSwarm.ts:24`, `UFO.ts:17`, `ChaosWorm.ts:26`, `ScanDrone.ts:16-17`); type `getEnemyStatsForLevel`'s return in `balance.config.ts:384-418`.
-- [ ] **Step 4:** Run `npm run typecheck` → 0 errors. Run the game (`npm run dev`), play 60 seconds of Arcade: menu → game → pause → resume → die → game over.
-- [ ] **Step 5:** Commit per chunk: `fix(types): clean tsc errors in <dir>`
+- [x] **Step 4:** Run `npm run typecheck` → 0 errors. Run the game (`npm run dev`), play 60 seconds of Arcade: menu → game → pause → resume → die → game over.
+- [x] **Step 5:** Commit per chunk: `fix(types): clean tsc errors in <dir>`
 
 ### Task 0.3: Playwright smoke suite 🔵 Sonnet
 
@@ -74,11 +74,13 @@
 **Interfaces:**
 - Produces: `npm test` — the regression gate every later task runs.
 
-- [ ] **Step 1:** `playwright.config.ts`: chromium only (keep it fast), `webServer: { command: 'npm run dev', port: 3000, reuseExistingServer: true }`.
-- [ ] **Step 2:** Write `tests/e2e/smoke.spec.ts` covering: (a) page boots with no console errors and `#startScreen` visible; (b) keyboard menu nav reaches HI SCORES and back; (c) starting ARCADE hides the start screen and shows the HUD; (d) ESC pauses (pause overlay visible) and ESC resumes; (e) leaderboard screen shows loading→content or empty state with the `/api/highscores` request mocked via `page.route`.
-- [ ] **Step 3:** Run `npx playwright test` → all pass. Commit: `test: add Playwright smoke suite`
+- [x] **Step 1:** `playwright.config.ts`: chromium only (keep it fast), `webServer: { command: 'npm run dev', port: 3000, reuseExistingServer: true }`.
+- [x] **Step 2:** Write `tests/e2e/smoke.spec.ts` covering: (a) page boots with no console errors and `#startScreen` visible; (b) keyboard menu nav reaches HI SCORES and back; (c) starting ARCADE hides the start screen and shows the HUD; (d) ESC pauses (pause overlay visible) and ESC resumes; (e) leaderboard screen shows loading→content or empty state with the `/api/highscores` request mocked via `page.route`.
+- [x] **Step 3:** Run `npx playwright test` → all pass. Commit: `test: add Playwright smoke suite`
 
 ---
+
+> **Plan drift (2026-07-10, user-directed, out of plan):** Rogue mode was deleted entirely (3c07a55) — menu is now START GAME / OPTIONS / HI SCORES / TEST, the leaderboard mode toggle is gone, and `'rogue'` is no longer a valid gameMode. Consequences for this plan: Task 5.2's "drop Tab from the leaderboard mode-toggle" bullet is moot (toggle deleted); Task 3.2's mode references reduce to Arcade/Test. Also shipped out of plan: favicon (d594273) and height-responsive fit fixes for StartScreen/Leaderboard (52830b2).
 
 ## Phase 1 — Bugs & leaks (cheap, high value, do second)
 
@@ -90,8 +92,8 @@
 
 **Problem:** Line 783 queries `#saveButton` (real id: `#saveScoreButton`, line 415); line 809 queries `#nameInput` (real id: `#playerNameInput`, line 403). Save is unreachable by keyboard/gamepad, and typing W/A/S/D into the name field is swallowed by menu navigation because the focused-input guard never matches.
 
-- [ ] **Step 1:** Write failing Playwright test: reach game over (drive via a debug hook or by mocking; if no cheap path to game over exists, test the screen in isolation by calling `GameOverScreen.show(...)` via `page.evaluate` — check how `GameScreens.ts` exposes it), focus the name input, type `WASD`, assert input value is `"WASD"`, press Enter, assert save request fires.
-- [ ] **Step 2:** Fix the two selectors:
+- [x] **Step 1:** Write failing Playwright test: reach game over (drive via a debug hook or by mocking; if no cheap path to game over exists, test the screen in isolation by calling `GameOverScreen.show(...)` via `page.evaluate` — check how `GameScreens.ts` exposes it), focus the name input, type `WASD`, assert input value is `"WASD"`, press Enter, assert save request fires.
+- [x] **Step 2:** Fix the two selectors:
 
 ```ts
 const saveButton = gameOverScreen.querySelector('#saveScoreButton') as HTMLButtonElement | null
@@ -99,7 +101,7 @@ const saveButton = gameOverScreen.querySelector('#saveScoreButton') as HTMLButto
 const nameInput = gameOverScreen.querySelector('#playerNameInput') as HTMLInputElement | null
 ```
 
-- [ ] **Step 3:** Test passes. Commit: `fix(ui): repair keyboard/gamepad high-score entry (wrong element ids)`
+- [x] **Step 3:** Test passes. Commit: `fix(ui): repair keyboard/gamepad high-score entry (wrong element ids)`
 
 ### Task 1.2: Dispose enemy GPU resources 🔵 Sonnet + 🟣 Fable review
 
