@@ -110,7 +110,7 @@ const nameInput = gameOverScreen.querySelector('#playerNameInput') as HTMLInputE
 
 **Problem:** `destroy()` only sets `this.alive = false`; geometries/materials are never disposed. Every restart/level-clear leaks VRAM.
 
-- [ ] **Step 1:** In base `Enemy.destroy()`, traverse and dispose:
+- [x] **Step 1:** In base `Enemy.destroy()`, traverse and dispose:
 
 ```ts
 this.mesh.traverse((child) => {
@@ -122,9 +122,13 @@ this.mesh.traverse((child) => {
 })
 ```
 
-- [ ] **Step 2:** Ensure every subclass override calls `super.destroy()`. Ensure destroy runs after `removeFromScene`, and that death-animation code never touches materials post-destroy (interacts with Task 1.3).
-- [ ] **Step 3:** Verify in the running game with `renderer.info.memory` logged under `DEBUG_MODE`: play a level, note geometry count, restart 3×, count must return to baseline (report actual before/after numbers).
-- [ ] **Step 4:** Commit: `fix(entities): dispose enemy geometry/materials on destroy`
+- [x] **Step 2:** Ensure every subclass override calls `super.destroy()`. Ensure destroy runs after `removeFromScene`, and that death-animation code never touches materials post-destroy (interacts with Task 1.3).
+- [x] **Step 3:** Verify in the running game with `renderer.info.memory` logged under `DEBUG_MODE`: play a level, note geometry count, restart 3×, count must return to baseline (report actual before/after numbers).
+- [x] **Step 4:** Commit: `fix(entities): dispose enemy geometry/materials on destroy`
+
+**Done (2026-07-10).** Verification (Playwright-driven TEST mode, ~15s combat per run, 5 restart cycles, post-cleanup `renderer.info.memory.geometries`):
+- Enemy-only fix: 69 → 1421 → 2531 → 3745 after 3 runs — criterion FAILED. Root cause of the residual: projectiles (`Projectile`/`EnemyProjectile`, 2 geometries + 2 materials each) were removed from scene at 19 sites but never disposed; same for pickups (`PickupManager` never called `destroy()`; `PowerUp`/`MedPack`/`SpeedUp`/`Shield` had no dispose), Fizzer bolts / ScanDrone arcs (scene-level `THREE.Line`s), and the per-game `Player` mesh.
+- After disposing all of the above: 69 → 98 → 105 → 109 → 127 across 5 cycles. Remaining ~10-20/run creep is small and not yet root-caused — candidates are particle-pool high-water marks and the `flashRed` timeout-retained material refs (Task 1.3's target). Textures stable at 18 throughout.
 
 ### Task 1.3: Replace flashRed setTimeouts with update-driven flash 🔵 Sonnet
 

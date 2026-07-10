@@ -467,11 +467,19 @@ export class ScanDrone extends Enemy {
       if (arc.parent) {
         arc.parent.remove(arc)
       }
+      this.disposeArc(arc)
       const index = this.electricArcs.indexOf(arc)
       if (index > -1) {
         this.electricArcs.splice(index, 1)
       }
     }, 200)
+  }
+
+  // 🧹 Dispose arc GPU resources - arcs live in the scene, not under this.mesh
+  private disposeArc(arc: THREE.Line): void {
+    arc.geometry.dispose()
+    const material = arc.material as THREE.Material
+    material.dispose()
   }
 
   private createRadialLightning(): void {
@@ -636,6 +644,7 @@ export class ScanDrone extends Enemy {
         if (this.sceneManager) {
           this.sceneManager.removeFromScene(projectile.getMesh())
         }
+        projectile.dispose()
         this.projectiles.splice(i, 1)
       }
     }
@@ -656,6 +665,7 @@ export class ScanDrone extends Enemy {
         if (this.sceneManager) {
           this.sceneManager.removeFromScene(projectile.getMesh())
         }
+        projectile.dispose()
       }
       this.projectiles = []
     }
@@ -665,6 +675,7 @@ export class ScanDrone extends Enemy {
       if (arc.parent) {
         arc.parent.remove(arc)
       }
+      this.disposeArc(arc)
     })
     this.electricArcs = []
     

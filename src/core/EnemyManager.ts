@@ -871,6 +871,7 @@ export class EnemyManager {
       // Remove dead projectiles
       if (!projectile.isAlive()) {
         this.sceneManager.removeFromScene(projectile.getMesh())
+        projectile.dispose()
         this.orphanedProjectiles.splice(i, 1)
       }
     }
@@ -880,6 +881,7 @@ export class EnemyManager {
   clearOrphanedProjectiles(): void {
     for (const projectile of this.orphanedProjectiles) {
       this.sceneManager.removeFromScene(projectile.getMesh())
+      projectile.dispose()
     }
     this.orphanedProjectiles = []
     if (DEBUG_MODE) console.log('🧹 Orphaned projectiles cleared')

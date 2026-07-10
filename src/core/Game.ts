@@ -307,7 +307,12 @@ export class Game {
     
     // COMPLETE CLEANUP FIRST! 🧹
     this.cleanupGameObjects()
-    
+
+    if (DEBUG_MODE) {
+      const mem = this.sceneManager.getRenderer().info.memory
+      console.log(`🧠 GPU memory after cleanup — geometries: ${mem.geometries}, textures: ${mem.textures}`)
+    }
+
     // Small delay to ensure cleanup is complete and old game loop has stopped
     setTimeout(() => {
       // Ensure game loop is stopped before starting test mode
@@ -521,7 +526,12 @@ export class Game {
     
     // COMPLETE CLEANUP FIRST! 🧹
     this.cleanupGameObjects()
-    
+
+    if (DEBUG_MODE) {
+      const mem = this.sceneManager.getRenderer().info.memory
+      console.log(`🧠 GPU memory after cleanup — geometries: ${mem.geometries}, textures: ${mem.textures}`)
+    }
+
     // Small delay to ensure cleanup is complete and old game loop has stopped
     setTimeout(() => {
       // Ensure game loop is stopped before starting new game
@@ -785,6 +795,7 @@ export class Game {
       if (this.player.getMesh()) {
         if (DEBUG_MODE) console.log('🧹 Removing player from scene...')
         this.sceneManager.removeFromScene(this.player.getMesh())
+        this.player.dispose()
       }
     }
     

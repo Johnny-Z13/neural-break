@@ -120,6 +120,17 @@ export class EnemyProjectile {
     }
   }
 
+  // 🧹 DISPOSE GPU RESOURCES - call after removing the mesh from the scene! 🧹
+  dispose(): void {
+    this.mesh.traverse((child) => {
+      const m = child as THREE.Mesh
+      if (m.geometry) m.geometry.dispose()
+      if (m.material) {
+        (Array.isArray(m.material) ? m.material : [m.material]).forEach(mat => mat.dispose())
+      }
+    })
+  }
+
   isCollidingWith(other: { getPosition(): THREE.Vector3, getRadius(): number }): boolean {
     const distance = this.position.distanceTo(other.getPosition())
     return distance < (this.radius + other.getRadius())

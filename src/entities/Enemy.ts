@@ -428,6 +428,15 @@ export abstract class Enemy {
 
   destroy(): void {
     this.alive = false
+
+    // 🧹 DISPOSE GPU RESOURCES - Prevent VRAM leak on every restart/level-clear! 🧹
+    this.mesh.traverse((child) => {
+      const m = child as THREE.Mesh
+      if (m.geometry) m.geometry.dispose()
+      if (m.material) {
+        (Array.isArray(m.material) ? m.material : [m.material]).forEach(mat => mat.dispose())
+      }
+    })
   }
 
   // Collision detection

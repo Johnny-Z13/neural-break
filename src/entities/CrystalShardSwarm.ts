@@ -783,6 +783,7 @@ export class CrystalShardSwarm extends Enemy {
         if (this.sceneManager) {
           this.sceneManager.removeFromScene(projectile.getMesh())
         }
+        projectile.dispose()
         this.projectiles.splice(i, 1)
       }
     }
@@ -973,6 +974,7 @@ export class CrystalShardSwarm extends Enemy {
         if (this.sceneManager) {
           this.sceneManager.removeFromScene(projectile.getMesh())
         }
+        projectile.dispose()
       }
       this.projectiles = []
     }

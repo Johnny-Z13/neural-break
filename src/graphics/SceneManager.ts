@@ -1098,7 +1098,11 @@ export class SceneManager {
   getScene(): THREE.Scene {
     return this.scene
   }
-  
+
+  getRenderer(): THREE.WebGLRenderer {
+    return this.renderer
+  }
+
   // 🎆 GET EFFECTS SYSTEM FOR EXTERNAL ACCESS 🎆
   getEffectsSystem(): EffectsSystem {
     return this.effectsSystem

@@ -384,11 +384,19 @@ export class Fizzer extends Enemy {
       if (bolt.parent) {
         bolt.parent.remove(bolt)
       }
+      this.disposeBolt(bolt)
       const index = this.electricBolts.indexOf(bolt)
       if (index > -1) {
         this.electricBolts.splice(index, 1)
       }
     }, 150)
+  }
+
+  // 🧹 Dispose bolt GPU resources - bolts live in the scene, not under this.mesh
+  private disposeBolt(bolt: THREE.Line): void {
+    bolt.geometry.dispose()
+    const material = bolt.material as THREE.Material
+    material.dispose()
   }
 
   private completeDeath(): void {
@@ -397,6 +405,7 @@ export class Fizzer extends Enemy {
       if (bolt.parent) {
         bolt.parent.remove(bolt)
       }
+      this.disposeBolt(bolt)
     })
     this.electricBolts = []
     
@@ -556,6 +565,7 @@ export class Fizzer extends Enemy {
         if (this.sceneManager) {
           this.sceneManager.removeFromScene(projectile.getMesh())
         }
+        projectile.dispose()
         this.projectiles.splice(i, 1)
       }
     }
@@ -573,6 +583,7 @@ export class Fizzer extends Enemy {
         if (this.sceneManager) {
           this.sceneManager.removeFromScene(projectile.getMesh())
         }
+        projectile.dispose()
       }
       this.projectiles = []
     }
@@ -582,6 +593,7 @@ export class Fizzer extends Enemy {
       if (bolt.parent) {
         bolt.parent.remove(bolt)
       }
+      this.disposeBolt(bolt)
     })
     this.electricBolts = []
     
