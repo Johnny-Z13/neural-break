@@ -232,7 +232,7 @@ vercel env pull .env.local     # Pull environment variables
 - Future Testing Library tests for UI components
 
 ### Game Design Context
-Based on comprehensive PRD in `Documents/neural_escape_prd.md` - an epic 99-level cyberpunk survival experience:
+Based on comprehensive PRD in `docs/neural_escape_prd.md` - an epic 99-level cyberpunk survival experience:
 - **99 levels** in Arcade mode with objective-based progression
 - **99 layers** in Rogue mode with wormhole advancement
 - Escalating difficulty from tutorial to brutal finale
@@ -247,4 +247,4 @@ Based on comprehensive PRD in `Documents/neural_escape_prd.md` - an epic 99-leve
 Players who complete all 99 levels receive a special victory screen with the message:
 "CONGRATULATIONS! YOU HAVE BEATEN NEURAL BREAK!"
 
-When implementing new features, refer to the PRD and `LEVEL_SYSTEM.md` for detailed specifications on level progression, enemy behaviors, and visual effects requirements.
+When implementing new features, refer to the PRD and `docs/LEVEL_SYSTEM.md` for detailed specifications on level progression, enemy behaviors, and visual effects requirements.

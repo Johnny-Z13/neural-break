@@ -125,11 +125,11 @@ WEAPONS: {
 }
 ```
 
-**See**: [`BALANCE_TUNING_GUIDE.md`](BALANCE_TUNING_GUIDE.md)
+**See**: [`docs/BALANCE_TUNING_GUIDE.md`](docs/BALANCE_TUNING_GUIDE.md)
 
 ### Adding Game Modes
 
-Want to add a new mode? See [`HOW_TO_ADD_NEW_GAME_MODES.md`](HOW_TO_ADD_NEW_GAME_MODES.md)
+Want to add a new mode? See [`docs/HOW_TO_ADD_NEW_GAME_MODES.md`](docs/HOW_TO_ADD_NEW_GAME_MODES.md)
 
 ### Code Architecture
 
@@ -179,7 +179,7 @@ vercel --prod
 ## 📚 Documentation
 
 ### 🚀 Start Here
-- **[GETTING_STARTED.md](GETTING_STARTED.md)** - Setup guide for new developers
+- **[docs/GETTING_STARTED.md](docs/GETTING_STARTED.md)** - Setup guide for new developers
 - **[README.md](README.md)** - This file - project overview
 
 ### 🎮 For Players
@@ -189,10 +189,10 @@ vercel --prod
 ### 💻 For Developers
 - [`docs/DEPLOYMENT.md`](docs/DEPLOYMENT.md) - Deploy to Vercel with online scores
 - [`docs/ARCHITECTURE.md`](docs/ARCHITECTURE.md) - System architecture and patterns
-- [`BALANCE_TUNING_GUIDE.md`](BALANCE_TUNING_GUIDE.md) - Edit gameplay values
-- [`BALANCE_QUICK_REFERENCE.md`](BALANCE_QUICK_REFERENCE.md) - Quick balance reference
-- [`HOW_TO_ADD_NEW_GAME_MODES.md`](HOW_TO_ADD_NEW_GAME_MODES.md) - Extend the game
-- [`LEVEL_SYSTEM.md`](LEVEL_SYSTEM.md) - Level progression details
+- [`docs/BALANCE_TUNING_GUIDE.md`](docs/BALANCE_TUNING_GUIDE.md) - Edit gameplay values
+- [`docs/BALANCE_QUICK_REFERENCE.md`](docs/BALANCE_QUICK_REFERENCE.md) - Quick balance reference
+- [`docs/HOW_TO_ADD_NEW_GAME_MODES.md`](docs/HOW_TO_ADD_NEW_GAME_MODES.md) - Extend the game
+- [`docs/LEVEL_SYSTEM.md`](docs/LEVEL_SYSTEM.md) - Level progression details
 
 ### 📝 Reference
 - [`CHANGELOG.md`](CHANGELOG.md) - Version history
@@ -254,7 +254,7 @@ ISC License - see LICENSE file
 
 **Issues?** Check the docs first:
 - Build problems → [`docs/DEPLOYMENT.md`](docs/DEPLOYMENT.md)
-- Balance questions → [`BALANCE_TUNING_GUIDE.md`](BALANCE_TUNING_GUIDE.md)
+- Balance questions → [`docs/BALANCE_TUNING_GUIDE.md`](docs/BALANCE_TUNING_GUIDE.md)
 - Architecture questions → [`docs/ARCHITECTURE.md`](docs/ARCHITECTURE.md)
 
 **Still stuck?** Open an issue with:
