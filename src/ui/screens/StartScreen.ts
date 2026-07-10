@@ -45,7 +45,7 @@ export class StartScreen {
       background: transparent;
       display: flex;
       flex-direction: column;
-      justify-content: center;
+      justify-content: flex-start;
       align-items: center;
       font-family: var(--font-family, 'Press Start 2P', monospace);
       text-align: center;
@@ -54,6 +54,7 @@ export class StartScreen {
       pointer-events: auto;
       image-rendering: pixelated;
       padding: var(--space-md, 1rem);
+      padding-bottom: calc(var(--space-md, 1rem) + 6.5rem);
       box-sizing: border-box;
     `
 
@@ -156,7 +157,7 @@ export class StartScreen {
       </div>
       
       <!-- MAIN CONTENT -->
-      <div class="start-content" style="position: relative; z-index: 1; max-width: 950px; width: 100%; display: flex; flex-direction: column; align-items: center;">
+      <div class="start-content" style="position: relative; z-index: 1; max-width: 950px; width: 100%; display: flex; flex-direction: column; align-items: center; margin-top: auto; margin-bottom: auto;">
         
         <!-- INSERT COIN BANNER -->
         <div class="insert-coin" style="
@@ -293,7 +294,7 @@ export class StartScreen {
           max-width: clamp(400px, 60vw, 600px);
         ">
           <!-- MENU TITLE -->
-          <div style="
+          <div class="menu-title" style="
             text-align: center;
             font-size: clamp(0.8rem, 2vw, 1.2rem);
             color: #FFFF00;
@@ -911,6 +912,120 @@ export class StartScreen {
         .enemy-visual {
           width: 40px !important;
           height: 40px !important;
+        }
+      }
+
+      /* ═══════════════════════════════════════════════════════════════════
+         HEIGHT-RESPONSIVE COMPRESSION
+         The full layout needs ~1150px of height; these tiers shrink the
+         decorative chrome so the menu always fits (and stays clickable)
+         above the fixed controls legend at common window/fullscreen sizes.
+         ═══════════════════════════════════════════════════════════════════ */
+      @media (max-height: 1150px) {
+        .game-title {
+          font-size: clamp(1.6rem, 4vw, 2.6rem) !important;
+        }
+        .enemy-visual {
+          width: clamp(34px, 5vw, 46px) !important;
+          height: clamp(34px, 5vw, 46px) !important;
+        }
+        .arcade-menu {
+          padding: clamp(0.8rem, 1.5vw, 1.4rem) clamp(2rem, 5vw, 4rem) !important;
+          margin: var(--space-sm, 0.8rem) auto !important;
+        }
+        .menu-title {
+          margin-bottom: clamp(0.8rem, 1.5vw, 1.4rem) !important;
+        }
+        .menu-item {
+          padding: clamp(0.5rem, 1.2vw, 0.8rem) clamp(1.5rem, 4vw, 3rem) !important;
+        }
+      }
+
+      @media (max-height: 900px) {
+        .insert-coin {
+          margin-bottom: 0.4rem !important;
+          font-size: 0.65rem !important;
+        }
+        .game-title {
+          font-size: clamp(1.4rem, 3vw, 1.9rem) !important;
+        }
+        .title-container {
+          margin-bottom: 0.5rem !important;
+        }
+        .threat-database {
+          padding: 0.6rem 1rem !important;
+          margin-bottom: 0.6rem !important;
+        }
+        .threat-database h3 {
+          font-size: 0.75rem !important;
+          margin-bottom: 0.5rem !important;
+        }
+        .enemy-grid {
+          gap: 0.45rem !important;
+        }
+        .enemy-card {
+          padding: 0.4rem 0.3rem !important;
+          gap: 0.25rem !important;
+        }
+        .enemy-visual {
+          width: 32px !important;
+          height: 32px !important;
+        }
+        .arcade-menu {
+          padding: 0.5rem 2rem !important;
+          margin: 0.4rem auto !important;
+        }
+        .menu-title {
+          font-size: 0.8rem !important;
+          margin-bottom: 0.7rem !important;
+        }
+        .menu-item {
+          font-size: clamp(0.8rem, 1.8vw, 1.1rem) !important;
+          padding: 0.45rem 1.5rem !important;
+        }
+        .controls-legend {
+          padding: 0.4rem 1rem !important;
+          gap: 1rem !important;
+          bottom: 0.5rem !important;
+        }
+        .key-cap {
+          padding: 0.25rem 0.4rem !important;
+          font-size: 0.55rem !important;
+        }
+      }
+
+      @media (max-height: 780px) {
+        .insert-coin {
+          display: none !important;
+        }
+        .game-title {
+          font-size: 1.4rem !important;
+        }
+        .enemy-visual {
+          width: 26px !important;
+          height: 26px !important;
+        }
+        .enemy-card > div:nth-child(2) {
+          font-size: 0.42rem !important;
+        }
+        .enemy-card > div:nth-child(3) {
+          font-size: 0.4rem !important;
+        }
+        .menu-title {
+          font-size: 0.7rem !important;
+          margin-bottom: 0.5rem !important;
+        }
+        .menu-item {
+          font-size: 0.8rem !important;
+          padding: 0.35rem 1.5rem !important;
+        }
+      }
+
+      /* GAMES PLAYED badge collides with the centered panel on narrow windows */
+      @media (max-width: 1250px), (max-height: 900px) {
+        .play-count-display {
+          transform: scale(0.7);
+          transform-origin: top left;
         }
       }
     `

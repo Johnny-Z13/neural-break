@@ -33,14 +33,15 @@ export class LeaderboardScreen {
       background: transparent;
       display: flex;
       flex-direction: column;
-      justify-content: center;
+      justify-content: flex-start;
       align-items: center;
       font-family: var(--font-family, 'Press Start 2P', monospace);
       text-align: center;
       z-index: 1000;
-      overflow: hidden;
+      overflow-y: auto;
       image-rendering: pixelated;
       padding: var(--space-md, 1rem);
+      padding-bottom: calc(var(--space-md, 1rem) + 3rem);
       box-sizing: border-box;
     `
 
@@ -138,10 +139,10 @@ export class LeaderboardScreen {
       </div>
       
       <!-- MAIN CONTENT -->
-      <div class="leaderboard-content" style="position: relative; z-index: 1; width: 95%; max-width: 900px;">
+      <div class="leaderboard-content" style="position: relative; z-index: 1; width: 95%; max-width: 900px; margin-top: auto; margin-bottom: auto;">
         
         <!-- LED-STYLE BANNER -->
-        <div style="
+        <div class="lb-banner" style="
           margin-bottom: var(--space-sm, 0.8rem);
           font-size: clamp(0.6rem, 1.5vw, 0.9rem);
           color: #FFD700;
@@ -175,7 +176,7 @@ export class LeaderboardScreen {
         </h1>
 
         <!-- Subtitle -->
-        <div style="
+        <div class="lb-subtitle" style="
           margin-bottom: var(--space-md, 1rem);
           font-size: clamp(0.5rem, 1.2vw, 0.75rem);
           color: #FF6600;
@@ -227,7 +228,7 @@ export class LeaderboardScreen {
         "></div>
         
         <!-- BUTTONS CONTAINER -->
-        <div style="display: flex; flex-direction: column; gap: var(--space-md, 1rem); align-items: center; margin-top: var(--space-lg, 1.5rem);">
+        <div class="lb-buttons" style="display: flex; flex-direction: column; gap: var(--space-md, 1rem); align-items: center; margin-top: var(--space-lg, 1.5rem);">
           
           <!-- BACK BUTTON -->
           <button id="backButton" class="arcade-button" style="
@@ -253,7 +254,7 @@ export class LeaderboardScreen {
       </div>
 
       <!-- CONTROLS HINT -->
-      <div style="
+      <div class="lb-hint" style="
         position: fixed;
         bottom: var(--space-md, 1rem);
         left: 50%;
@@ -265,7 +266,7 @@ export class LeaderboardScreen {
         z-index: 1;
         text-align: center;
       ">
-        <div style="margin-bottom: 0.3rem;">▲ TOP NEURAL HACKERS ▲</div>
+        <div class="lb-hint-title" style="margin-bottom: 0.3rem;">▲ TOP NEURAL HACKERS ▲</div>
         <div style="font-size: 0.6em; color: var(--color-cyan, #00FFFF); text-shadow: 0 0 8px var(--color-cyan, #00FFFF);">
           SPACE/ESC TO RETURN
         </div>
@@ -388,6 +389,59 @@ export class LeaderboardScreen {
         .expanded-view .score-row {
           grid-template-columns: 40px 1fr 50px 80px 60px 60px 70px !important;
           font-size: 0.45rem !important;
+        }
+      }
+
+      /* ═══════════════════════════════════════════════════════════════════
+         HEIGHT-RESPONSIVE COMPRESSION
+         Shrinks the header chrome and table so the full board + BACK button
+         fit above the fixed controls hint at short window heights.
+         ═══════════════════════════════════════════════════════════════════ */
+      @media (max-height: 900px) {
+        .lb-banner {
+          margin-bottom: 0.3rem !important;
+          font-size: 0.6rem !important;
+        }
+        .leaderboard-title {
+          font-size: clamp(1.1rem, 2.5vw, 1.6rem) !important;
+          margin-bottom: 0.4rem !important;
+        }
+        .lb-subtitle {
+          margin-bottom: 0.5rem !important;
+        }
+        .scores-container {
+          min-height: 0 !important;
+          max-height: 46vh !important;
+        }
+        .lb-buttons {
+          margin-top: 0.8rem !important;
+        }
+        .lb-buttons .arcade-button {
+          padding: 0.5rem 1.5rem !important;
+          font-size: 0.75rem !important;
+        }
+        .lb-hint-title {
+          display: none !important;
+        }
+      }
+
+      @media (max-height: 760px) {
+        .lb-banner {
+          display: none !important;
+        }
+        .leaderboard-title {
+          font-size: 1.1rem !important;
+        }
+        .lb-subtitle {
+          display: none !important;
+        }
+        .scores-container {
+          max-height: 52vh !important;
+        }
+        .score-row,
+        .score-header {
+          padding-top: 0.3rem !important;
+          padding-bottom: 0.3rem !important;
         }
       }
     `

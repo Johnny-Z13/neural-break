@@ -15,12 +15,10 @@ import { test, expect, Page } from '@playwright/test'
  * name entry is broken (tracked as Task 1.1). This suite never drives
  * a player to game-over.
  *
- * Known issue (pre-existing, not introduced by the Rogue-mode removal):
- * at the 1280x720 test viewport, the fixed-position .controls-legend bar
- * overlaps part of the vertical menu list (confirmed present against the
- * OPTIONS button before this menu was reordered too). #leaderboardButton
- * currently sits partially behind the legend, so tests below navigate to
- * it via keyboard rather than a raw mouse .click() to avoid flakiness.
+ * Menu buttons are clicked directly: the start screen reserves space for
+ * the fixed .controls-legend bar, so no menu item may ever sit behind it.
+ * If a click here times out with "intercepts pointer events", that layout
+ * regression has returned.
  */
 
 // Mocked /api/highscores response — matches HighScoreEntry in src/core/GameState.ts
@@ -174,11 +172,7 @@ test.describe('Neural Break smoke suite', () => {
     await page.goto('/')
     await expect(page.locator('#startScreen')).toBeVisible({ timeout: 15_000 })
 
-    // Menu order: START GAME(0), OPTIONS(1), HI SCORES(2), TEST(3).
-    // Navigate via keyboard (see file-level note on the .controls-legend overlap).
-    await page.keyboard.press('ArrowDown')
-    await page.keyboard.press('ArrowDown')
-    await page.keyboard.press('Enter')
+    await page.locator('#leaderboardButton').click()
     await expect(page.locator('#leaderboardScreen')).toBeVisible({ timeout: 10_000 })
 
     const scoresList = page.locator('#leaderboardScoresList')
@@ -192,10 +186,7 @@ test.describe('Neural Break smoke suite', () => {
     await page.goto('/')
     await expect(page.locator('#startScreen')).toBeVisible({ timeout: 15_000 })
 
-    // Menu order: START GAME(0), OPTIONS(1), HI SCORES(2), TEST(3).
-    await page.keyboard.press('ArrowDown')
-    await page.keyboard.press('ArrowDown')
-    await page.keyboard.press('Enter')
+    await page.locator('#leaderboardButton').click()
     await expect(page.locator('#leaderboardScreen')).toBeVisible({ timeout: 10_000 })
 
     const scoresList = page.locator('#leaderboardScoresList')
