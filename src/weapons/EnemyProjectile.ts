@@ -1,8 +1,9 @@
 import * as THREE from 'three'
 import { EffectsSystem } from '../graphics/EffectsSystem'
+import { tracerQuad } from '../graphics/VectorShapes'
 
 /**
- * Enemy Projectile - Red/orange projectiles fired by enemies
+ * Enemy Projectile - owner-colored tracer fired by enemies
  */
 export class EnemyProjectile {
   private mesh!: THREE.Mesh
@@ -13,57 +14,31 @@ export class EnemyProjectile {
   private radius: number = 0.16 // 2x larger (was 0.08)
   private alive: boolean = true
   private effectsSystem: EffectsSystem | null = null
-  private trailTimer: number = 0
-  private trailInterval: number = 0.05
   private color: number
-  private emissiveColor: number
-  private glowIntensity: number
 
   constructor(
-    startPos: THREE.Vector3, 
-    direction: THREE.Vector3, 
-    speed: number, 
+    startPos: THREE.Vector3,
+    direction: THREE.Vector3,
+    speed: number,
     damage: number,
     sizeMultiplier: number = 1.0,
     color: number = 0xFF4400,
-    emissiveColor: number = 0xFF2200,
-    glowIntensity: number = 0.4
+    _emissiveColor: number = 0xFF2200,
+    _glowIntensity: number = 0.4
   ) {
     this.position = startPos.clone()
     this.velocity = direction.normalize().multiplyScalar(speed)
     this.damage = damage
     this.radius = this.radius * sizeMultiplier
     this.color = color
-    this.emissiveColor = emissiveColor
-    this.glowIntensity = glowIntensity
-    
+
     this.createMesh()
   }
 
   private createMesh(): void {
-    // 🔴 ENEMY PROJECTILE - RED/ORANGE DANGER COLOR! 🔴
-    // Using lower poly count for performance (was 12,12)
-    const geometry = new THREE.SphereGeometry(this.radius, 8, 6)
-    const material = new THREE.MeshBasicMaterial({
-      color: this.color,
-      transparent: true,
-      opacity: 0.95
-    })
-
-    this.mesh = new THREE.Mesh(geometry, material)
+    this.mesh = tracerQuad(Math.max(0.08, this.radius), this.radius * 6, this.color)
     this.mesh.position.copy(this.position)
-    
-    // 🔥 OUTER GLOW - Danger aura! (optimized low-poly)
-    const glowGeometry = new THREE.SphereGeometry(this.radius * 1.5, 6, 4)
-    const glowMaterial = new THREE.MeshBasicMaterial({
-      color: this.emissiveColor,
-      transparent: true,
-      opacity: this.glowIntensity,
-      side: THREE.BackSide,
-      blending: THREE.AdditiveBlending
-    })
-    const glow = new THREE.Mesh(glowGeometry, glowMaterial)
-    this.mesh.add(glow)
+    this.mesh.rotation.z = Math.atan2(this.velocity.y, this.velocity.x) - Math.PI / 2
   }
 
   update(deltaTime: number): void {
@@ -77,37 +52,6 @@ export class EnemyProjectile {
     this.lifeTime -= deltaTime
     if (this.lifeTime <= 0) {
       this.destroy()
-    }
-
-    // Create trail effects
-    this.updateTrail(deltaTime)
-
-    // Update visuals
-    this.updateVisuals(deltaTime)
-  }
-
-  private updateTrail(deltaTime: number): void {
-    if (!this.effectsSystem) return
-
-    this.trailTimer += deltaTime
-    if (this.trailTimer >= this.trailInterval) {
-      const trailVelocity = this.velocity.clone().multiplyScalar(-0.2)
-      const trailColor = new THREE.Color(this.color)
-      this.effectsSystem.createSparkle(this.position, trailVelocity, trailColor, 0.3)
-      this.trailTimer = 0
-    }
-  }
-
-  private updateVisuals(deltaTime: number): void {
-    // Rotate projectile
-    this.mesh.rotation.x += deltaTime * 5
-    this.mesh.rotation.y += deltaTime * 3
-
-    // Pulsing glow
-    const pulse = Math.sin(Date.now() * 0.01) * 0.1 + 1
-    if (this.mesh.children[0]) {
-      const glow = this.mesh.children[0] as THREE.Mesh
-      glow.scale.setScalar(pulse)
     }
   }
 

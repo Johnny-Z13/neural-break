@@ -5,6 +5,7 @@ import { EnemyProjectile } from '../weapons/EnemyProjectile'
 import { AudioManager } from '../audio/AudioManager'
 import { SceneManager } from '../graphics/SceneManager'
 import { BALANCE_CONFIG } from '../config'
+import { ENTITY_PALETTE } from '../config/palette.config'
 
 /**
  * 🌀 VOID SPHERE - MASSIVE COSMIC HORROR 🌀
@@ -593,20 +594,11 @@ export class VoidSphere extends Enemy {
       firePos,
       spreadDirection,
       stats.BULLET_SPEED,
-      stats.BULLET_DAMAGE
+      stats.BULLET_DAMAGE,
+      1.0,
+      ENTITY_PALETTE.VOID_SPHERE
     )
-    
-    // Set custom color for void projectiles
-    const mesh = projectile.getMesh()
-    const material = mesh.material as THREE.MeshBasicMaterial
-    material.color.setHex(0xFF00FF) // Magenta void color
-    
-    // Update glow color too
-    if (mesh.children[0]) {
-      const glowMaterial = (mesh.children[0] as THREE.Mesh).material as THREE.MeshBasicMaterial
-      glowMaterial.color.setHex(0x8800FF) // Purple glow
-    }
-    
+
     this.projectiles.push(projectile)
     if (this.sceneManager) {
       this.sceneManager.addToScene(projectile.getMesh())

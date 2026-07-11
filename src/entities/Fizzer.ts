@@ -5,6 +5,7 @@ import { EnemyProjectile } from '../weapons/EnemyProjectile'
 import { AudioManager } from '../audio/AudioManager'
 import { SceneManager } from '../graphics/SceneManager'
 import { BALANCE_CONFIG } from '../config'
+import { ENTITY_PALETTE } from '../config/palette.config'
 
 /**
  * ⚡ FIZZER - CHAOS INCARNATE ⚡
@@ -527,7 +528,7 @@ export class Fizzer extends Enemy {
     direction.y += (Math.random() - 0.5) * spread
     direction.normalize()
     
-    // 🔴 FIZZER BULLETS: 40% smaller, BRIGHT RED with extra glow! 🔴
+    // ⚡ FIZZER BULLETS: 40% smaller ⚡
     const stats = BALANCE_CONFIG.FIZZER
     const projectile = new EnemyProjectile(
       this.position.clone(),
@@ -535,9 +536,7 @@ export class Fizzer extends Enemy {
       stats.BULLET_SPEED,
       stats.BULLET_DAMAGE,
       0.6, // 40% smaller (60% of original size)
-      0xFF0000, // Pure bright red
-      0xFF0000, // Bright red emissive
-      0.7 // Stronger glow (was 0.4)
+      ENTITY_PALETTE.FIZZER
     )
     
     // Connect effects system for trails

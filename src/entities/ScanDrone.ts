@@ -5,6 +5,7 @@ import { EnemyProjectile } from '../weapons/EnemyProjectile'
 import { AudioManager } from '../audio/AudioManager'
 import { SceneManager } from '../graphics/SceneManager'
 import { BALANCE_CONFIG } from '../config'
+import { ENTITY_PALETTE } from '../config/palette.config'
 
 export class ScanDrone extends Enemy {
   private scanBeamMesh!: THREE.Mesh
@@ -621,7 +622,9 @@ export class ScanDrone extends Enemy {
       this.position.clone(),
       direction,
       stats.BULLET_SPEED,
-      stats.BULLET_DAMAGE
+      stats.BULLET_DAMAGE,
+      1.0,
+      ENTITY_PALETTE.SCAN_DRONE
     )
     
     this.projectiles.push(projectile)
