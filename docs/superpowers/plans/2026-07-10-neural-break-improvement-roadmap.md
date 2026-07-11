@@ -137,8 +137,10 @@ this.mesh.traverse((child) => {
 
 **Problem:** 4 chained `setTimeout`s per hit retain material refs and fire after death/dispose.
 
-- [ ] **Step 1:** Replace with a `flashTimer` field decremented in `update(deltaTime)`; toggle emissive/color from the timer's phase; reset material state when it expires or on `destroy()`. No timeouts.
-- [ ] **Step 2:** Verify in-game: hit flashes still visible; kill an enemy mid-flash — no console errors. Commit: `fix(entities): drive hit flash from update loop, not setTimeout`
+- [x] **Step 1:** Replace with a `flashTimer` field decremented in `update(deltaTime)`; toggle emissive/color from the timer's phase; reset material state when it expires or on `destroy()`. No timeouts.
+- [x] **Step 2:** Verify in-game: hit flashes still visible; kill an enemy mid-flash — no console errors. Commit: `fix(entities): drive hit flash from update loop, not setTimeout`
+
+**ABSORBED by the vector overhaul (2026-07-11):** all enemies now use the timer-driven `vectorFlashTimer` white flash via `registerVector()` (see `docs/superpowers/plans/2026-07-11-vector-overhaul.md`, Task 8). The legacy setTimeout path survives only as a fallback for unmigrated enemies — none remain.
 
 ### Task 1.4: Listener hygiene 🔵 Sonnet
 
