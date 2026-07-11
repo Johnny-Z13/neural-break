@@ -223,13 +223,10 @@ export class StartScreen {
         <!-- ENEMY DATABASE - REFINED COMPACT LAYOUT -->
         <!-- ═══════════════════════════════════════════════════════════════════ -->
         <div class="threat-database" style="
-          background: rgba(10, 0, 5, 0.22);
-          border: 1px solid rgba(255, 0, 0, 0.45);
-          padding: var(--space-sm, 0.8rem) var(--space-md, 1.2rem);
-          max-width: 820px;
+          padding: 0 var(--space-md, 1.2rem);
+          max-width: 880px;
           width: 100%;
           margin: 0 auto var(--space-sm, 0.8rem);
-          box-shadow: 0 0 18px rgba(255, 0, 0, 0.12);
           text-align: center;
           pointer-events: none;
         ">
@@ -1165,16 +1162,12 @@ export class StartScreen {
         align-items: center;
         justify-content: center;
         gap: var(--space-xs, 0.35rem);
-        padding: var(--space-sm, 0.6rem) var(--space-xs, 0.4rem);
-        background: rgba(0, 0, 0, 0.04);
-        border: 1px solid ${color}55;
-        border-radius: 2px;
-        box-shadow: 0 0 10px ${color}22;
+        padding: var(--space-xs, 0.4rem);
       ">
         <!-- LIVE ENEMY WINDOW (real entity rendered behind this element) -->
         <div class="enemy-visual" data-exhibit="${type}" style="
-          width: clamp(44px, 7vw, 62px);
-          height: clamp(44px, 7vw, 62px);
+          width: clamp(60px, 9vw, 88px);
+          height: clamp(60px, 9vw, 88px);
         "></div>
 
         <!-- ENEMY NAME -->
