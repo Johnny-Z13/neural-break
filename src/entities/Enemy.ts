@@ -2,6 +2,7 @@ import * as THREE from 'three'
 import { Player } from './Player'
 import { EffectsSystem } from '../graphics/EffectsSystem'
 import { AudioManager } from '../audio/AudioManager'
+import { fragmentsFromOutline, VectorFragment } from '../graphics/VectorShapes'
 
 // 🌟 ENEMY LIFECYCLE STATE MACHINE 🌟
 export enum EnemyState {
@@ -80,6 +81,15 @@ export abstract class Enemy {
   private spawnSoundPlayed: boolean = false
   private deathSoundPlayed: boolean = false
 
+  // 📐 VECTOR ENEMY PLUMBING - opt-in via registerVector(); unmigrated enemies unaffected 📐
+  protected vectorOutline: THREE.Vector2[] | null = null
+  protected vectorStroke: number = 0.08
+  protected vectorColor: number = 0xFFFFFF
+  private flashMaterials: THREE.MeshBasicMaterial[] = []
+  private flashOriginals: number[] = []
+  private vectorFlashTimer: number = 0
+  private deathFragments: VectorFragment[] = []
+
   constructor(x: number, y: number) {
     this.position = new THREE.Vector3(x, y, 0)
     this.velocity = new THREE.Vector3(0, 0, 0)
@@ -87,7 +97,16 @@ export abstract class Enemy {
 
   abstract initialize(): void
   abstract updateAI(deltaTime: number, player: Player): void
-  
+
+  // 📐 VECTOR ENEMY REGISTRATION - subclasses call at the end of initialize() to opt in 📐
+  protected registerVector(outline: THREE.Vector2[], stroke: number, color: number, flashMaterials: THREE.MeshBasicMaterial[]): void {
+    this.vectorOutline = outline
+    this.vectorStroke = stroke
+    this.vectorColor = color
+    this.flashMaterials = flashMaterials
+    this.flashOriginals = flashMaterials.map(m => m.color.getHex())
+  }
+
   // 🎬 LIFECYCLE CONFIGURATION - Override in subclasses for custom behavior 🎬
   protected getSpawnConfig(): SpawnConfig {
     return {
@@ -104,7 +123,7 @@ export abstract class Enemy {
   
   protected getDeathConfig(): DeathConfig {
     return {
-      duration: 0,
+      duration: this.vectorOutline ? 0.4 : 0,
       particles: {
         count: 15,
         colors: [0xFF4400, 0xFF6600],
@@ -126,7 +145,19 @@ export abstract class Enemy {
     this.mesh.scale.setScalar(Math.max(0.01, elasticProgress))
   }
   
-  protected onDeathUpdate(progress: number): void {
+  protected onDeathUpdate(progress: number, deltaTime?: number): void {
+    if (this.deathFragments.length > 0) {
+      // Vector fragment death: fly fragments outward, fade, spin
+      const dt = deltaTime ?? 0
+      this.deathFragments.forEach(f => {
+        f.mesh.position.x += f.velocity.x * dt
+        f.mesh.position.y += f.velocity.y * dt
+        f.mesh.rotation.z += f.spin * dt
+        ;(f.mesh.material as THREE.Material).opacity = 1 - progress
+      })
+      return
+    }
+
     // Default: fade out
     this.mesh.traverse((child) => {
       if (child instanceof THREE.Mesh || child instanceof THREE.Line) {
@@ -139,6 +170,11 @@ export abstract class Enemy {
   }
 
   update(deltaTime: number, player: Player): void {
+    // ⚡ TIMER-DRIVEN HIT FLASH - runs in every state except DEAD ⚡
+    if (this.state !== EnemyState.DEAD) {
+      this.updateFlash(deltaTime)
+    }
+
     // 🎬 LIFECYCLE STATE MACHINE UPDATE 🎬
     switch (this.state) {
       case EnemyState.SPAWNING:
@@ -219,8 +255,8 @@ export abstract class Enemy {
       : 1.0
     
     // Call subclass hook for custom death animation
-    this.onDeathUpdate(progress)
-    
+    this.onDeathUpdate(progress, deltaTime)
+
     // Complete death
     if (progress >= 1.0) {
       this.state = EnemyState.DEAD
@@ -281,19 +317,19 @@ export abstract class Enemy {
     // Trigger death effects at start
     if (this.effectsSystem) {
       // Particles
-      if (config.particles) {
+      if (config.particles && !this.vectorOutline) {
         this.spawnParticleBurst(config.particles)
       }
-      
+
       // Explosion
-      if (config.explosion) {
+      if (config.explosion && !this.vectorOutline) {
         this.effectsSystem.createExplosion(
           this.position,
           config.explosion.size,
           new THREE.Color(config.explosion.color)
         )
       }
-      
+
       // Screen flash
       if (config.screenFlash) {
         this.effectsSystem.addScreenFlash(
@@ -301,7 +337,7 @@ export abstract class Enemy {
           new THREE.Color(config.screenFlash.color)
         )
       }
-      
+
       // Distortion wave
       if (config.distortionWave) {
         this.effectsSystem.addDistortionWave(
@@ -309,20 +345,30 @@ export abstract class Enemy {
           config.distortionWave.radius
         )
       }
-      
+
       // Electric death
       if (config.electricDeath) {
         this.effectsSystem.createElectricDeath(this.position)
       }
-      
+
       // Vector death particles
-      const enemyType = this.constructor.name
-      const deathColor = config.explosion 
-        ? new THREE.Color(config.explosion.color)
-        : new THREE.Color(0xFF4400)
-      this.effectsSystem.createEnemyDeathParticles(this.position, enemyType, deathColor)
+      if (!this.vectorOutline) {
+        const enemyType = this.constructor.name
+        const deathColor = config.explosion
+          ? new THREE.Color(config.explosion.color)
+          : new THREE.Color(0xFF4400)
+        this.effectsSystem.createEnemyDeathParticles(this.position, enemyType, deathColor)
+      }
     }
-    
+
+    // 📐 GENERIC VECTOR FRAGMENT DEATH - registered enemies shatter into outline fragments 📐
+    if (this.vectorOutline) {
+      this.mesh.children.slice().forEach(c => (c.visible = false))
+      if (this.mesh instanceof THREE.Mesh) (this.mesh.material as THREE.Material).opacity = 0
+      this.deathFragments = fragmentsFromOutline(this.vectorOutline, this.vectorStroke, this.vectorColor)
+      this.deathFragments.forEach(f => this.mesh.add(f.mesh))
+    }
+
     // If no death animation duration, transition to dead immediately
     if (config.duration === 0) {
       this.state = EnemyState.DEAD
@@ -352,10 +398,17 @@ export abstract class Enemy {
     }
   }
   
-  // 🔴 RED FLASH - Clear visual feedback that enemy was hit! 🔴
-  private flashRed(): void {
+  // 🔴 RED/WHITE FLASH - Clear visual feedback that enemy was hit! 🔴
+  protected flashRed(): void {
+    // Vector-migrated enemies: timer-driven white flash, updated in updateFlash()
+    if (this.flashMaterials.length > 0) {
+      this.vectorFlashTimer = 0.15
+      return
+    }
+
+    // 💀 LEGACY PATH - unmigrated enemies (Fizzer/UFO/Boss) until their task lands 💀
     const material = this.mesh.material as THREE.Material & { color?: THREE.Color; emissive?: THREE.Color }
-    
+
     // Safety check - ensure material has color property
     if (!material || !material.color) return
 
@@ -403,6 +456,15 @@ export abstract class Enemy {
       }
       color.copy(originalColor)
     }, 200)
+  }
+
+  // ⚡ TIMER-DRIVEN WHITE HIT FLASH - for vector enemies registered via registerVector() ⚡
+  private updateFlash(deltaTime: number): void {
+    if (this.vectorFlashTimer <= 0 || this.flashMaterials.length === 0) return
+    this.vectorFlashTimer -= deltaTime
+    const white = this.vectorFlashTimer > 0.075
+    this.flashMaterials.forEach((m, i) => m.color.setHex(white ? 0xFFFFFF : this.flashOriginals[i]))
+    if (this.vectorFlashTimer <= 0) this.flashMaterials.forEach((m, i) => m.color.setHex(this.flashOriginals[i]))
   }
 
   // 💀 DEPRECATED - Death effects now handled by lifecycle system 💀
