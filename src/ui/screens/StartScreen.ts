@@ -1338,283 +1338,61 @@ export class StartScreen {
   private static getEnemyVisual(type: string): string {
     switch (type) {
       case 'datamite':
-        // Orange sphere with wireframe ring and glowing core
         return `
-          <svg viewBox="0 0 60 60" width="100%" height="100%">
-            <defs>
-              <radialGradient id="miteGrad" cx="40%" cy="40%">
-                <stop offset="0%" stop-color="#FFAA00"/>
-                <stop offset="100%" stop-color="#FF4400"/>
-              </radialGradient>
-              <filter id="miteGlow">
-                <feGaussianBlur stdDeviation="2" result="coloredBlur"/>
-                <feMerge>
-                  <feMergeNode in="coloredBlur"/>
-                  <feMergeNode in="SourceGraphic"/>
-                </feMerge>
-              </filter>
-            </defs>
-            <!-- Outer ring -->
-            <circle cx="30" cy="30" r="25" fill="none" stroke="#FF6600" stroke-width="2" opacity="0.6" style="animation: orbitRing 3s linear infinite;"/>
-            <!-- Main body -->
-            <circle cx="30" cy="30" r="18" fill="url(#miteGrad)" filter="url(#miteGlow)"/>
-            <!-- Inner core -->
-            <circle cx="30" cy="30" r="8" fill="#FFFFFF" opacity="0.9"/>
-            <!-- Eye/sensor -->
-            <circle cx="30" cy="26" r="4" fill="#000000"/>
-            <circle cx="31" cy="25" r="1.5" fill="#FFFFFF"/>
+          <svg viewBox="0 0 60 60" width="100%" height="100%" fill="none" stroke-linejoin="round">
+            <polygon points="30,8 14,46 30,36 46,46" fill="#FF4400"/>
           </svg>
         `
-      
+
       case 'scandrone':
-        // Hexagonal drone with radar sweep
         return `
-          <svg viewBox="0 0 60 60" width="100%" height="100%">
-            <defs>
-              <linearGradient id="droneGrad" x1="0%" y1="0%" x2="100%" y2="100%">
-                <stop offset="0%" stop-color="#FFAA00"/>
-                <stop offset="100%" stop-color="#FF6600"/>
-              </linearGradient>
-              <filter id="droneGlow">
-                <feGaussianBlur stdDeviation="2"/>
-                <feMerge>
-                  <feMergeNode/>
-                  <feMergeNode in="SourceGraphic"/>
-                </feMerge>
-              </filter>
-            </defs>
-            <!-- Hexagon body -->
-            <polygon points="30,5 52,17 52,43 30,55 8,43 8,17" fill="url(#droneGrad)" stroke="#FFCC00" stroke-width="2" filter="url(#droneGlow)"/>
-            <!-- Radar circle -->
-            <circle cx="30" cy="30" r="12" fill="none" stroke="#00FFFF" stroke-width="2"/>
-            <!-- Radar sweep -->
-            <g style="transform-origin: 30px 30px; animation: orbitRing 1.5s linear infinite;">
-              <line x1="30" y1="30" x2="30" y2="18" stroke="#00FF00" stroke-width="3" opacity="0.9"/>
-            </g>
-            <!-- Center eye -->
-            <circle cx="30" cy="30" r="5" fill="#00FFFF"/>
-            <circle cx="30" cy="30" r="2" fill="#FFFFFF"/>
+          <svg viewBox="0 0 60 60" width="100%" height="100%" fill="none" stroke-linejoin="round">
+            <polygon points="30,6 51,18 51,42 30,54 9,42 9,18" fill="none" stroke="#FF8800" stroke-width="3"/><line x1="30" y1="30" x2="30" y2="8" stroke="#FF8800" stroke-width="2"><animateTransform attributeName="transform" type="rotate" from="0 30 30" to="360 30 30" dur="3s" repeatCount="indefinite"/></line>
           </svg>
         `
-      
+
       case 'chaosworm':
-        // Segmented rainbow worm
         return `
-          <svg viewBox="0 0 60 60" width="100%" height="100%" style="animation: wormWiggle 0.5s ease-in-out infinite;">
-            <defs>
-              <filter id="wormGlow">
-                <feGaussianBlur stdDeviation="1.5"/>
-                <feMerge>
-                  <feMergeNode/>
-                  <feMergeNode in="SourceGraphic"/>
-                </feMerge>
-              </filter>
-            </defs>
-            <!-- Tail segments -->
-            <rect x="2" y="26" width="8" height="8" rx="2" fill="#8800FF" transform="rotate(-10 6 30)" filter="url(#wormGlow)"/>
-            <rect x="11" y="25" width="9" height="9" rx="2" fill="#0088FF" transform="rotate(-5 15 30)" filter="url(#wormGlow)"/>
-            <rect x="21" y="24" width="10" height="10" rx="2" fill="#00FF00" transform="rotate(0 26 30)" filter="url(#wormGlow)"/>
-            <rect x="32" y="23" width="11" height="11" rx="2" fill="#FFFF00" transform="rotate(5 37 30)" filter="url(#wormGlow)"/>
-            <!-- Head -->
-            <rect x="44" y="22" width="13" height="13" rx="3" fill="#FF0000" transform="rotate(10 50 30)" filter="url(#wormGlow)"/>
-            <!-- Eyes -->
-            <circle cx="51" cy="26" r="3" fill="#FFFFFF"/>
-            <circle cx="51" cy="26" r="1.5" fill="#000000"/>
-            <!-- Fangs -->
-            <polygon points="56,30 58,35 54,35" fill="#FFFFFF"/>
+          <svg viewBox="0 0 60 60" width="100%" height="100%" fill="none" stroke-linejoin="round">
+            <polygon points="16,22 24,30 16,38 8,30" fill="none" stroke="#FF00FF" stroke-width="2.5"/><polygon points="32,18 42,30 32,42 22,30" fill="none" stroke="#FF00FF" stroke-width="3"/><polygon points="48,24 54,30 48,36 42,30" fill="none" stroke="#FF00FF" stroke-width="2"/>
           </svg>
         `
-      
+
       case 'voidsphere':
-        // Dark sphere with purple orbital rings
         return `
-          <svg viewBox="0 0 60 60" width="100%" height="100%">
-            <defs>
-              <radialGradient id="voidGrad" cx="50%" cy="50%">
-                <stop offset="0%" stop-color="#220044"/>
-                <stop offset="100%" stop-color="#000000"/>
-              </radialGradient>
-              <filter id="voidGlow">
-                <feGaussianBlur stdDeviation="3"/>
-                <feMerge>
-                  <feMergeNode/>
-                  <feMergeNode in="SourceGraphic"/>
-                </feMerge>
-              </filter>
-            </defs>
-            <!-- Outer ring 1 -->
-            <ellipse cx="30" cy="30" rx="27" ry="10" fill="none" stroke="#AA00FF" stroke-width="2" opacity="0.6" style="animation: orbitRing 3s linear infinite;"/>
-            <!-- Outer ring 2 -->
-            <ellipse cx="30" cy="30" rx="10" ry="27" fill="none" stroke="#FF00FF" stroke-width="1.5" opacity="0.5" style="animation: orbitRing 2s linear infinite reverse;"/>
-            <!-- Main void sphere -->
-            <circle cx="30" cy="30" r="16" fill="url(#voidGrad)" stroke="#8800FF" stroke-width="2" filter="url(#voidGlow)"/>
-            <!-- Inner void -->
-            <circle cx="30" cy="30" r="8" fill="#000000"/>
-            <!-- Energy points -->
-            <circle cx="44" cy="30" r="3" fill="#FF00FF" opacity="0.8" style="animation: enemyGlow 0.5s ease-in-out infinite;"/>
-            <circle cx="16" cy="30" r="3" fill="#FF00FF" opacity="0.8" style="animation: enemyGlow 0.5s ease-in-out infinite 0.25s;"/>
+          <svg viewBox="0 0 60 60" width="100%" height="100%" fill="none" stroke-linejoin="round">
+            <circle cx="30" cy="30" r="14" fill="#000000"/><circle cx="30" cy="30" r="21" fill="none" stroke="#AA00FF" stroke-width="3" stroke-dasharray="115 17"/>
           </svg>
         `
-      
+
       case 'crystalswarm':
-        // Multiple crystals orbiting a core
         return `
-          <svg viewBox="0 0 60 60" width="100%" height="100%">
-            <defs>
-              <linearGradient id="crystalGrad1" x1="0%" y1="0%" x2="100%" y2="100%">
-                <stop offset="0%" stop-color="#00FFFF"/>
-                <stop offset="100%" stop-color="#0088AA"/>
-              </linearGradient>
-              <linearGradient id="crystalGrad2" x1="0%" y1="0%" x2="100%" y2="100%">
-                <stop offset="0%" stop-color="#FF00FF"/>
-                <stop offset="100%" stop-color="#AA0088"/>
-              </linearGradient>
-              <filter id="crystalGlow">
-                <feGaussianBlur stdDeviation="2"/>
-                <feMerge>
-                  <feMergeNode/>
-                  <feMergeNode in="SourceGraphic"/>
-                </feMerge>
-              </filter>
-            </defs>
-            <!-- Center core -->
-            <polygon points="30,22 38,30 30,38 22,30" fill="#00FFFF" filter="url(#crystalGlow)"/>
-            <!-- Orbiting crystals -->
-            <g style="transform-origin: 30px 30px; animation: crystalSpin 4s linear infinite;">
-              <polygon points="30,5 34,12 26,12" fill="url(#crystalGrad1)" filter="url(#crystalGlow)"/>
-              <polygon points="50,30 43,34 43,26" fill="url(#crystalGrad2)" filter="url(#crystalGlow)"/>
-              <polygon points="30,55 26,48 34,48" fill="#FFFF00" filter="url(#crystalGlow)"/>
-              <polygon points="10,30 17,26 17,34" fill="#00FF88" filter="url(#crystalGlow)"/>
-            </g>
-            <!-- Lightning connections -->
-            <line x1="30" y1="22" x2="30" y2="12" stroke="#00FFFF" stroke-width="1" opacity="0.6" style="animation: enemyGlow 0.2s step-end infinite;"/>
-            <line x1="38" y1="30" x2="43" y2="30" stroke="#00FFFF" stroke-width="1" opacity="0.6" style="animation: enemyGlow 0.2s step-end infinite 0.1s;"/>
+          <svg viewBox="0 0 60 60" width="100%" height="100%" fill="none" stroke-linejoin="round">
+            <polygon points="30,4 36,20 54,17 42,30 54,43 36,40 30,56 24,40 6,43 18,30 6,17 24,20" fill="none" stroke="#00FFFF" stroke-width="2.5"/>
           </svg>
         `
-      
+
       case 'fizzer':
-        // Electric chaos orb with crackling spikes
         return `
-          <svg viewBox="0 0 60 60" width="100%" height="100%">
-            <defs>
-              <radialGradient id="fizzerGrad" cx="40%" cy="40%">
-                <stop offset="0%" stop-color="#FFFFFF"/>
-                <stop offset="50%" stop-color="#00FF88"/>
-                <stop offset="100%" stop-color="#00AA44"/>
-              </radialGradient>
-              <filter id="fizzerGlow">
-                <feGaussianBlur stdDeviation="3"/>
-                <feMerge>
-                  <feMergeNode/>
-                  <feMergeNode in="SourceGraphic"/>
-                </feMerge>
-              </filter>
-            </defs>
-            <!-- Erratic ring -->
-            <circle cx="30" cy="30" r="22" fill="none" stroke="#00FF88" stroke-width="1.5" opacity="0.5" stroke-dasharray="3 5" style="animation: orbitRing 0.5s linear infinite;"/>
-            <!-- Main glowing core -->
-            <circle cx="30" cy="30" r="12" fill="url(#fizzerGrad)" filter="url(#fizzerGlow)"/>
-            <!-- Inner white hot core -->
-            <circle cx="30" cy="30" r="5" fill="#FFFFFF" opacity="0.95" style="animation: enemyGlow 0.1s step-end infinite;"/>
-            <!-- Electric spikes radiating out -->
-            <line x1="30" y1="5" x2="30" y2="15" stroke="#00FFFF" stroke-width="2" opacity="0.9" style="animation: enemyGlow 0.15s step-end infinite;"/>
-            <line x1="30" y1="45" x2="30" y2="55" stroke="#00FFFF" stroke-width="2" opacity="0.9" style="animation: enemyGlow 0.15s step-end infinite 0.05s;"/>
-            <line x1="5" y1="30" x2="15" y2="30" stroke="#00FFFF" stroke-width="2" opacity="0.9" style="animation: enemyGlow 0.15s step-end infinite 0.1s;"/>
-            <line x1="45" y1="30" x2="55" y2="30" stroke="#00FFFF" stroke-width="2" opacity="0.9" style="animation: enemyGlow 0.15s step-end infinite 0.15s;"/>
-            <!-- Diagonal spikes -->
-            <line x1="10" y1="10" x2="18" y2="18" stroke="#00FF00" stroke-width="1.5" opacity="0.8"/>
-            <line x1="50" y1="10" x2="42" y2="18" stroke="#00FF00" stroke-width="1.5" opacity="0.8"/>
-            <line x1="10" y1="50" x2="18" y2="42" stroke="#00FF00" stroke-width="1.5" opacity="0.8"/>
-            <line x1="50" y1="50" x2="42" y2="42" stroke="#00FF00" stroke-width="1.5" opacity="0.8"/>
-            <!-- Orbiting sparks -->
-            <circle cx="30" cy="8" r="3" fill="#00FF00" style="animation: orbitRing 0.3s linear infinite;"/>
-            <circle cx="8" cy="30" r="2.5" fill="#00FFFF" style="animation: orbitRing 0.4s linear infinite reverse;"/>
-            <circle cx="52" cy="30" r="2" fill="#FFFFFF" opacity="0.9"/>
-            <circle cx="30" cy="52" r="2.5" fill="#00FF88"/>
+          <svg viewBox="0 0 60 60" width="100%" height="100%" fill="none" stroke-linejoin="round">
+            <rect x="26" y="8" width="8" height="44" fill="#00FF88"/><rect x="8" y="26" width="44" height="8" fill="#00FF88"/>
           </svg>
         `
-      
+
       case 'ufo':
-        // Classic flying saucer with dome and running lights
         return `
-          <svg viewBox="0 0 60 60" width="100%" height="100%">
-            <defs>
-              <linearGradient id="ufoGrad" x1="0%" y1="0%" x2="0%" y2="100%">
-                <stop offset="0%" stop-color="#778899"/>
-                <stop offset="50%" stop-color="#445566"/>
-                <stop offset="100%" stop-color="#334455"/>
-              </linearGradient>
-              <radialGradient id="ufoDomeGrad" cx="40%" cy="30%">
-                <stop offset="0%" stop-color="#AADDFF"/>
-                <stop offset="100%" stop-color="#4488CC"/>
-              </radialGradient>
-              <filter id="ufoGlow">
-                <feGaussianBlur stdDeviation="2"/>
-                <feMerge>
-                  <feMergeNode/>
-                  <feMergeNode in="SourceGraphic"/>
-                </feMerge>
-              </filter>
-            </defs>
-            <!-- Main saucer body -->
-            <ellipse cx="30" cy="35" rx="25" ry="8" fill="url(#ufoGrad)" stroke="#66AACC" stroke-width="2"/>
-            <!-- Saucer wireframe overlay -->
-            <ellipse cx="30" cy="35" rx="26" ry="9" fill="none" stroke="#00FFFF" stroke-width="1" opacity="0.4"/>
-            <!-- Cockpit dome -->
-            <ellipse cx="30" cy="30" rx="12" ry="10" fill="url(#ufoDomeGrad)" filter="url(#ufoGlow)"/>
-            <ellipse cx="30" cy="30" rx="13" ry="11" fill="none" stroke="#00FFFF" stroke-width="1" opacity="0.6"/>
-            <!-- Running lights around edge -->
-            <circle cx="6" cy="35" r="2.5" fill="#FF0000" style="animation: enemyGlow 0.5s ease-in-out infinite;"/>
-            <circle cx="14" cy="38" r="2" fill="#00FF00" style="animation: enemyGlow 0.5s ease-in-out infinite 0.1s;"/>
-            <circle cx="23" cy="40" r="2" fill="#0088FF" style="animation: enemyGlow 0.5s ease-in-out infinite 0.2s;"/>
-            <circle cx="37" cy="40" r="2" fill="#FF0000" style="animation: enemyGlow 0.5s ease-in-out infinite 0.3s;"/>
-            <circle cx="46" cy="38" r="2" fill="#00FF00" style="animation: enemyGlow 0.5s ease-in-out infinite 0.4s;"/>
-            <circle cx="54" cy="35" r="2.5" fill="#0088FF" style="animation: enemyGlow 0.5s ease-in-out infinite 0.5s;"/>
-            <!-- Bottom glow/tractor beam -->
-            <ellipse cx="30" cy="42" rx="8" ry="4" fill="#00FF88" opacity="0.4" style="animation: enemyGlow 1s ease-in-out infinite;"/>
-            <!-- Laser charging indicator -->
-            <line x1="30" y1="42" x2="30" y2="55" stroke="#FF0000" stroke-width="3" opacity="0.6" stroke-dasharray="2 2" style="animation: enemyGlow 0.3s step-end infinite;"/>
+          <svg viewBox="0 0 60 60" width="100%" height="100%" fill="none" stroke-linejoin="round">
+            <polygon points="6,32 18,26 42,26 54,32 42,38 18,38" fill="none" stroke="#88AAFF" stroke-width="3"/><path d="M 20 26 A 10 10 0 0 1 40 26" fill="none" stroke="#88AAFF" stroke-width="3"/>
           </svg>
         `
-      
+
       case 'boss':
-        // Large armored boss with energy core
         return `
-          <svg viewBox="0 0 60 60" width="100%" height="100%">
-            <defs>
-              <linearGradient id="bossGrad" x1="0%" y1="0%" x2="100%" y2="100%">
-                <stop offset="0%" stop-color="#FF0000"/>
-                <stop offset="50%" stop-color="#880000"/>
-                <stop offset="100%" stop-color="#440000"/>
-              </linearGradient>
-              <filter id="bossGlow">
-                <feGaussianBlur stdDeviation="3"/>
-                <feMerge>
-                  <feMergeNode/>
-                  <feMergeNode in="SourceGraphic"/>
-                </feMerge>
-              </filter>
-            </defs>
-            <!-- Outer energy ring -->
-            <circle cx="30" cy="30" r="28" fill="none" stroke="#FF6600" stroke-width="2" opacity="0.5" style="animation: orbitRing 2s linear infinite;"/>
-            <!-- Main body (octahedron shape) -->
-            <polygon points="30,5 55,30 30,55 5,30" fill="url(#bossGrad)" stroke="#FF4400" stroke-width="3" filter="url(#bossGlow)"/>
-            <!-- Armor plates -->
-            <rect x="26" y="2" width="8" height="6" fill="#4B0000" stroke="#FF4400" stroke-width="1"/>
-            <rect x="26" y="52" width="8" height="6" fill="#4B0000" stroke="#FF4400" stroke-width="1"/>
-            <rect x="2" y="27" width="6" height="8" fill="#4B0000" stroke="#FF4400" stroke-width="1"/>
-            <rect x="52" y="27" width="6" height="8" fill="#4B0000" stroke="#FF4400" stroke-width="1"/>
-            <!-- Center core -->
-            <polygon points="30,18 42,30 30,42 18,30" fill="#FF0000" opacity="0.9"/>
-            <circle cx="30" cy="30" r="6" fill="#FFFF00" style="animation: enemyGlow 0.3s ease-in-out infinite;"/>
-            <!-- Turret points -->
-            <circle cx="30" cy="8" r="3" fill="#FFFF00" opacity="0.8"/>
-            <circle cx="30" cy="52" r="3" fill="#FFFF00" opacity="0.8"/>
-            <circle cx="8" cy="30" r="3" fill="#FFFF00" opacity="0.8"/>
-            <circle cx="52" cy="30" r="3" fill="#FFFF00" opacity="0.8"/>
+          <svg viewBox="0 0 60 60" width="100%" height="100%" fill="none" stroke-linejoin="round">
+            <polygon points="30,4 53,17 53,43 30,56 7,43 7,17" fill="none" stroke="#FF0000" stroke-width="3.5"/><circle cx="30" cy="30" r="7" fill="#FF0000"/>
           </svg>
         `
-      
+
       default:
         return `<div style="width: 40px; height: 40px; background: ${type}; border-radius: 50%;"></div>`
     }
