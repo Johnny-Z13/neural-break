@@ -317,7 +317,7 @@ export abstract class Enemy {
     // Trigger death effects at start
     if (this.effectsSystem) {
       // Particles
-      if (config.particles) {
+      if (config.particles && !this.vectorOutline) {
         this.spawnParticleBurst(config.particles)
       }
 
