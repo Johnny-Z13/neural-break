@@ -1,5 +1,5 @@
 import * as THREE from 'three'
-import { Enemy, EnemyState } from './Enemy'
+import { Enemy, EnemyState, SpawnConfig } from './Enemy'
 import { Player } from './Player'
 import { EnemyProjectile } from '../weapons/EnemyProjectile'
 import { AudioManager } from '../audio/AudioManager'
@@ -90,32 +90,21 @@ export class Fizzer extends Enemy {
     this.jitterAmount = 0.5 + Math.random() * 0.5
   }
 
-  // Override update: route through base lifecycle (spawn/flash/death), keep bespoke AI timing
+  // 🎬 SPAWN CONFIGURATION - preserve old gameplay: instant-active, never invulnerable 🎬
+  protected getSpawnConfig(): SpawnConfig {
+    return {
+      duration: 0,
+      invulnerable: false
+    }
+  }
+
+  // Override update: route through base lifecycle (spawn/AI/movement/flash/death)
   update(deltaTime: number, player: Player): void {
-    // Use parent's lifecycle state machine (handles hit-flash + vector fragment death)
+    // Use parent's lifecycle state machine (handles AI, movement, hit-flash + vector fragment death)
     super.update(deltaTime, player)
 
     // 🔫 CRITICAL: Always update projectiles, even during death animation! 🔫
     this.updateProjectiles(deltaTime)
-
-    // Only do custom updates when alive
-    if (this.state !== EnemyState.ALIVE) return
-    if (!this.alive) return
-
-    // Store last position for trail calculation
-    this.lastPosition.copy(this.position)
-
-    this.updateAI(deltaTime, player)
-
-    // Update position
-    this.position.add(this.velocity.clone().multiplyScalar(deltaTime))
-    this.mesh.position.set(this.position.x, this.position.y, 0)
-
-    // Create trail effects
-    this.updateTrails(deltaTime)
-
-    // Update visual effects
-    this.updateVisuals(deltaTime)
   }
 
   updateAI(deltaTime: number, player: Player): void {
