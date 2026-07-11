@@ -4,34 +4,45 @@ import { Player } from './Player'
 import { AudioManager } from '../audio/AudioManager'
 import { EnemyProjectile } from '../weapons/EnemyProjectile'
 import { BALANCE_CONFIG } from '../config'
-import { ENTITY_PALETTE } from '../config/palette.config'
-import { outlinePolygon } from '../graphics/VectorShapes'
 
 /**
- * 🐛 CHAOS WORM - MAGENTA DIAMOND CHAIN 🐛
+ * 🐛 CHAOS WORM - MASSIVE RAINBOW SERPENT 🐛
  * A terrifying 3x sized chaos entity that:
- * - Slithers as a chain of magenta vector diamonds
+ * - Slithers with mesmerizing rainbow segments
  * - Needs A LOT of bullets to destroy
  * - Has a spectacular multi-stage death animation
  */
 export class ChaosWorm extends Enemy {
   private segments: THREE.Mesh[] = []
   private segmentCount: number = BALANCE_CONFIG.CHAOS_WORM.SEGMENT_COUNT
+  private particleSystem!: THREE.Points
+  private particleGeometry!: THREE.BufferGeometry
+  private particlePositions!: Float32Array
+  private particleVelocities!: Float32Array
+  private particleColors!: Float32Array
+  private particleLifetimes!: Float32Array
+  private particleCount: number = 400 // More particles!
   private waveOffset: number = 0
   private sceneManager: any = null
-
+  
   // 💀 DEATH ANIMATION STATE 💀
   private isDying: boolean = false
   private deathTimer: number = 0
   private deathDuration: number = BALANCE_CONFIG.CHAOS_WORM.DEATH_DURATION
   private explodedSegments: Set<number> = new Set()
   private segmentVelocities: THREE.Vector3[] = []
-
+  
   // 💥 DEATH BULLETS - RUN AWAY! 💥
   private deathProjectiles: EnemyProjectile[] = []
   private static readonly BULLETS_PER_SEGMENT = BALANCE_CONFIG.CHAOS_WORM.BULLETS_PER_SEGMENT
   private static readonly DEATH_BULLET_SPEED = BALANCE_CONFIG.CHAOS_WORM.DEATH_BULLET_SPEED
   private static readonly DEATH_BULLET_DAMAGE = BALANCE_CONFIG.CHAOS_WORM.DEATH_BULLET_DAMAGE
+  
+  // 🔴 HIT FLASH STATE 🔴
+  private isFlashing: boolean = false
+  private flashTimer: number = 0
+  private flashDuration: number = 0.15 // 150ms flash
+  private originalColors: THREE.Color[] = []
 
   constructor(x: number, y: number) {
     super(x, y)
@@ -72,26 +83,126 @@ export class ChaosWorm extends Enemy {
     this.mesh = new THREE.Mesh(containerGeometry, containerMaterial)
     this.mesh.position.copy(this.position)
 
-    // 📐 MAGENTA DIAMOND CHAIN - each segment is one diamond outline 📐
-    let headDiamondPoints: THREE.Vector2[] = []
+    // 🎮 ASTEROIDS-STYLE SEGMENTED BODY 🎮
     for (let i = 0; i < this.segmentCount; i++) {
-      const s = 0.45 - (i * 0.03) // Compact tapering segments
-      const diamondPoints = [
-        new THREE.Vector2(0, s),
-        new THREE.Vector2(s, 0),
-        new THREE.Vector2(0, -s),
-        new THREE.Vector2(-s, 0)
-      ]
-      if (i === 0) headDiamondPoints = diamondPoints
+      const segmentSize = 0.45 - (i * 0.03) // Compact tapering segments
+      const geometry = new THREE.OctahedronGeometry(segmentSize, 2)
+      
+      // Rainbow shifting colors based on segment position
+      const hue = (i / this.segmentCount) * 360
+      const color = new THREE.Color().setHSL(hue / 360, 0.9, 0.6)
+      
+      const material = new THREE.MeshLambertMaterial({
+        color: color,
+        emissive: color.clone().multiplyScalar(0.4),
+        transparent: true,
+        opacity: 0.9
+      })
 
-      const segment = outlinePolygon(diamondPoints, 0.06, ENTITY_PALETTE.CHAOS_WORM)
+      const segment = new THREE.Mesh(geometry, material)
+      
+      // 🌟 WIREFRAME OUTLINE - Classic vector style! 🌟
+      const wireframeGeometry = new THREE.OctahedronGeometry(segmentSize * 1.05, 2)
+      const wireframeMaterial = new THREE.MeshBasicMaterial({
+        color: color,
+        wireframe: true,
+        transparent: true,
+        opacity: 0.9,
+        blending: THREE.AdditiveBlending
+      })
+      const wireframe = new THREE.Mesh(wireframeGeometry, wireframeMaterial)
+      segment.add(wireframe)
+      
+      // 💫 ENERGY AURA - Glowing ring per segment! 💫
+      const auraGeometry = new THREE.RingGeometry(segmentSize * 0.8, segmentSize * 1.3, 16)
+      const auraMaterial = new THREE.MeshBasicMaterial({
+        color: color,
+        transparent: true,
+        opacity: 0.5,
+        side: THREE.DoubleSide,
+        blending: THREE.AdditiveBlending
+      })
+      const aura = new THREE.Mesh(auraGeometry, auraMaterial)
+      aura.rotation.x = Math.PI / 2
+      segment.add(aura)
+      
+      // 🗡️ SPIKES 🗡️
+      const spikeGeometry = new THREE.ConeGeometry(0.056, 0.34, 6) // Compact
+      const spikeMaterial = new THREE.MeshBasicMaterial({
+        color: 0xFFFFFF,
+        transparent: true,
+        opacity: 0.9,
+        blending: THREE.AdditiveBlending
+      })
+      
+      for (let j = 0; j < 8; j++) { // More spikes!
+        const spike = new THREE.Mesh(spikeGeometry, spikeMaterial.clone())
+        const angle = (j / 8) * Math.PI * 2
+        spike.position.set(
+          Math.cos(angle) * segmentSize,
+          Math.sin(angle) * segmentSize,
+          0
+        )
+        spike.rotation.z = angle
+        segment.add(spike)
+      }
+      
+      // ⚡ INNER ENERGY CORE ⚡
+      const coreGeometry = new THREE.SphereGeometry(segmentSize * 0.4, 8, 8)
+      const coreMaterial = new THREE.MeshBasicMaterial({
+        color: color,
+        transparent: true,
+        opacity: 0.8,
+        blending: THREE.AdditiveBlending
+      })
+      const core = new THREE.Mesh(coreGeometry, coreMaterial)
+      segment.add(core)
 
       this.segments.push(segment)
       this.mesh.add(segment)
     }
 
-    this.registerVector(headDiamondPoints, 0.06, ENTITY_PALETTE.CHAOS_WORM,
-      this.segments.map(s => s.material as THREE.MeshBasicMaterial))
+    // Create MASSIVE particle trail system
+    this.particlePositions = new Float32Array(this.particleCount * 3)
+    this.particleVelocities = new Float32Array(this.particleCount * 3)
+    this.particleColors = new Float32Array(this.particleCount * 3)
+    this.particleLifetimes = new Float32Array(this.particleCount)
+
+    // Initialize particles
+    for (let i = 0; i < this.particleCount; i++) {
+      const i3 = i * 3
+      this.particlePositions[i3] = this.position.x
+      this.particlePositions[i3 + 1] = this.position.y
+      this.particlePositions[i3 + 2] = this.position.z
+      
+      this.particleVelocities[i3] = (Math.random() - 0.5) * 4
+      this.particleVelocities[i3 + 1] = (Math.random() - 0.5) * 4
+      this.particleVelocities[i3 + 2] = (Math.random() - 0.5) * 4
+      
+      // Rainbow colors
+      const hue = Math.random()
+      const color = new THREE.Color().setHSL(hue, 1.0, 0.7)
+      this.particleColors[i3] = color.r
+      this.particleColors[i3 + 1] = color.g
+      this.particleColors[i3 + 2] = color.b
+      
+      this.particleLifetimes[i] = Math.random()
+    }
+
+    this.particleGeometry = new THREE.BufferGeometry()
+    this.particleGeometry.setAttribute('position', new THREE.BufferAttribute(this.particlePositions, 3))
+    this.particleGeometry.setAttribute('color', new THREE.BufferAttribute(this.particleColors, 3))
+
+    const particleMaterial = new THREE.PointsMaterial({
+      size: 0.15, // Compact particles
+      vertexColors: true,
+      transparent: true,
+      opacity: 0.85,
+      blending: THREE.AdditiveBlending
+    })
+
+    this.particleSystem = new THREE.Points(this.particleGeometry, particleMaterial)
+    this.mesh.add(this.particleSystem)
 
     // Initialize segment velocities for death animation
     this.segmentVelocities = new Array(this.segmentCount).fill(null).map(() => new THREE.Vector3())
@@ -137,25 +248,43 @@ export class ChaosWorm extends Enemy {
       }
     }
     
-    // 🦴 ANIMATE BREAKING SEGMENTS - diamonds fly off and fade 🦴
+    // 🦴 ANIMATE BREAKING SEGMENTS 🦴
     for (let i = 0; i < this.segments.length; i++) {
       const segment = this.segments[i]
-      const material = segment.material as THREE.MeshBasicMaterial
-
+      
       if (this.explodedSegments.has(i)) {
         // Exploded segments fly off
         const velocity = this.segmentVelocities[i]
         segment.position.add(velocity.clone().multiplyScalar(deltaTime))
-        segment.rotation.z += deltaTime * 6
+        segment.rotation.x += deltaTime * 5
+        segment.rotation.y += deltaTime * 7
+        
+        // Fade out
+        const material = segment.material as THREE.MeshLambertMaterial
+        material.opacity = Math.max(0, material.opacity - deltaTime * 0.8)
+        
+        // Children (spikes etc) also fade
+        segment.children.forEach(child => {
+          if (child instanceof THREE.Mesh) {
+            const childMat = child.material as THREE.MeshBasicMaterial
+            childMat.opacity = Math.max(0, childMat.opacity - deltaTime * 1.2)
+          }
+        })
       } else {
         // Remaining segments shake violently
         const shake = (progress) * 0.8 + 0.1
         segment.position.x += (Math.random() - 0.5) * shake
         segment.position.y += (Math.random() - 0.5) * shake
+        
+        // Color shifts to red as death approaches
+        const material = segment.material as THREE.MeshLambertMaterial
+        const deathHue = 0 // Red
+        const normalHue = (i / this.segmentCount)
+        const currentHue = normalHue * (1 - progress) + deathHue * progress
+        const color = new THREE.Color().setHSL(currentHue, 1.0, 0.5 + progress * 0.3)
+        material.color.copy(color)
+        material.emissive.copy(color).multiplyScalar(0.5)
       }
-
-      // Fade the whole chain out over the death timeline
-      material.opacity = 1 - progress
     }
     
     // 💥 UPDATE DEATH PROJECTILES 💥
@@ -247,9 +376,7 @@ export class ChaosWorm extends Enemy {
         position.clone(),
         direction,
         speed,
-        ChaosWorm.DEATH_BULLET_DAMAGE,
-        1.0,
-        ENTITY_PALETTE.CHAOS_WORM
+        ChaosWorm.DEATH_BULLET_DAMAGE
       )
       
       // Connect effects system for trails
@@ -323,9 +450,7 @@ export class ChaosWorm extends Enemy {
         this.position.clone(),
         direction,
         speed,
-        ChaosWorm.DEATH_BULLET_DAMAGE * 1.5, // Extra damage for final burst
-        1.0,
-        ENTITY_PALETTE.CHAOS_WORM
+        ChaosWorm.DEATH_BULLET_DAMAGE * 1.5 // Extra damage for final burst
       )
       
       if (this.effectsSystem) {
@@ -340,16 +465,30 @@ export class ChaosWorm extends Enemy {
     }
   }
 
-  // 🔴 OVERRIDE TAKE DAMAGE - Base timer flash, don't scale container! 🔴
+  // 🔴 OVERRIDE TAKE DAMAGE - Flash red, don't scale container! 🔴
   takeDamage(damage: number): void {
     this.health -= damage
-
-    // ⚡ VISUAL + AUDIO HIT FEEDBACK - base timer-driven white flash ⚡
-    this.flashRed()
-
-    // 🔊 PLAY HIT SOUND!
-    if (this.audioManager) {
-      this.audioManager.playEnemyHitSound()
+    
+    // 🔴 VISUAL + AUDIO HIT FEEDBACK 🔴
+    if (!this.isFlashing) {
+      this.isFlashing = true
+      this.flashTimer = 0
+      
+      // Store original colors
+      this.originalColors = []
+      for (const segment of this.segments) {
+        const material = segment.material as THREE.MeshLambertMaterial
+        this.originalColors.push(material.color.clone())
+        
+        // Set to bright RED
+        material.color.setRGB(1, 0, 0)
+        material.emissive.setRGB(1, 0, 0)
+      }
+      
+      // 🔊 PLAY HIT SOUND!
+      if (this.audioManager) {
+        this.audioManager.playEnemyHitSound()
+      }
     }
 
     if (this.health <= 0) {
@@ -395,14 +534,29 @@ export class ChaosWorm extends Enemy {
   }
 
   protected updateVisuals(deltaTime: number): void {
-    void deltaTime // Base timer-driven flash is handled by Enemy.updateFlash()
-
     // Skip normal visuals if dying
     if (this.isDying) return
-
+    
+    // 🔴 Handle hit flash 🔴
+    if (this.isFlashing) {
+      this.flashTimer += deltaTime
+      if (this.flashTimer >= this.flashDuration) {
+        // Restore original colors
+        this.isFlashing = false
+        for (let i = 0; i < this.segments.length; i++) {
+          const segment = this.segments[i]
+          const material = segment.material as THREE.MeshLambertMaterial
+          if (this.originalColors[i]) {
+            material.color.copy(this.originalColors[i])
+            material.emissive.copy(this.originalColors[i]).multiplyScalar(0.4)
+          }
+        }
+      }
+    }
+    
     // 🛡️ SAFEGUARD: Ensure container mesh never scales (prevents size growth bug)
     this.mesh.scale.setScalar(1)
-
+    
     const time = Date.now() * 0.001
 
     // Update each segment with wave motion - compact spacing
@@ -410,19 +564,99 @@ export class ChaosWorm extends Enemy {
       const segment = this.segments[i]
       const offset = i * 0.6
       const wave = Math.sin(time * 3 + offset) * 0.3 // Wave motion
-
+      
       segment.position.set(
         -i * 0.6 + wave, // Compact spacing
         Math.sin(time * 2 + offset) * 0.2,
         Math.cos(time * 4 + offset) * 0.1
       )
-
-      // Gentle in-plane rotation - keeps the flat diamond outline readable
+      
+      // Crazy rotation
+      segment.rotation.x = time * 2 + i * 0.5
+      segment.rotation.y = time * 3 + i * 0.3
       segment.rotation.z = time * 1.5 + i * 0.7
-
+      
+      // Color shifting (skip if flashing red)
+      if (!this.isFlashing) {
+        const material = segment.material as THREE.MeshLambertMaterial
+        const hue = ((time * 0.5 + i * 0.1) % 1)
+        const color = new THREE.Color().setHSL(hue, 0.9, 0.6)
+        material.color.copy(color)
+        material.emissive.copy(color).multiplyScalar(0.4)
+      }
+      
       // Scale pulsing - reduced to prevent growing too big
       const scale = 1 + Math.sin(time * 4 + i * 0.5) * 0.1
       segment.scale.setScalar(scale)
+      
+      // Update spikes animation
+      for (let j = 2; j < segment.children.length - 1; j++) { // Skip wireframe, aura, and core
+        const spike = segment.children[j] as THREE.Mesh
+        if (spike && spike.geometry instanceof THREE.ConeGeometry) {
+          const spikeMaterial = spike.material as THREE.MeshBasicMaterial
+          spikeMaterial.opacity = 0.6 + Math.sin(time * 8 + i + j) * 0.4
+          
+          // Extend spikes periodically
+          const extension = 1 + Math.sin(time * 6 + i * 0.5 + j * 0.3) * 0.3
+          spike.scale.y = extension
+        }
+      }
+      
+      // Update inner core
+      const core = segment.children[segment.children.length - 1] as THREE.Mesh
+      if (core) {
+        const coreMaterial = core.material as THREE.MeshBasicMaterial
+        coreMaterial.opacity = 0.5 + Math.sin(time * 10 + i) * 0.4
+        core.scale.setScalar(1 + Math.sin(time * 8 + i) * 0.3)
+      }
     }
+
+    // Update MASSIVE particle system
+    for (let i = 0; i < this.particleCount; i++) {
+      const i3 = i * 3
+      
+      // Update particle lifetime
+      this.particleLifetimes[i] -= deltaTime * 1.5
+      
+      if (this.particleLifetimes[i] <= 0) {
+        // Respawn particle at random segment position
+        const segIndex = Math.floor(Math.random() * this.segments.length)
+        const seg = this.segments[segIndex]
+        const worldPos = new THREE.Vector3()
+        seg.getWorldPosition(worldPos)
+        
+        this.particlePositions[i3] = worldPos.x
+        this.particlePositions[i3 + 1] = worldPos.y
+        this.particlePositions[i3 + 2] = worldPos.z
+        
+        // Random velocity
+        this.particleVelocities[i3] = (Math.random() - 0.5) * 8
+        this.particleVelocities[i3 + 1] = (Math.random() - 0.5) * 8
+        this.particleVelocities[i3 + 2] = (Math.random() - 0.5) * 4
+        
+        this.particleLifetimes[i] = 1 + Math.random()
+        
+        // New rainbow color
+        const hue = Math.random()
+        const useSaturated = Math.random() < 0.8
+        const color = new THREE.Color().setHSL(hue, 1.0, useSaturated ? 0.5 + Math.random() * 0.2 : 0.7)
+        this.particleColors[i3] = color.r
+        this.particleColors[i3 + 1] = color.g
+        this.particleColors[i3 + 2] = color.b
+      } else {
+        // Update particle position
+        this.particlePositions[i3] += this.particleVelocities[i3] * deltaTime
+        this.particlePositions[i3 + 1] += this.particleVelocities[i3 + 1] * deltaTime
+        this.particlePositions[i3 + 2] += this.particleVelocities[i3 + 2] * deltaTime
+        
+        // Apply gravity/drag
+        this.particleVelocities[i3] *= 0.97
+        this.particleVelocities[i3 + 1] *= 0.97
+        this.particleVelocities[i3 + 2] *= 0.94
+      }
+    }
+
+    this.particleGeometry.attributes.position.needsUpdate = true
+    this.particleGeometry.attributes.color.needsUpdate = true
   }
 }

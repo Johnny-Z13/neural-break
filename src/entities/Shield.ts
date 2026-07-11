@@ -1,7 +1,5 @@
 import * as THREE from 'three'
 import { EffectsSystem } from '../graphics/EffectsSystem'
-import { ENTITY_PALETTE } from '../config/palette.config'
-import { ringOutline } from '../graphics/VectorShapes'
 
 export class Shield {
   private mesh!: THREE.Mesh
@@ -10,6 +8,7 @@ export class Shield {
   private alive: boolean = true
   private effectsSystem: EffectsSystem | null = null
   private pulseTime: number = 0
+  private rotationSpeed: number = 3.5 // Faster for "fizz"
   private trailTimer: number = 0
   private trailInterval: number = 0.07 // Faster for "fizz"
 
@@ -26,15 +25,120 @@ export class Shield {
   }
 
   private createMesh(): void {
-    // 🛡️ SHIELD - ONE EMERALD RING! 🛡️
-    // Transparent container
+    // 🛡️ SHIELD - RICH EMERALD GREEN with 'S' letter! 🛡️
+    // Create base container
     const containerGeometry = new THREE.CircleGeometry(0.125, 8) // Scaled up
     const containerMaterial = new THREE.MeshBasicMaterial({ transparent: true, opacity: 0 })
     this.mesh = new THREE.Mesh(containerGeometry, containerMaterial)
     this.mesh.position.copy(this.position)
+    
+    // 💚 DEEP EMERALD GLOWING BASE (matches PowerUp) 💚
+    const glowGeometry = new THREE.CircleGeometry(0.56, 32) // Scaled up
+    const glowMaterial = new THREE.MeshBasicMaterial({
+      color: 0x00AA44, // DEEP EMERALD GREEN - matches PowerUp!
+      transparent: true,
+      opacity: 0.9,
+      blending: THREE.AdditiveBlending,
+      side: THREE.DoubleSide
+    })
+    const glow = new THREE.Mesh(glowGeometry, glowMaterial)
+    glow.position.z = -0.01
+    this.mesh.add(glow)
 
-    const ring = ringOutline(0.45, 0.08, ENTITY_PALETTE.PICKUP_EMERALD)
-    this.mesh.add(ring)
+    // 💫 OUTER GLOW RING - FOREST GREEN (matches PowerUp) 💫
+    const outerRingGeometry = new THREE.RingGeometry(0.625, 0.81, 32) // Scaled up
+    const outerRingMaterial = new THREE.MeshBasicMaterial({
+      color: 0x009933, // FOREST GREEN - matches PowerUp!
+      transparent: true,
+      opacity: 0.85,
+      blending: THREE.AdditiveBlending,
+      side: THREE.DoubleSide
+    })
+    const outerRing = new THREE.Mesh(outerRingGeometry, outerRingMaterial)
+    this.mesh.add(outerRing)
+
+    // 🟢 INNER RING - JADE GREEN (matches PowerUp) 🟢
+    const innerRingGeometry = new THREE.RingGeometry(0.44, 0.525, 32) // Scaled up
+    const innerRingMaterial = new THREE.MeshBasicMaterial({
+      color: 0x00DD55, // JADE GREEN - matches PowerUp!
+      transparent: true,
+      opacity: 0.95,
+      blending: THREE.AdditiveBlending,
+      side: THREE.DoubleSide
+    })
+    const innerRing = new THREE.Mesh(innerRingGeometry, innerRingMaterial)
+    this.mesh.add(innerRing)
+    
+    // ✨ 'S' LETTER - SHIELD! ✨
+    this.createLetterS()
+    
+    // 💫 ENERGY PARTICLES - Deep emerald/jade tones (matches PowerUp)! 💫
+    for (let i = 0; i < 12; i++) {
+      const particleGeometry = new THREE.CircleGeometry(0.06, 8) // Slightly larger, more segments
+      // Alternate between deep emerald and jade green
+      const particleColor = i % 2 === 0 ? 0x00AA44 : 0x00DD55
+      const particleMaterial = new THREE.MeshBasicMaterial({
+        color: particleColor, // DEEP EMERALD or JADE GREEN alternating
+        transparent: true,
+        opacity: 0.85,
+        blending: THREE.AdditiveBlending
+      })
+      const particle = new THREE.Mesh(particleGeometry, particleMaterial)
+      const angle = (i / 12) * Math.PI * 2
+      particle.position.set(
+        Math.cos(angle) * 0.7, // Scaled up
+        Math.sin(angle) * 0.7,
+        0
+      )
+      this.mesh.add(particle)
+    }
+  }
+
+  private createLetterS(): void {
+    // Create 'S' shape using curved segments
+    const letterColor = 0xFFFFFF // White letter for contrast
+    const letterMaterial = new THREE.MeshBasicMaterial({
+      color: letterColor,
+      transparent: true,
+      opacity: 1.0,
+      blending: THREE.AdditiveBlending
+    })
+    
+    // Create a group for the letter - SCALED UP
+    const letterGroup = new THREE.Group()
+    letterGroup.scale.setScalar(1.25)
+    
+    // Top curve of S
+    const topCurveGeometry = new THREE.BoxGeometry(0.2, 0.08, 0.01)
+    const topCurve = new THREE.Mesh(topCurveGeometry, letterMaterial.clone())
+    topCurve.position.set(0, 0.14, 0.02)
+    letterGroup.add(topCurve)
+    
+    // Top-left vertical
+    const topLeftGeometry = new THREE.BoxGeometry(0.08, 0.14, 0.01)
+    const topLeft = new THREE.Mesh(topLeftGeometry, letterMaterial.clone())
+    topLeft.position.set(-0.08, 0.07, 0.02)
+    letterGroup.add(topLeft)
+    
+    // Middle bar of S
+    const middleBarGeometry = new THREE.BoxGeometry(0.2, 0.08, 0.01)
+    const middleBar = new THREE.Mesh(middleBarGeometry, letterMaterial.clone())
+    middleBar.position.set(0, 0.0, 0.02)
+    letterGroup.add(middleBar)
+    
+    // Bottom-right vertical
+    const bottomRightGeometry = new THREE.BoxGeometry(0.08, 0.14, 0.01)
+    const bottomRight = new THREE.Mesh(bottomRightGeometry, letterMaterial.clone())
+    bottomRight.position.set(0.08, -0.07, 0.02)
+    letterGroup.add(bottomRight)
+    
+    // Bottom curve of S
+    const bottomCurveGeometry = new THREE.BoxGeometry(0.2, 0.08, 0.01)
+    const bottomCurve = new THREE.Mesh(bottomCurveGeometry, letterMaterial.clone())
+    bottomCurve.position.set(0, -0.14, 0.02)
+    letterGroup.add(bottomCurve)
+    
+    this.mesh.add(letterGroup)
   }
 
   update(deltaTime: number, playerPosition?: THREE.Vector3): void {
@@ -54,11 +158,61 @@ export class Shield {
     const pulse = basePulse + Math.sin(this.pulseTime * pulseSpeed) * pulseAmount
     this.mesh.scale.setScalar(pulse)
 
-    // Idle rotation animation
-    this.mesh.rotation.z += deltaTime * 1.5
+    // Gentle rotation animation
+    this.mesh.rotation.z += deltaTime * this.rotationSpeed
+
+    // ✨ ANIMATE PARTICLES - Orbiting around pickup with more speed! ✨
+    const children = this.mesh.children
+    const particleCount = 12
+    const particleStartIndex = 4
+    for (let i = particleStartIndex; i < particleStartIndex + particleCount; i++) {
+      const child = children[i]
+      if (child instanceof THREE.Mesh) {
+        const particleIndex = i - particleStartIndex
+        const angle = (particleIndex / particleCount) * Math.PI * 2 + this.pulseTime * 4 // Faster "fizz"
+        const radius = 0.7 + Math.sin(this.pulseTime * 5 + particleIndex) * 0.15 // Scaled up
+        child.position.set(
+          Math.cos(angle) * radius,
+          Math.sin(angle) * radius,
+          0
+        )
+        const particleMaterial = child.material as THREE.MeshBasicMaterial
+        particleMaterial.opacity = 0.7 + Math.sin(this.pulseTime * 7 + particleIndex) * 0.3
+      }
+    }
+
+    // Update glow and ring pulsing
+    this.updateGlowEffects()
 
     // Create particle trail effect
     this.updateTrail(deltaTime)
+  }
+
+  private updateGlowEffects(): void {
+    const time = this.pulseTime
+    
+    // Update main glow
+    if (this.mesh.children[0]) {
+      const glow = this.mesh.children[0] as THREE.Mesh
+      const glowMaterial = glow.material as THREE.MeshBasicMaterial
+      glowMaterial.opacity = 0.5 + Math.sin(time * 4) * 0.2
+      glow.scale.setScalar(1 + Math.sin(time * 5) * 0.15)
+    }
+    
+    // Update outer ring
+    if (this.mesh.children[1]) {
+      const outerRing = this.mesh.children[1] as THREE.Mesh
+      const outerRingMaterial = outerRing.material as THREE.MeshBasicMaterial
+      outerRingMaterial.opacity = 0.7 + Math.sin(time * 3) * 0.3
+      outerRing.scale.setScalar(1 + Math.sin(time * 4) * 0.1)
+    }
+    
+    // Update inner ring
+    if (this.mesh.children[2]) {
+      const innerRing = this.mesh.children[2] as THREE.Mesh
+      const innerRingMaterial = innerRing.material as THREE.MeshBasicMaterial
+      innerRingMaterial.opacity = 0.8 + Math.sin(time * 5) * 0.2
+    }
   }
 
   private updateTrail(deltaTime: number): void {
