@@ -399,7 +399,7 @@ export abstract class Enemy {
   }
   
   // 🔴 RED/WHITE FLASH - Clear visual feedback that enemy was hit! 🔴
-  private flashRed(): void {
+  protected flashRed(): void {
     // Vector-migrated enemies: timer-driven white flash, updated in updateFlash()
     if (this.flashMaterials.length > 0) {
       this.vectorFlashTimer = 0.15
