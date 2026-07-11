@@ -18,6 +18,8 @@ export class Boss extends Enemy {
   private coreMesh!: THREE.Mesh
   private attackPhase: number = 0 // 0 = normal, 1 = rapid fire, 2 = spread
   private phaseTimer: number = 0
+  private pulseTimer: number = 0 // Boss-owned visual timer (do NOT use base animTimer - it's driven by spawn/death lifecycle)
+  private hitPunchTimer: number = 0 // Counts down from 0.1s after a hit; drives the scale punch
 
   // 💀 DEATH ANIMATION STATE 💀
   private isDying: boolean = false
@@ -547,15 +549,25 @@ export class Boss extends Enemy {
     // Skip if dying - death animation handles visuals
     if (this.isDying) return
 
-    this.animTimer += deltaTime
+    // NOTE: increments Boss's OWN pulseTimer, never the base animTimer -
+    // animTimer is driven by the base spawn/death lifecycle (see Enemy.ts),
+    // and writing to it here would desync the spawn animation/invuln window.
+    this.pulseTimer += deltaTime
 
     // 🔷 HEX ROTATION - menacing spin 🔷
     this.coreMesh.rotation.z += deltaTime * 0.3
 
-    // 🔴 CORE DISC SCALE-PULSE 🔴
+    // ⏱️ HIT PUNCH DECAY - counts down after takeDamage() triggers it ⏱️
+    if (this.hitPunchTimer > 0) {
+      this.hitPunchTimer = Math.max(0, this.hitPunchTimer - deltaTime)
+    }
+
+    // 🔴 CORE DISC SCALE-PULSE + HIT PUNCH - composed fresh each frame, never cumulative 🔴
     const core = this.coreMesh.children[0] as THREE.Mesh
     if (core) {
-      core.scale.setScalar(1 + Math.sin(this.animTimer * 3) * 0.08)
+      const pulse = 1 + Math.sin(this.pulseTimer * 3) * 0.08
+      const punch = 1 + 0.2 * (this.hitPunchTimer / 0.1)
+      core.scale.setScalar(pulse * punch)
     }
   }
 
@@ -566,20 +578,11 @@ export class Boss extends Enemy {
   takeDamage(damage: number): void {
     this.health -= damage
 
-    // JUICY visual feedback - flash red and scale up
-    const material = this.coreMesh.material as THREE.MeshBasicMaterial
-    const originalColor = material.color.clone()
-    const originalScale = this.coreMesh.scale.clone()
-
-    material.color.setRGB(1, 1, 1)
-    this.coreMesh.scale.multiplyScalar(1.2)
-
-    setTimeout(() => {
-      if (this.coreMesh) {
-        material.color.copy(originalColor)
-        this.coreMesh.scale.copy(originalScale)
-      }
-    }, 100)
+    // JUICY visual feedback - timer-driven white flash (hex + core disc via
+    // registerVector) plus a scale punch, both composed fresh each frame in
+    // updateVisuals() - no setTimeout, so rapid hits can't ratchet or stick white.
+    this.flashRed()
+    this.hitPunchTimer = 0.1
 
     if (this.health <= 0) {
       this.createDeathEffect()

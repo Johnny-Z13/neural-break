@@ -17,7 +17,18 @@
 
 import * as THREE from 'three'
 import { Enemy, EnemyState } from '../entities/Enemy'
+import { DataMite } from '../entities/DataMite'
 import { Fizzer } from '../entities/Fizzer'
+import { ScanDrone } from '../entities/ScanDrone'
+import { ChaosWorm } from '../entities/ChaosWorm'
+import { CrystalShardSwarm } from '../entities/CrystalShardSwarm'
+import { UFO } from '../entities/UFO'
+import { VoidSphere } from '../entities/VoidSphere'
+
+interface RosterEntry {
+  create: (x: number, y: number) => Enemy
+  max: number
+}
 
 interface AttractEnemy {
   enemy: Enemy
@@ -25,6 +36,7 @@ interface AttractEnemy {
   targetPosition: THREE.Vector2
   retargetTimer: number
   retargetInterval: number
+  rosterIndex: number
 }
 
 export class AttractMode {
@@ -32,24 +44,38 @@ export class AttractMode {
   private scene: THREE.Scene
   private isActive: boolean = false
   private readonly boundaryRadius: number = 35 // Larger than gameplay area
-  private readonly maxFizzers: number = 3 // Only 3 fizzers zipping about
+
+  // Full living enemy roster for the title screen backdrop. Boss stays out
+  // deliberately - a 7-unit hex dominates the menu backdrop.
+  private static readonly ROSTER: RosterEntry[] = [
+    { create: (x, y) => new DataMite(x, y), max: 3 },
+    { create: (x, y) => new Fizzer(x, y), max: 2 },
+    { create: (x, y) => new ScanDrone(x, y), max: 1 },
+    { create: (x, y) => new ChaosWorm(x, y), max: 1 },
+    { create: (x, y) => new CrystalShardSwarm(x, y), max: 1 },
+    { create: (x, y) => new UFO(x, y), max: 1 },
+    { create: (x, y) => new VoidSphere(x, y), max: 1 },
+  ]
 
   constructor(scene: THREE.Scene) {
     this.scene = scene
   }
 
   /**
-   * Start attract mode - spawns 3 fizzers immediately
+   * Start attract mode - spawns the full roster immediately
    */
   start(): void {
     if (this.isActive) return
 
     this.isActive = true
-    console.log('🎮 Attract Mode: Started (3 Fizzers)')
+    console.log('🎮 Attract Mode: Started (full roster)')
 
-    // Spawn 3 fizzers immediately
-    for (let i = 0; i < this.maxFizzers; i++) {
-      this.spawnFizzer()
+    // Spawn each roster type up to its max
+    for (let rosterIndex = 0; rosterIndex < AttractMode.ROSTER.length; rosterIndex++) {
+      const entry = AttractMode.ROSTER[rosterIndex]
+      for (let i = 0; i < entry.max; i++) {
+        this.spawnOfType(rosterIndex)
+      }
     }
   }
 
@@ -91,7 +117,9 @@ export class AttractMode {
         // requires guarding player access in all subclass updateAI overrides — deferred.
         attractEnemy.enemy.update(deltaTime, undefined)
       } catch {
-        // Silently handle errors from enemies trying to access missing game systems
+        // AI threw before reaching its updateVisuals() call (missing player/scene
+        // systems) — run the idle animation directly so sweep/spin/etc. still play.
+        ;(attractEnemy.enemy as unknown as { updateVisuals?(dt: number): void }).updateVisuals?.(deltaTime)
       }
 
       // Update autonomous movement - fizzers zip around fast!
@@ -108,16 +136,26 @@ export class AttractMode {
       if (pos.y < -wrapRadius) pos.y = wrapRadius
     }
 
-    // Respawn if we somehow lost a fizzer
-    while (this.enemies.length < this.maxFizzers) {
-      this.spawnFizzer()
+    // Respawn whichever roster type died/expired, back up to its max
+    for (let rosterIndex = 0; rosterIndex < AttractMode.ROSTER.length; rosterIndex++) {
+      const entry = AttractMode.ROSTER[rosterIndex]
+      let count = 0
+      for (const attractEnemy of this.enemies) {
+        if (attractEnemy.rosterIndex === rosterIndex) count++
+      }
+      while (count < entry.max) {
+        this.spawnOfType(rosterIndex)
+        count++
+      }
     }
   }
 
   /**
-   * Spawn a fizzer at a random position
+   * Spawn an enemy of the given roster type at a random position
    */
-  private spawnFizzer(): void {
+  private spawnOfType(rosterIndex: number): void {
+    const entry = AttractMode.ROSTER[rosterIndex]
+
     // Spawn at random position within bounds
     const angle = Math.random() * Math.PI * 2
     const spawnRadius = Math.random() * this.boundaryRadius * 0.6
@@ -127,9 +165,9 @@ export class AttractMode {
     let enemy: Enemy | null = null
 
     try {
-      enemy = new Fizzer(x, y)
+      enemy = entry.create(x, y)
     } catch (error) {
-      console.warn('⚠️ Attract Mode: Failed to create Fizzer:', error)
+      console.warn('⚠️ Attract Mode: Failed to create enemy:', error)
       return
     }
 
@@ -167,7 +205,8 @@ export class AttractMode {
       ),
       targetPosition: new THREE.Vector2(targetX, targetY),
       retargetTimer: 0,
-      retargetInterval: 1.0 + Math.random() * 1.5 // Fast retargeting: 1-2.5 seconds
+      retargetInterval: 1.0 + Math.random() * 1.5, // Fast retargeting: 1-2.5 seconds
+      rosterIndex
     }
 
     this.enemies.push(attractEnemy)

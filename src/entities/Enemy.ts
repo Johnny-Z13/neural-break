@@ -406,7 +406,8 @@ export abstract class Enemy {
       return
     }
 
-    // 💀 LEGACY PATH - unmigrated enemies (Fizzer/UFO/Boss) until their task lands 💀
+    // 💀 LEGACY PATH - currently unreachable; all enemies now register vector materials via
+    // registerVector() and take the timer-driven branch above. Retained as a safety fallback. 💀
     const material = this.mesh.material as THREE.Material & { color?: THREE.Color; emissive?: THREE.Color }
 
     // Safety check - ensure material has color property
