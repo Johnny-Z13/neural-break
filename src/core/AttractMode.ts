@@ -44,14 +44,13 @@ export class AttractMode {
   // Threat-database exhibits: one REAL enemy instance pinned behind each card's
   // transparent window (element rect → NDC → unproject). The menu never lies.
   private static readonly EXHIBIT_TYPES: Record<string, ExhibitType> = {
-    datamite: { create: () => new DataMite(0, 0), visualRadius: 0.55 },
-    scandrone: { create: () => new ScanDrone(0, 0), visualRadius: 1.4 },
+    datamite: { create: () => new DataMite(0, 0), visualRadius: 0.7 },
+    scandrone: { create: () => new ScanDrone(0, 0), visualRadius: 1.6 },
     chaosworm: { create: () => new ChaosWorm(0, 0), visualRadius: 1.3 },
-    crystalswarm: { create: () => new CrystalShardSwarm(0, 0), visualRadius: 4.0 },
-    voidsphere: { create: () => new VoidSphere(0, 0), visualRadius: 3.4 },
+    crystalswarm: { create: () => new CrystalShardSwarm(0, 0), visualRadius: 5.0 },
+    voidsphere: { create: () => new VoidSphere(0, 0), visualRadius: 4.0 },
     fizzer: { create: () => new Fizzer(0, 0), visualRadius: 0.4 },
-    // Pale hairline strokes need to render larger to read; the clip planes crop the spill
-    ufo: { create: () => new UFO(0, 0), visualRadius: 0.95, displayScale: 0.75 },
+    ufo: { create: () => new UFO(0, 0), visualRadius: 1.25 },
     boss: { create: () => new Boss(0, 0), visualRadius: 3.0 },
   }
 
