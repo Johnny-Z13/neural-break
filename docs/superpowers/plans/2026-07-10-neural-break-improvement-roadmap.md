@@ -140,7 +140,7 @@ this.mesh.traverse((child) => {
 - [x] **Step 1:** Replace with a `flashTimer` field decremented in `update(deltaTime)`; toggle emissive/color from the timer's phase; reset material state when it expires or on `destroy()`. No timeouts.
 - [x] **Step 2:** Verify in-game: hit flashes still visible; kill an enemy mid-flash — no console errors. Commit: `fix(entities): drive hit flash from update loop, not setTimeout`
 
-**ABSORBED by the vector overhaul (2026-07-11):** all enemies now use the timer-driven `vectorFlashTimer` white flash via `registerVector()` (see `docs/superpowers/plans/2026-07-11-vector-overhaul.md`, Task 8). The legacy setTimeout path survives only as a fallback for unmigrated enemies — none remain.
+**ABSORBED by the vector overhaul (2026-07-11):** all enemies now use the timer-driven `vectorFlashTimer` white flash via `registerVector()` (see `docs/superpowers/plans/2026-07-11-vector-overhaul.md`, Task 8). The legacy `flashRed` setTimeout fallback path survives only as a safety net for unmigrated enemies — none remain, so it is currently unreachable. Boss was the last holdout: its `takeDamage()` had its own separate stacking-setTimeout hit-flash (bypassing `flashRed` entirely), fixed in the final whole-branch review pass (2026-07-11) to call `flashRed()` plus a timer-driven scale punch.
 
 ### Task 1.4: Listener hygiene 🔵 Sonnet
 
