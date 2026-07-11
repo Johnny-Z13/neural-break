@@ -559,9 +559,6 @@ export class EnemyManager {
       ufo.setAudioManager(this.audioManager)
     }
     
-    if (this.sceneManager) {
-      ufo.setSceneManager(this.sceneManager)
-    }
     if (this.audioManager) {
       ufo.setAudioManager(this.audioManager)
       this.audioManager.playEnemySpawnSound('UFO')
