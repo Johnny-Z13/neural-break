@@ -1,6 +1,8 @@
 import * as THREE from 'three'
 import { EffectsSystem } from '../graphics/EffectsSystem'
 import { BALANCE_CONFIG } from '../config'
+import { ENTITY_PALETTE } from '../config/palette.config'
+import { tracerQuad } from '../graphics/VectorShapes'
 
 export class MedPack {
   private mesh!: THREE.Mesh
@@ -9,10 +11,8 @@ export class MedPack {
   private alive: boolean = true
   private effectsSystem: EffectsSystem | null = null
   private pulseTime: number = 0
-  private rotationSpeed: number = 2.5 // Faster for "fizz"
   private healthRestore: number = BALANCE_CONFIG.PICKUPS.MED_PACK.HEAL_AMOUNT
-  private glowMesh!: THREE.Mesh
-  
+
   // 🧲 MAGNETISM SYSTEM 🧲
   private static readonly MAGNET_RADIUS = BALANCE_CONFIG.PICKUPS.MAGNET_RADIUS
   private static readonly MAGNET_STRENGTH = BALANCE_CONFIG.PICKUPS.MAGNET_STRENGTH
@@ -26,109 +26,20 @@ export class MedPack {
   }
 
   private createMesh(): void {
-    // 💚 HEALTH PACK - RICH EMERALD GREEN CROSS! 💚
-    // Create base container
+    // 💚 HEALTH PACK - ONE SOLID GREEN CROSS! 💚
+    // Transparent container
     const containerGeometry = new THREE.SphereGeometry(0.125, 4, 4) // Scaled up
     const containerMaterial = new THREE.MeshBasicMaterial({ transparent: true, opacity: 0 })
     this.mesh = new THREE.Mesh(containerGeometry, containerMaterial)
     this.mesh.position.copy(this.position)
-    
-    // 💚 RICH EMERALD GLOWING BASE - Health pickup! 💚
-    // OPTIMIZED: Reduced from 16x16 to 8x8 for performance
-    const glowGeometry = new THREE.SphereGeometry(0.5, 8, 8)
-    const glowMaterial = new THREE.MeshBasicMaterial({
-      color: 0x00FF00, // BRIGHT GREEN glow (matches INVULNERABLE notification)
-      transparent: true,
-      opacity: 0.6,
-      side: THREE.BackSide,
-      blending: THREE.AdditiveBlending
-    })
-    this.glowMesh = new THREE.Mesh(glowGeometry, glowMaterial)
-    this.mesh.add(this.glowMesh)
-    
-    // 💫 ADDITIONAL EMERALD AURA - Extra glow layer! 💫
-    // OPTIMIZED: Reduced from 16x16 to 8x8 for performance
-    const outerGlowGeometry = new THREE.SphereGeometry(0.625, 8, 8)
-    const outerGlowMaterial = new THREE.MeshBasicMaterial({
-      color: 0x00FF00, // BRIGHT GREEN (matches INVULNERABLE notification)
-      transparent: true,
-      opacity: 0.4,
-      side: THREE.BackSide,
-      blending: THREE.AdditiveBlending
-    })
-    const outerGlow = new THREE.Mesh(outerGlowGeometry, outerGlowMaterial)
-    this.mesh.add(outerGlow)
-    
-    // ✨ MAIN CROSS - BRIGHT EMERALD medical cross! ✨
-    // Vertical bar - RICH EMERALD!
-    const verticalGeometry = new THREE.BoxGeometry(0.15, 0.56, 0.06) // Scaled up
-    const verticalMaterial = new THREE.MeshBasicMaterial({
-      color: 0x00FF00, // BRIGHT GREEN cross (matches INVULNERABLE notification)
-      transparent: true,
-      opacity: 0.95,
-      blending: THREE.AdditiveBlending
-    })
-    const verticalBar = new THREE.Mesh(verticalGeometry, verticalMaterial)
-    this.mesh.add(verticalBar)
-    
-    // Horizontal bar - RICH EMERALD!
-    const horizontalGeometry = new THREE.BoxGeometry(0.56, 0.15, 0.06) // Scaled up
-    const horizontalMaterial = new THREE.MeshBasicMaterial({
-      color: 0x00FF00, // BRIGHT GREEN cross (matches INVULNERABLE notification)
-      transparent: true,
-      opacity: 0.95,
-      blending: THREE.AdditiveBlending
-    })
-    const horizontalBar = new THREE.Mesh(horizontalGeometry, horizontalMaterial)
-    this.mesh.add(horizontalBar)
-    
-    // 💚 BRIGHT INNER CROSS - Glowing center highlight! 💚
-    const innerVerticalGeometry = new THREE.BoxGeometry(0.075, 0.44, 0.075) // Scaled up
-    const innerMaterial = new THREE.MeshBasicMaterial({
-      color: 0x00FF00, // BRIGHT GREEN inner (matches INVULNERABLE notification)
-      transparent: true,
-      opacity: 0.85,
-      blending: THREE.AdditiveBlending
-    })
-    const innerVertical = new THREE.Mesh(innerVerticalGeometry, innerMaterial)
-    innerVertical.position.z = 0.01
-    this.mesh.add(innerVertical)
-    
-    const innerHorizontalGeometry = new THREE.BoxGeometry(0.44, 0.075, 0.075) // Scaled up
-    const innerHorizontal = new THREE.Mesh(innerHorizontalGeometry, innerMaterial.clone())
-    innerHorizontal.position.z = 0.01
-    this.mesh.add(innerHorizontal)
-    
-    // 💚 EMERALD WIREFRAME OUTLINE 💚
-    const wireframeGeometry = new THREE.SphereGeometry(0.5, 12, 12) // Scaled up
-    const wireframeMaterial = new THREE.MeshBasicMaterial({
-      color: 0x00FF00, // BRIGHT GREEN wireframe (matches INVULNERABLE notification)
-      wireframe: true,
-      transparent: true,
-      opacity: 0.9,
-      blending: THREE.AdditiveBlending
-    })
-    const wireframe = new THREE.Mesh(wireframeGeometry, wireframeMaterial)
-    this.mesh.add(wireframe)
 
-    // 💫 ENERGY PARTICLES - 10 particles for more "fizz"! 💫
-    for (let i = 0; i < 10; i++) {
-      const particleGeometry = new THREE.SphereGeometry(0.04, 6, 6) // Scaled up
-      const particleMaterial = new THREE.MeshBasicMaterial({
-        color: 0x00FF00, // BRIGHT GREEN particles (matches INVULNERABLE notification)
-        transparent: true,
-        opacity: 0.9,
-        blending: THREE.AdditiveBlending
-      })
-      const particle = new THREE.Mesh(particleGeometry, particleMaterial)
-      const angle = (i / 10) * Math.PI * 2
-      particle.position.set(
-        Math.cos(angle) * 0.625, // Scaled up
-        Math.sin(angle) * 0.625,
-        0
-      )
-      this.mesh.add(particle)
-    }
+    // Solid green cross - two stacked bars
+    const verticalBar = tracerQuad(0.16, 0.6, ENTITY_PALETTE.PICKUP_MEDPACK)
+    this.mesh.add(verticalBar)
+
+    const horizontalBar = tracerQuad(0.16, 0.6, ENTITY_PALETTE.PICKUP_MEDPACK)
+    horizontalBar.rotation.z = Math.PI / 2
+    this.mesh.add(horizontalBar)
   }
 
   update(deltaTime: number, playerPosition?: THREE.Vector3): void {
@@ -148,61 +59,8 @@ export class MedPack {
     const pulse = basePulse + Math.sin(this.pulseTime * pulseSpeed) * pulseAmount
     this.mesh.scale.setScalar(pulse)
 
-    // 🌪️ GENTLE ROTATION (faster when magnetized) 🌪️
-    const rotSpeed = this.isMagnetized ? this.rotationSpeed * 3 : this.rotationSpeed
-    this.mesh.rotation.z += deltaTime * rotSpeed
-
-    // 💚 ANIMATE EMERALD GLOW - Pulsing rich green aura! 💚
-    if (this.glowMesh) {
-      const glowMaterial = this.glowMesh.material as THREE.MeshBasicMaterial
-      glowMaterial.opacity = 0.5 + Math.sin(this.pulseTime * 6) * 0.3 // Faster for "fizz"
-      this.glowMesh.scale.setScalar(1 + Math.sin(this.pulseTime * 7) * 0.2)
-      glowMaterial.color.setHex(0x00FF00) // Bright green (matches INVULNERABLE notification)
-    }
-    
-    // Animate outer glow if it exists
-    if (this.mesh.children.length > 1) {
-      const outerGlow = this.mesh.children[1] as THREE.Mesh
-      if (outerGlow && outerGlow !== this.glowMesh) {
-        const outerGlowMaterial = outerGlow.material as THREE.MeshBasicMaterial
-        outerGlowMaterial.opacity = 0.3 + Math.sin(this.pulseTime * 4) * 0.2
-        outerGlow.scale.setScalar(1 + Math.sin(this.pulseTime * 5) * 0.3)
-      }
-    }
-    
-    // ✨ ANIMATE GREEN CROSS - Pulsing brightness! ✨
-    // Vertical bar (index 2)
-    if (this.mesh.children[2]) {
-      const verticalBar = this.mesh.children[2] as THREE.Mesh
-      const vertMaterial = verticalBar.material as THREE.MeshBasicMaterial
-      vertMaterial.opacity = 0.8 + Math.sin(this.pulseTime * 7) * 0.2
-    }
-    // Horizontal bar (index 3)
-    if (this.mesh.children[3]) {
-      const horizontalBar = this.mesh.children[3] as THREE.Mesh
-      const horizMaterial = horizontalBar.material as THREE.MeshBasicMaterial
-      horizMaterial.opacity = 0.8 + Math.sin(this.pulseTime * 7 + 0.5) * 0.2
-    }
-    
-    // ✨ ANIMATE PARTICLES - Orbiting particles (faster when magnetized)! ✨
-    const orbitSpeed = this.isMagnetized ? 6 : 3 // Faster for "fizz"
-    const particleStartIndex = 8
-    const particleCount = 10
-    for (let i = particleStartIndex; i < particleStartIndex + particleCount; i++) {
-      const child = this.mesh.children[i]
-      if (child instanceof THREE.Mesh) {
-        const particleIndex = i - particleStartIndex
-        const angle = (particleIndex / particleCount) * Math.PI * 2 + this.pulseTime * orbitSpeed
-        const radius = 0.625 + Math.sin(this.pulseTime * 5 + particleIndex) * 0.12 // Scaled up
-        child.position.set(
-          Math.cos(angle) * radius,
-          Math.sin(angle) * radius,
-          Math.sin(this.pulseTime * 6 + particleIndex) * 0.1
-        )
-        const particleMaterial = child.material as THREE.MeshBasicMaterial
-        particleMaterial.opacity = 0.6 + Math.sin(this.pulseTime * 8 + particleIndex) * 0.3
-      }
-    }
+    // 🌪️ IDLE ROTATION 🌪️
+    this.mesh.rotation.z += deltaTime * 1.5
   }
 
   // 🧲 MAGNETISM - Suck pickup towards player when close! 🧲
