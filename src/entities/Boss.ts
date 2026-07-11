@@ -560,6 +560,9 @@ export class Boss extends Enemy {
   }
 
   // 🔴 OVERRIDE TAKE DAMAGE - Don't set alive=false immediately! 🔴
+  // MUST NOT call super.takeDamage(): Boss runs a fully custom death lifecycle
+  // (isDying/deathTimer, never enters base DYING state). registerVector() is set,
+  // so routing through the base would ALSO fire the generic fragment death — double-death visual.
   takeDamage(damage: number): void {
     this.health -= damage
 
