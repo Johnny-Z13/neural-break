@@ -5,6 +5,7 @@ import { EnemyProjectile } from '../weapons/EnemyProjectile'
 import { AudioManager } from '../audio/AudioManager'
 import { SceneManager } from '../graphics/SceneManager'
 import { BALANCE_CONFIG } from '../config'
+import { ENTITY_PALETTE } from '../config/palette.config'
 
 /**
  * 💎 CRYSTAL SHARD SWARM - MASSIVE PRISMATIC STORM 💎
@@ -748,21 +749,11 @@ export class CrystalShardSwarm extends Enemy {
       worldPos,
       direction,
       stats.BULLET_SPEED,
-      stats.BULLET_DAMAGE
+      stats.BULLET_DAMAGE,
+      1.0,
+      ENTITY_PALETTE.CRYSTAL_SWARM
     )
-    
-    // Set custom color for crystal projectiles - cyan/prismatic
-    const mesh = projectile.getMesh()
-    const material = mesh.material as THREE.MeshBasicMaterial
-    const hue = Math.random() * 0.3 + 0.45 // Cyan to green range
-    material.color.setHSL(hue, 1.0, 0.6)
-    
-    // Update glow color too
-    if (mesh.children[0]) {
-      const glowMaterial = (mesh.children[0] as THREE.Mesh).material as THREE.MeshBasicMaterial
-      glowMaterial.color.setHSL(hue, 1.0, 0.8)
-    }
-    
+
     this.projectiles.push(projectile)
     if (this.sceneManager) {
       this.sceneManager.addToScene(projectile.getMesh())

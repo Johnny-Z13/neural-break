@@ -4,6 +4,7 @@ import { Player } from './Player'
 import { AudioManager } from '../audio/AudioManager'
 import { EnemyProjectile } from '../weapons/EnemyProjectile'
 import { BALANCE_CONFIG } from '../config'
+import { ENTITY_PALETTE } from '../config/palette.config'
 
 /**
  * 🐛 CHAOS WORM - MASSIVE RAINBOW SERPENT 🐛
@@ -376,7 +377,9 @@ export class ChaosWorm extends Enemy {
         position.clone(),
         direction,
         speed,
-        ChaosWorm.DEATH_BULLET_DAMAGE
+        ChaosWorm.DEATH_BULLET_DAMAGE,
+        1.0,
+        ENTITY_PALETTE.CHAOS_WORM
       )
       
       // Connect effects system for trails
@@ -450,7 +453,9 @@ export class ChaosWorm extends Enemy {
         this.position.clone(),
         direction,
         speed,
-        ChaosWorm.DEATH_BULLET_DAMAGE * 1.5 // Extra damage for final burst
+        ChaosWorm.DEATH_BULLET_DAMAGE * 1.5, // Extra damage for final burst
+        1.0,
+        ENTITY_PALETTE.CHAOS_WORM
       )
       
       if (this.effectsSystem) {
