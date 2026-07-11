@@ -113,6 +113,8 @@ export class SceneManager {
         stencil: false,  // Not needed for our effects
         depth: true      // Needed for proper rendering
       })
+      // Attract-mode threat-database exhibits clip to their card windows
+      this.renderer.localClippingEnabled = true
       // Get size from game container if available, otherwise use window
       const gameContainer = document.getElementById('gameContainer')
       const width = gameContainer ? gameContainer.clientWidth : window.innerWidth

@@ -161,81 +161,61 @@ export class StartScreen {
         
         <!-- INSERT COIN BANNER -->
         <div class="insert-coin" style="
-          margin-bottom: var(--space-md, 1rem);
-          font-size: clamp(0.7rem, 1.8vw, 1.1rem);
+          margin-bottom: var(--space-sm, 0.7rem);
+          font-size: clamp(0.55rem, 1.2vw, 0.8rem);
           color: #FFFF00;
-          text-shadow:
-            0 0 10px #FFFF00,
-            0 0 20px #FFFF00,
-            0 0 30px #FFFF00,
-            2px 2px 0 #886600;
-          letter-spacing: 0.3em;
-          animation: coinBlink 1s step-end infinite;
+          text-shadow: 0 0 10px #FFFF00;
+          letter-spacing: 0.4em;
+          animation: coinBlink 1.4s step-end infinite;
           font-weight: bold;
+          opacity: 0.9;
         ">
-          ▼ INSERT COIN ▼
+          INSERT COIN
         </div>
 
         <!-- MAIN TITLE -->
-        <div class="title-container" style="margin-bottom: var(--space-md, 1rem); text-align: center; position: relative;">
+        <div class="title-container" style="margin-bottom: var(--space-sm, 0.8rem); text-align: center; position: relative;">
           <!-- Main Title -->
           <h1 class="game-title" style="
             position: relative;
-            font-size: clamp(1.8rem, 5vw, 3.5rem);
+            font-size: clamp(1.6rem, 4vw, 2.8rem);
             font-weight: bold;
-            letter-spacing: 0.2em;
+            letter-spacing: 0.25em;
             margin: 0;
             text-transform: uppercase;
             color: #00FFFF;
             text-shadow:
-              0 0 10px #00FFFF,
-              0 0 20px #00FFFF,
-              0 0 40px #00FFFF,
-              0 0 80px #00FFFF,
-              4px 4px 0 #006666;
-            animation: titleGlitch 8s ease-in-out infinite, titleFlicker 0.1s infinite;
+              0 0 12px #00FFFF,
+              0 0 30px rgba(0, 255, 255, 0.5),
+              3px 3px 0 #006666;
+            animation: titleGlitch 8s ease-in-out infinite;
           ">
             NEURAL BREAK
           </h1>
 
           <!-- Subtitle -->
           <div style="
-            margin-top: var(--space-xs, 0.5rem);
-            font-size: clamp(0.5rem, 1.2vw, 0.75rem);
-            color: #FF00FF;
-            text-shadow: 0 0 10px #FF00FF, 2px 2px 0 #660066;
-            letter-spacing: 0.3em;
-            animation: subtitlePulse 2s ease-in-out infinite;
+            margin-top: var(--space-xs, 0.4rem);
+            font-size: clamp(0.45rem, 0.9vw, 0.6rem);
+            color: rgba(255, 0, 255, 0.75);
+            text-shadow: 0 0 8px rgba(255, 0, 255, 0.6);
+            letter-spacing: 0.4em;
           ">
             NEURAL SYSTEMS v2.6.9
           </div>
 
-          <!-- Decorative lines with glitch -->
+          <!-- Decorative line -->
           <div style="
             position: relative;
-            margin: var(--space-sm, 0.6rem) auto;
-            width: 80%;
-            height: 4px;
-            background: linear-gradient(90deg,
-              transparent 0%,
-              #00FFFF 15%,
-              #FF00FF 30%,
-              #FFFF00 50%,
-              #FF00FF 70%,
-              #00FFFF 85%,
-              transparent 100%);
-            box-shadow: 0 0 10px #00FFFF, 0 0 20px #FF00FF;
-            animation: lineGlitch 3s ease-in-out infinite;
-          "></div>
-          <div style="
-            margin: var(--space-xs, 0.2rem) auto;
+            margin: var(--space-sm, 0.6rem) auto 0;
             width: 60%;
-            height: 2px;
+            height: 1px;
             background: linear-gradient(90deg,
               transparent 0%,
-              #FFFF00 50%,
+              rgba(0, 255, 255, 0.8) 30%,
+              rgba(255, 0, 255, 0.8) 70%,
               transparent 100%);
-            box-shadow: 0 0 10px #FFFF00;
+            box-shadow: 0 0 8px rgba(0, 255, 255, 0.5);
           "></div>
         </div>
         
@@ -243,38 +223,30 @@ export class StartScreen {
         <!-- ENEMY DATABASE - REFINED COMPACT LAYOUT -->
         <!-- ═══════════════════════════════════════════════════════════════════ -->
         <div class="threat-database" style="
-          background: linear-gradient(180deg, var(--color-bg-panel, rgba(0, 0, 0, 0.95)) 0%, rgba(20, 0, 10, 0.95) 100%);
-          border: var(--border-thick, 4px) solid var(--color-red, #FF0000);
-          padding: var(--space-md, 1.2rem) var(--space-lg, 1.5rem);
-          max-width: 850px;
+          background: rgba(10, 0, 5, 0.22);
+          border: 1px solid rgba(255, 0, 0, 0.45);
+          padding: var(--space-sm, 0.8rem) var(--space-md, 1.2rem);
+          max-width: 820px;
           width: 100%;
-          margin: 0 auto var(--space-md, 1rem);
-          box-shadow: 
-            0 0 35px rgba(255, 0, 0, 0.35),
-            inset 0 0 25px rgba(255, 0, 0, 0.08),
-            var(--shadow-pixel, 5px 5px 0) #660000;
+          margin: 0 auto var(--space-sm, 0.8rem);
+          box-shadow: 0 0 18px rgba(255, 0, 0, 0.12);
           text-align: center;
           pointer-events: none;
-          animation: threatDatabaseWarning 0.5s step-end infinite;
         ">
           <h3 style="
-            font-size: clamp(0.85rem, 1.8vw, 1.2rem);
-            margin-bottom: var(--space-md, 1rem);
-            color: var(--color-red, #FF0000);
-            text-shadow: 
-              2px 2px 0 #880000, 
-              0 0 15px var(--color-red, #FF0000),
-              0 0 30px rgba(255, 0, 0, 0.4);
-            letter-spacing: 0.15em;
+            font-size: clamp(0.55rem, 1.1vw, 0.75rem);
+            margin-bottom: var(--space-sm, 0.7rem);
+            color: rgba(255, 40, 40, 0.9);
+            text-shadow: 0 0 10px rgba(255, 0, 0, 0.6);
+            letter-spacing: 0.35em;
             text-transform: uppercase;
-            animation: dangerPulse 1.2s ease-in-out infinite;
             text-align: center;
-          ">⚠ THREAT DATABASE ⚠</h3>
-          
+          ">THREAT DATABASE</h3>
+
           <div class="enemy-grid" style="
             display: grid;
             grid-template-columns: repeat(4, 1fr);
-            gap: var(--space-sm, 0.7rem);
+            gap: var(--space-sm, 0.6rem);
           ">
             ${StartScreen.createEnemyCard('DATA MITE', 'datamite', '#FF4400', 100)}
             ${StartScreen.createEnemyCard('SCAN DRONE', 'scandrone', '#FF8800', 250)}
@@ -289,26 +261,12 @@ export class StartScreen {
 
         <!-- VERTICAL ARCADE MENU -->
         <div class="arcade-menu" style="
-          padding: clamp(1.5rem, 3vw, 2.5rem) clamp(2rem, 5vw, 4rem);
-          margin: var(--space-lg, 1.5rem) auto;
+          padding: clamp(0.8rem, 1.5vw, 1.2rem) clamp(2rem, 5vw, 4rem);
+          margin: var(--space-sm, 0.8rem) auto;
           max-width: clamp(400px, 60vw, 600px);
         ">
-          <!-- MENU TITLE -->
-          <div class="menu-title" style="
-            text-align: center;
-            font-size: clamp(0.8rem, 2vw, 1.2rem);
-            color: #FFFF00;
-            letter-spacing: 0.3em;
-            text-shadow: 0 0 20px #FFFF00, 0 0 40px #FFFF00, 3px 3px 0 #886600;
-            margin-bottom: clamp(1.5rem, 3vw, 2.5rem);
-            animation: menuTitlePulse 2s ease-in-out infinite;
-            font-weight: bold;
-          ">
-            ▼ SELECT MODE ▼
-          </div>
-
           <!-- VERTICAL MENU ITEMS -->
-          <div style="display: flex; flex-direction: column; gap: clamp(0.8rem, 2vw, 1.2rem);">
+          <div style="display: flex; flex-direction: column; gap: clamp(0.4rem, 1vw, 0.7rem);">
 
             <!-- START GAME -->
             <button id="arcadeButton" class="menu-item" style="
@@ -316,14 +274,14 @@ export class StartScreen {
               border: none;
               color: #FFFF00;
               font-family: inherit;
-              font-size: clamp(0.9rem, 2.25vw, 1.5rem);
+              font-size: clamp(0.75rem, 1.7vw, 1.05rem);
               font-weight: bold;
-              padding: clamp(0.8rem, 2vw, 1.2rem) clamp(1.5rem, 4vw, 3rem);
+              padding: clamp(0.45rem, 1vw, 0.7rem) clamp(1.5rem, 4vw, 3rem);
               cursor: pointer;
               text-transform: uppercase;
               letter-spacing: 0.2em;
               text-align: center;
-              text-shadow: 0 0 20px #FFFF00, 4px 4px 0 #886600;
+              text-shadow: 0 0 12px #FFFF00, 2px 2px 0 #886600;
               transition: all 0.1s step-end;
               position: relative;
               border-left: 6px solid transparent;
@@ -337,14 +295,14 @@ export class StartScreen {
               border: none;
               color: #00FF88;
               font-family: inherit;
-              font-size: clamp(0.9rem, 2.25vw, 1.5rem);
+              font-size: clamp(0.75rem, 1.7vw, 1.05rem);
               font-weight: bold;
-              padding: clamp(0.8rem, 2vw, 1.2rem) clamp(1.5rem, 4vw, 3rem);
+              padding: clamp(0.45rem, 1vw, 0.7rem) clamp(1.5rem, 4vw, 3rem);
               cursor: pointer;
               text-transform: uppercase;
               letter-spacing: 0.2em;
               text-align: center;
-              text-shadow: 0 0 20px #00FF88, 4px 4px 0 #006644;
+              text-shadow: 0 0 12px #00FF88, 2px 2px 0 #006644;
               transition: all 0.1s step-end;
               position: relative;
               border-left: 6px solid transparent;
@@ -358,14 +316,14 @@ export class StartScreen {
               border: none;
               color: #00FFFF;
               font-family: inherit;
-              font-size: clamp(0.9rem, 2.25vw, 1.5rem);
+              font-size: clamp(0.75rem, 1.7vw, 1.05rem);
               font-weight: bold;
-              padding: clamp(0.8rem, 2vw, 1.2rem) clamp(1.5rem, 4vw, 3rem);
+              padding: clamp(0.45rem, 1vw, 0.7rem) clamp(1.5rem, 4vw, 3rem);
               cursor: pointer;
               text-transform: uppercase;
               letter-spacing: 0.2em;
               text-align: center;
-              text-shadow: 0 0 20px #00FFFF, 4px 4px 0 #006666;
+              text-shadow: 0 0 12px #00FFFF, 2px 2px 0 #006666;
               transition: all 0.1s step-end;
               position: relative;
               border-left: 6px solid transparent;
@@ -379,14 +337,14 @@ export class StartScreen {
               border: none;
               color: #FF6600;
               font-family: inherit;
-              font-size: clamp(0.9rem, 2.25vw, 1.5rem);
+              font-size: clamp(0.75rem, 1.7vw, 1.05rem);
               font-weight: bold;
-              padding: clamp(0.8rem, 2vw, 1.2rem) clamp(1.5rem, 4vw, 3rem);
+              padding: clamp(0.45rem, 1vw, 0.7rem) clamp(1.5rem, 4vw, 3rem);
               cursor: pointer;
               text-transform: uppercase;
               letter-spacing: 0.2em;
               text-align: center;
-              text-shadow: 0 0 20px #FF6600, 4px 4px 0 #663300;
+              text-shadow: 0 0 12px #FF6600, 2px 2px 0 #663300;
               transition: all 0.1s step-end;
               position: relative;
               border-left: 6px solid transparent;
@@ -406,12 +364,9 @@ export class StartScreen {
         display: flex;
         gap: var(--space-lg, 1.5rem);
         padding: var(--space-sm, 0.8rem) var(--space-lg, 1.5rem);
-        background: linear-gradient(180deg, var(--color-bg-panel, rgba(0, 0, 0, 0.95)) 0%, rgba(0, 10, 20, 0.95) 100%);
-        border: var(--border-thick, 4px) solid var(--color-cyan, #00FFFF);
-        box-shadow: 
-          0 0 25px rgba(0, 255, 255, 0.4),
-          inset 0 0 20px rgba(0, 255, 255, 0.08),
-          4px 4px 0 var(--color-cyan-dark, #006666);
+        background: rgba(0, 5, 10, 0.55);
+        border: 1px solid rgba(0, 255, 255, 0.4);
+        box-shadow: 0 0 14px rgba(0, 255, 255, 0.15);
         z-index: 1;
         flex-wrap: wrap;
         justify-content: center;
@@ -465,17 +420,11 @@ export class StartScreen {
         left: var(--space-md, 1rem);
         z-index: 1;
         background: linear-gradient(135deg, rgba(0, 0, 0, 0.95) 0%, rgba(20, 0, 40, 0.95) 100%);
-        border: 2px solid #FF00FF;
-        border-radius: 12px;
-        padding: clamp(0.8rem, 2vw, 1.2rem) clamp(1.2rem, 3vw, 2rem);
-        box-shadow:
-          0 0 20px rgba(255, 0, 255, 0.5),
-          0 0 40px rgba(0, 255, 255, 0.3),
-          inset 0 1px 0 rgba(255, 255, 255, 0.1),
-          inset 0 -1px 0 rgba(0, 0, 0, 0.5);
+        border: 1px solid rgba(255, 0, 255, 0.5);
+        border-radius: 4px;
+        padding: clamp(0.5rem, 1.2vw, 0.8rem) clamp(0.8rem, 2vw, 1.2rem);
+        box-shadow: 0 0 12px rgba(255, 0, 255, 0.25);
         backdrop-filter: blur(10px);
-        transform-style: preserve-3d;
-        animation: play-count-pulse 2s ease-in-out infinite;
       ">
         <style>
           @keyframes play-count-pulse {
@@ -623,23 +572,6 @@ export class StartScreen {
         95% { transform: translate(0, 0); filter: none; }
       }
 
-      @keyframes lineGlitch {
-        0%, 80%, 100% { transform: scaleX(1); opacity: 1; }
-        85% { transform: scaleX(0.95); opacity: 0.8; }
-        90% { transform: scaleX(1.05); opacity: 1; }
-        95% { transform: scaleX(0.98); opacity: 0.9; }
-      }
-
-      @keyframes subtitlePulse {
-        0%, 100% { opacity: 1; filter: brightness(1); }
-        50% { opacity: 0.8; filter: brightness(1.2); }
-      }
-
-      @keyframes titleFlicker {
-        0%, 90%, 100% { opacity: 1; }
-        95% { opacity: 0.85; }
-      }
-
       @keyframes arcadeColorCycle {
         0% { 
           color: #FF0000;
@@ -676,16 +608,6 @@ export class StartScreen {
         50% { opacity: 0.3; }
       }
 
-      @keyframes menuTitlePulse {
-        0%, 100% { opacity: 1; filter: brightness(1); }
-        50% { opacity: 0.85; filter: brightness(1.3); }
-      }
-
-      @keyframes subtitlePulse {
-        0%, 100% { opacity: 0.8; transform: scale(1); }
-        50% { opacity: 1; transform: scale(1.02); }
-      }
-
       /* Vertical Menu Item Styles */
       .menu-item.selected {
         background: rgba(0, 255, 255, 0.15) !important;
@@ -705,45 +627,6 @@ export class StartScreen {
         0%, 49% { opacity: 1; }
         50%, 100% { opacity: 0; }
       }
-      
-      @keyframes dangerPulse {
-        0%, 100% { opacity: 1; }
-        50% { opacity: 0.7; }
-      }
-      
-      @keyframes enemyFloat {
-        0%, 100% { transform: translateY(0); }
-        50% { transform: translateY(-3px); }
-      }
-      
-      @keyframes enemyGlow {
-        0%, 100% { filter: drop-shadow(0 0 5px currentColor); }
-        50% { filter: drop-shadow(0 0 15px currentColor); }
-      }
-      
-      @keyframes wormWiggle {
-        0%, 100% { transform: rotate(-3deg); }
-        50% { transform: rotate(3deg); }
-      }
-      
-      @keyframes orbitRing {
-        from { transform: rotate(0deg); }
-        to { transform: rotate(360deg); }
-      }
-      
-      @keyframes crystalSpin {
-        from { transform: rotate(0deg); }
-        to { transform: rotate(360deg); }
-      }
-      
-      @keyframes threatDatabaseWarning {
-        0%, 50% { 
-          border-color: #FF0000; 
-          box-shadow: 
-            0 0 35px rgba(255, 0, 0, 0.6),
-            inset 0 0 25px rgba(255, 0, 0, 0.15),
-            5px 5px 0 #660000;
-        }
         51%, 100% { 
           border-color: #FFFF00; 
           box-shadow: 
@@ -868,11 +751,6 @@ export class StartScreen {
           0 0 25px currentColor,
           inset 0 0 20px currentColor,
           4px 4px 0 currentColor !important;
-      }
-      
-      .enemy-card:hover .enemy-visual {
-        animation-duration: 0.4s;
-        filter: brightness(1.2);
       }
       
       @media (max-width: 1024px) {
@@ -1276,127 +1154,52 @@ export class StartScreen {
   // ENEMY CARD GENERATOR - With visual representation
   // ═══════════════════════════════════════════════════════════════════════════
   private static createEnemyCard(name: string, type: string, color: string, points: number, isBoss: boolean = false): string {
-    const enemyVisual = StartScreen.getEnemyVisual(type)
     const sizeClass = isBoss ? 'boss-card' : ''
-    
+
+    // The visual area is a transparent WINDOW: AttractMode pins a real, live
+    // enemy instance in the 3D scene exactly behind this element (data-exhibit).
     return `
       <div class="enemy-card ${sizeClass}" style="
         display: flex;
         flex-direction: column;
         align-items: center;
         justify-content: center;
-        gap: var(--space-xs, 0.4rem);
-        padding: var(--space-sm, 0.7rem) var(--space-xs, 0.5rem);
-        background: linear-gradient(180deg, rgba(0,0,0,0.85) 0%, rgba(15,5,25,0.9) 100%);
-        border: 2.5px solid ${color};
-        border-radius: 3px;
-        box-shadow: 
-          0 0 15px ${color}55,
-          inset 0 0 12px ${color}18,
-          2px 2px 0 ${color}33;
+        gap: var(--space-xs, 0.35rem);
+        padding: var(--space-sm, 0.6rem) var(--space-xs, 0.4rem);
+        background: rgba(0, 0, 0, 0.04);
+        border: 1px solid ${color}55;
+        border-radius: 2px;
+        box-shadow: 0 0 10px ${color}22;
       ">
-        <!-- ENEMY VISUAL -->
-        <div class="enemy-visual" style="
-          width: clamp(42px, 7vw, 60px);
-          height: clamp(42px, 7vw, 60px);
-          display: flex;
-          align-items: center;
-          justify-content: center;
-          position: relative;
-          animation: enemyFloat 2.2s ease-in-out infinite;
-          filter: drop-shadow(0 0 8px ${color}88);
-        ">
-          ${enemyVisual}
-        </div>
-        
+        <!-- LIVE ENEMY WINDOW (real entity rendered behind this element) -->
+        <div class="enemy-visual" data-exhibit="${type}" style="
+          width: clamp(44px, 7vw, 62px);
+          height: clamp(44px, 7vw, 62px);
+        "></div>
+
         <!-- ENEMY NAME -->
         <div style="
           color: ${color};
-          font-size: clamp(0.5rem, 1.1vw, 0.7rem);
+          font-size: clamp(0.45rem, 0.95vw, 0.6rem);
           font-weight: bold;
           text-transform: uppercase;
-          text-shadow: 0 0 8px ${color}, 1px 1px 0 ${color}44;
+          text-shadow: 0 0 6px ${color}99;
           letter-spacing: 0.08em;
           line-height: 1.2;
           text-align: center;
         ">${name}</div>
-        
+
         <!-- POINTS VALUE -->
         <div style="
-          color: var(--color-yellow, #FFFF00);
-          font-size: clamp(0.45rem, 0.95vw, 0.6rem);
-          text-shadow: 0 0 6px var(--color-yellow, #FFFF00);
+          color: rgba(255, 255, 0, 0.8);
+          font-size: clamp(0.4rem, 0.85vw, 0.55rem);
+          text-shadow: 0 0 5px rgba(255, 255, 0, 0.5);
           font-weight: bold;
         ">${points.toLocaleString()}</div>
       </div>
     `
   }
 
-  // ═══════════════════════════════════════════════════════════════════════════
-  // SVG ENEMY VISUALS - Detailed representations
-  // ═══════════════════════════════════════════════════════════════════════════
-  private static getEnemyVisual(type: string): string {
-    switch (type) {
-      case 'datamite':
-        return `
-          <svg viewBox="0 0 60 60" width="100%" height="100%" fill="none" stroke-linejoin="round">
-            <polygon points="30,8 14,46 30,36 46,46" fill="#FF4400"/>
-          </svg>
-        `
-
-      case 'scandrone':
-        return `
-          <svg viewBox="0 0 60 60" width="100%" height="100%" fill="none" stroke-linejoin="round">
-            <polygon points="30,6 51,18 51,42 30,54 9,42 9,18" fill="none" stroke="#FF8800" stroke-width="3"/><line x1="30" y1="30" x2="30" y2="8" stroke="#FF8800" stroke-width="2"><animateTransform attributeName="transform" type="rotate" from="0 30 30" to="360 30 30" dur="3s" repeatCount="indefinite"/></line>
-          </svg>
-        `
-
-      case 'chaosworm':
-        return `
-          <svg viewBox="0 0 60 60" width="100%" height="100%" fill="none" stroke-linejoin="round">
-            <polygon points="16,22 24,30 16,38 8,30" fill="none" stroke="#FF00FF" stroke-width="2.5"/><polygon points="32,18 42,30 32,42 22,30" fill="none" stroke="#FF00FF" stroke-width="3"/><polygon points="48,24 54,30 48,36 42,30" fill="none" stroke="#FF00FF" stroke-width="2"/>
-          </svg>
-        `
-
-      case 'voidsphere':
-        return `
-          <svg viewBox="0 0 60 60" width="100%" height="100%" fill="none" stroke-linejoin="round">
-            <circle cx="30" cy="30" r="14" fill="#000000"/><circle cx="30" cy="30" r="21" fill="none" stroke="#AA00FF" stroke-width="3" stroke-dasharray="115 17"/>
-          </svg>
-        `
-
-      case 'crystalswarm':
-        return `
-          <svg viewBox="0 0 60 60" width="100%" height="100%" fill="none" stroke-linejoin="round">
-            <polygon points="30,4 36,20 54,17 42,30 54,43 36,40 30,56 24,40 6,43 18,30 6,17 24,20" fill="none" stroke="#00FFFF" stroke-width="2.5"/>
-          </svg>
-        `
-
-      case 'fizzer':
-        return `
-          <svg viewBox="0 0 60 60" width="100%" height="100%" fill="none" stroke-linejoin="round">
-            <rect x="26" y="8" width="8" height="44" fill="#00FF88"/><rect x="8" y="26" width="44" height="8" fill="#00FF88"/>
-          </svg>
-        `
-
-      case 'ufo':
-        return `
-          <svg viewBox="0 0 60 60" width="100%" height="100%" fill="none" stroke-linejoin="round">
-            <polygon points="6,32 18,26 42,26 54,32 42,38 18,38" fill="none" stroke="#88AAFF" stroke-width="3"/><path d="M 20 26 A 10 10 0 0 1 40 26" fill="none" stroke="#88AAFF" stroke-width="3"/>
-          </svg>
-        `
-
-      case 'boss':
-        return `
-          <svg viewBox="0 0 60 60" width="100%" height="100%" fill="none" stroke-linejoin="round">
-            <polygon points="30,4 53,17 53,43 30,56 7,43 7,17" fill="none" stroke="#FF0000" stroke-width="3.5"/><circle cx="30" cy="30" r="7" fill="#FF0000"/>
-          </svg>
-        `
-
-      default:
-        return `<div style="width: 40px; height: 40px; background: ${type}; border-radius: 50%;"></div>`
-    }
-  }
 
   static stopStarfield(): void {
     StarfieldManager.getInstance().stop()

@@ -251,6 +251,7 @@ export class Game {
     if (!this.attractMode) {
       this.attractMode = new AttractMode(this.sceneManager.getScene())
     }
+    this.attractMode.setCamera(this.sceneManager.getCamera())
     this.attractMode.start()
     console.log('🎮 Attract Mode: Started (2D starfield stopped, 3D scene visible)')
     
