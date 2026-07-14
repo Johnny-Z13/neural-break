@@ -1,144 +1,198 @@
-import { SceneManager } from '../../graphics/SceneManager'
+export type ScreenDirection = 'forward' | 'back'
 
 /**
- * Utility functions for screen transitions and animations
+ * Shared motion language for full-screen menus, overlays, and game launch.
+ *
+ * Screens crossfade while they overlap so the starfield is never left holding
+ * an accidental blank frame. Individual headings and buttons do not animate
+ * independently; each composition moves as a single, stable unit.
  */
 export class ScreenTransitions {
-  static transitionOut(
+  private static readonly menuDuration = 360
+  private static readonly overlayDuration = 260
+  private static readonly launchDuration = 560
+  private static readonly easing = 'cubic-bezier(0.22, 1, 0.36, 1)'
+
+  static async transitionScreens(
     currentScreen: HTMLElement | null,
-    sceneManager: SceneManager | null,
-    onComplete: () => void,
-    type: 'fade' | 'zoom' | 'slide' | 'particle' = 'fade'
-  ): void {
-    if (!currentScreen) {
-      onComplete()
+    nextScreen: HTMLElement,
+    direction: ScreenDirection = 'forward'
+  ): Promise<void> {
+    const reducedMotion = ScreenTransitions.prefersReducedMotion()
+    const duration = reducedMotion ? 1 : ScreenTransitions.menuDuration
+    const offset = direction === 'forward' ? 14 : -14
+
+    nextScreen.style.opacity = '0'
+    nextScreen.style.pointerEvents = 'none'
+    nextScreen.style.willChange = 'opacity, transform, filter'
+    nextScreen.setAttribute('aria-hidden', 'true')
+
+    if (currentScreen) {
+      currentScreen.style.pointerEvents = 'none'
+      currentScreen.style.willChange = 'opacity, transform, filter'
+      currentScreen.setAttribute('aria-hidden', 'true')
+    }
+
+    await ScreenTransitions.nextFrame()
+
+    const animations: Animation[] = []
+    if (currentScreen) {
+      animations.push(currentScreen.animate([
+        {
+          opacity: 1,
+          transform: 'translate3d(0, 0, 0) scale(1)',
+          filter: 'blur(0) brightness(1)'
+        },
+        {
+          opacity: 0,
+          transform: `translate3d(${-offset}px, 0, 0) scale(0.992)`,
+          filter: 'blur(4px) brightness(0.82)'
+        }
+      ], {
+        duration,
+        easing: ScreenTransitions.easing,
+        fill: 'forwards'
+      }))
+    }
+
+    animations.push(nextScreen.animate([
+      {
+        opacity: 0,
+        transform: `translate3d(${offset}px, 0, 0) scale(1.008)`,
+        filter: 'blur(4px) brightness(1.12)'
+      },
+      {
+        opacity: 1,
+        transform: 'translate3d(0, 0, 0) scale(1)',
+        filter: 'blur(0) brightness(1)'
+      }
+    ], {
+      duration,
+      easing: ScreenTransitions.easing,
+      fill: 'forwards'
+    }))
+
+    await Promise.all(animations.map(animation => ScreenTransitions.waitForAnimation(animation)))
+    ScreenTransitions.restoreScreen(nextScreen)
+  }
+
+  static async transitionToGameplay(
+    currentScreen: HTMLElement | null,
+    onLaunch: () => void
+  ): Promise<void> {
+    const reducedMotion = ScreenTransitions.prefersReducedMotion()
+    const hud = document.getElementById('ui')
+
+    document.body.classList.add('ui-game-launching')
+    hud?.classList.remove('ui-game-entering')
+
+    if (!currentScreen || reducedMotion) {
+      onLaunch()
+      document.body.classList.remove('ui-game-launching')
       return
     }
 
-    // Trigger camera transition if available
-    if (sceneManager) {
-      sceneManager.startTransition(type, 0.4)
-    }
+    currentScreen.style.pointerEvents = 'none'
+    currentScreen.style.willChange = 'opacity, transform, filter'
+    currentScreen.setAttribute('aria-hidden', 'true')
 
-    // Animate out
-    currentScreen.style.transition = 'all 0.4s cubic-bezier(0.4, 0, 0.2, 1)'
-    
-    switch (type) {
-      case 'fade':
-        currentScreen.style.opacity = '0'
-        break
-      case 'zoom':
-        currentScreen.style.transform = 'scale(1.2)'
-        currentScreen.style.opacity = '0'
-        break
-      case 'slide':
-        currentScreen.style.transform = 'translateX(-100%)'
-        currentScreen.style.opacity = '0'
-        break
-      case 'particle':
-        currentScreen.style.opacity = '0'
-        currentScreen.style.filter = 'blur(10px)'
-        break
-    }
-
-    setTimeout(() => {
-      onComplete()
-      if (sceneManager) {
-        sceneManager.startTransition(type, 0.4)
+    const launchAnimation = currentScreen.animate([
+      {
+        offset: 0,
+        opacity: 1,
+        transform: 'scale(1)',
+        filter: 'blur(0) brightness(1)'
+      },
+      {
+        offset: 0.22,
+        opacity: 1,
+        transform: 'scale(1.012)',
+        filter: 'blur(0) brightness(1.18)'
+      },
+      {
+        offset: 1,
+        opacity: 0,
+        transform: 'scale(1.14)',
+        filter: 'blur(9px) brightness(1.42)'
       }
-    }, 400)
+    ], {
+      duration: ScreenTransitions.launchDuration,
+      easing: 'cubic-bezier(0.32, 0, 0.18, 1)',
+      fill: 'forwards'
+    })
+
+    await ScreenTransitions.delay(90)
+    onLaunch()
+    await ScreenTransitions.waitForAnimation(launchAnimation)
+
+    hud?.classList.add('ui-game-entering')
+    document.body.classList.remove('ui-game-launching')
+    window.setTimeout(() => hud?.classList.remove('ui-game-entering'), 420)
   }
 
-  static animateScreenIn(
-    screen: HTMLElement,
-    type: 'fade' | 'zoom' | 'slide' = 'fade'
-  ): void {
-    // Set initial state
-    screen.style.opacity = '0'
-    screen.style.transition = 'all 0.6s cubic-bezier(0.34, 1.56, 0.64, 1)'
-    
-    switch (type) {
-      case 'fade':
-        screen.style.transform = 'scale(0.95)'
-        break
-      case 'zoom':
-        screen.style.transform = 'scale(0.8)'
-        break
-      case 'slide':
-        screen.style.transform = 'translateX(100%)'
-        break
+  static async animateOverlayIn(screen: HTMLElement): Promise<void> {
+    const duration = ScreenTransitions.prefersReducedMotion() ? 1 : ScreenTransitions.overlayDuration
+    screen.getAnimations().forEach(animation => animation.cancel())
+    screen.style.pointerEvents = 'none'
+    screen.style.willChange = 'opacity, transform, filter'
+
+    const animation = screen.animate([
+      { opacity: 0, transform: 'scale(1.012)', filter: 'blur(4px)' },
+      { opacity: 1, transform: 'scale(1)', filter: 'blur(0)' }
+    ], {
+      duration,
+      easing: ScreenTransitions.easing,
+      fill: 'forwards'
+    })
+
+    await ScreenTransitions.waitForAnimation(animation)
+    if (screen.dataset.closing !== 'true') {
+      ScreenTransitions.restoreScreen(screen)
     }
-
-    // Animate in
-    requestAnimationFrame(() => {
-      screen.style.opacity = '1'
-      screen.style.transform = 'scale(1) translateX(0)'
-    })
-
-    // 🎬 Animate UI elements with stagger! 🎬
-    const buttons = screen.querySelectorAll('button')
-    buttons.forEach((button, index) => {
-      button.style.opacity = '0'
-      button.style.transform = 'translateY(20px)'
-      button.style.transition = `all 0.5s cubic-bezier(0.34, 1.56, 0.64, 1) ${index * 0.1}s`
-      
-      setTimeout(() => {
-        button.style.opacity = '1'
-        button.style.transform = 'translateY(0)'
-      }, 100 + index * 100)
-    })
-
-    // Animate text elements
-    const headings = screen.querySelectorAll('h1, h2, h3')
-    headings.forEach((heading, index) => {
-      const el = heading as HTMLElement
-      el.style.opacity = '0'
-      el.style.transform = 'translateY(-30px) scale(0.9)'
-      el.style.transition = `all 0.8s cubic-bezier(0.34, 1.56, 0.64, 1) ${index * 0.15}s`
-      
-      setTimeout(() => {
-        el.style.opacity = '1'
-        el.style.transform = 'translateY(0) scale(1)'
-      }, 200 + index * 150)
-    })
-
-    // Add floating animation to particles
-    const particles = screen.querySelectorAll('.bg-particle')
-    particles.forEach((particle, index) => {
-      const el = particle as HTMLElement
-      el.style.opacity = '0'
-      el.style.transition = `opacity 1s ease ${index * 10}ms`
-      
-      setTimeout(() => {
-        el.style.opacity = ''
-      }, index * 10)
-    })
   }
 
-  static hideCurrentScreen(currentScreen: HTMLElement | null): HTMLElement | null {
-    if (currentScreen) {
-      // Force remove with multiple methods to ensure it's gone
-      currentScreen.style.display = 'none'
-      currentScreen.style.visibility = 'hidden'
-      currentScreen.style.opacity = '0'
-      currentScreen.style.pointerEvents = 'none'
-      currentScreen.remove()
-      
-      // Also remove any lingering screens by ID
-      const startScreen = document.getElementById('startScreen')
-      if (startScreen) {
-        startScreen.remove()
-      }
-      const leaderboardScreen = document.getElementById('leaderboardScreen')
-      if (leaderboardScreen) {
-        leaderboardScreen.remove()
-      }
-      const gameOverScreen = document.getElementById('gameOverScreen')
-      if (gameOverScreen) {
-        gameOverScreen.remove()
-      }
-    }
-    return null
+  static async animateOverlayOut(screen: HTMLElement): Promise<void> {
+    const duration = ScreenTransitions.prefersReducedMotion() ? 1 : ScreenTransitions.overlayDuration
+    screen.getAnimations().forEach(animation => animation.cancel())
+    screen.style.pointerEvents = 'none'
+    screen.style.willChange = 'opacity, transform, filter'
+    screen.setAttribute('aria-hidden', 'true')
+
+    const animation = screen.animate([
+      { opacity: 1, transform: 'scale(1)', filter: 'blur(0)' },
+      { opacity: 0, transform: 'scale(0.992)', filter: 'blur(4px)' }
+    ], {
+      duration,
+      easing: ScreenTransitions.easing,
+      fill: 'forwards'
+    })
+
+    await ScreenTransitions.waitForAnimation(animation)
+  }
+
+  private static restoreScreen(screen: HTMLElement): void {
+    screen.getAnimations().forEach(animation => animation.cancel())
+    screen.style.opacity = ''
+    screen.style.transform = ''
+    screen.style.filter = ''
+    screen.style.pointerEvents = ''
+    screen.style.willChange = ''
+    screen.removeAttribute('aria-hidden')
+  }
+
+  private static waitForAnimation(animation: Animation): Promise<void> {
+    return animation.finished.then(() => undefined).catch(() => undefined)
+  }
+
+  private static nextFrame(): Promise<void> {
+    return new Promise(resolve => requestAnimationFrame(() => requestAnimationFrame(() => resolve())))
+  }
+
+  private static delay(duration: number): Promise<void> {
+    return new Promise(resolve => window.setTimeout(resolve, duration))
+  }
+
+  private static prefersReducedMotion(): boolean {
+    return window.matchMedia('(prefers-reduced-motion: reduce)').matches
   }
 }
-

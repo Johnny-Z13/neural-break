@@ -5,10 +5,10 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Neural Break</title>
     <link rel="icon" type="image/svg+xml" href="/favicon.svg?v=1" />
-    <!-- 80s PIXEL FONT - Press Start 2P -->
+    <!-- UI fonts: legacy pixel face plus the modern title-screen pair -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500;600&family=Press+Start+2P&family=Rajdhani:wght@500;600;700&display=swap" rel="stylesheet">
     <style>
       /* ═══════════════════════════════════════════════════════════════════
          NEURAL BREAK - UNIFIED DESIGN SYSTEM
@@ -1118,7 +1118,8 @@
         
         <!-- TIMER - Top Right -->
         <div id="timer" class="hud-element">
-          <span class="hud-label">Time:</span> <span id="timeRemaining">30:00</span>
+          <span class="hud-label">OBJECTIVES</span>
+          <span id="timeRemaining">M:0/22 D:0/5</span>
         </div>
         
         <!-- COMBO - Below Timer -->
@@ -1135,12 +1136,6 @@
              WEAPON PANEL - Bottom Right (Grouped)
              ═══════════════════════════════════════════════════════════════════ -->
         <div id="weaponPanel" class="hud-element">
-          <!-- Decorative corner brackets -->
-          <div class="weapon-panel-corner weapon-panel-corner-tl"></div>
-          <div class="weapon-panel-corner weapon-panel-corner-tr"></div>
-          <div class="weapon-panel-corner weapon-panel-corner-bl"></div>
-          <div class="weapon-panel-corner weapon-panel-corner-br"></div>
-
           <!-- Weapon Type -->
           <div id="weaponType" class="weapon-panel-row">
             <span class="weapon-panel-label">WEAPON</span>
@@ -1167,8 +1162,7 @@
         
         <!-- LOADING -->
         <div id="loading">
-          <div class="loading-spinner">⟳</div>
-          Initializing Neural Network...
+          INITIALIZING NEURAL SYSTEMS
         </div>
       </div>
     </div>

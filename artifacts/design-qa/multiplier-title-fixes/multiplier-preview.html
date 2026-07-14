@@ -1,0 +1,40 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Multiplier Notification QA</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500;600&family=Rajdhani:wght@500;600;700&display=swap" rel="stylesheet" />
+    <link rel="stylesheet" href="/src/ui/ui-overhaul.css" />
+    <style>
+      body {
+        margin: 0;
+        min-height: 100vh;
+        overflow: hidden;
+        background: #00050c;
+      }
+
+      .preview-stack {
+        position: fixed;
+        inset: 0;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        gap: 72px;
+      }
+    </style>
+  </head>
+  <body>
+    <main class="preview-stack" aria-label="Multiplier notification preview">
+      <div class="game-notification notification-multiplier" style="--notification-accent: #78d99a; --notification-size: clamp(1.2rem, 2.4vw, 1.8rem);">
+        MULTIPLIER x10
+      </div>
+      <div class="game-notification notification-multiplier-lost">
+        MULTIPLIER LOST
+      </div>
+    </main>
+  </body>
+</html>

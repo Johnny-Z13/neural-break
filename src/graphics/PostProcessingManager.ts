@@ -159,6 +159,7 @@ export class PostProcessingManager {
     this.scanlineEffect = new ScanlineEffect({
       density: this.config.scanlines.density
     })
+    this.scanlineEffect.blendMode.opacity.value = this.config.scanlines.opacity
 
     // Shock wave - triggered on boss/void sphere death
     this.shockWaveEffect = new ShockWaveEffect(this.camera, new THREE.Vector3(), {
@@ -348,6 +349,7 @@ export class PostProcessingManager {
 
     if (this.scanlineEffect) {
       this.scanlineEffect.density = this.config.scanlines.density
+      this.scanlineEffect.blendMode.opacity.value = this.config.scanlines.opacity
     }
 
     if (needsRebuild) {

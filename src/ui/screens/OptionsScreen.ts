@@ -338,11 +338,11 @@ export class OptionsScreen {
           animation: titleFlicker 0.1s infinite, titleGlow 3s ease-in-out infinite;
           font-weight: bold;
         ">
-          ⚙ OPTIONS ⚙
+          OPTIONS
         </h1>
 
         <!-- Decorative lines -->
-        <div style="
+        <div class="options-divider" style="
           width: 100%;
           height: 4px;
           background: linear-gradient(90deg,
@@ -356,7 +356,7 @@ export class OptionsScreen {
           margin-bottom: var(--space-xs, 0.5rem);
           box-shadow: 0 0 10px #00FFFF, 0 0 20px #FF00FF;
         "></div>
-        <div style="
+        <div class="options-divider" style="
           width: 80%;
           height: 2px;
           margin: 0 auto var(--space-xl, 2rem);
@@ -556,12 +556,12 @@ export class OptionsScreen {
             var(--shadow-pixel, 4px 4px 0) var(--color-red-dark, #662222);
           transition: all 0.1s step-end;
         ">
-          ◀ BACK TO MENU
+          BACK TO MENU
         </button>
       </div>
       
       <!-- CONTROLS HINT -->
-      <div style="
+      <div class="screen-controls-hint" style="
         position: fixed;
         bottom: var(--space-md, 1rem);
         left: 50%;
@@ -573,7 +573,7 @@ export class OptionsScreen {
         z-index: 1;
         text-align: center;
       ">
-        <div style="margin-bottom: 0.3rem;">SPACE/ENTER TO TOGGLE • ESC TO RETURN</div>
+        <div style="margin-bottom: 0.3rem;">SPACE / ENTER TO TOGGLE &nbsp;&nbsp; ESC TO RETURN</div>
         <div style="font-size: 0.6em; color: var(--color-cyan, #00FFFF); text-shadow: 0 0 8px var(--color-cyan, #00FFFF);">
           ARROW KEYS OR WASD TO NAVIGATE
         </div>
@@ -684,6 +684,17 @@ export class OptionsScreen {
 
     // Update toggle visuals
     const updateToggleVisuals = () => {
+      fullscreenOn.classList.toggle('active', currentSettings.fullscreen)
+      fullscreenOff.classList.toggle('active', !currentSettings.fullscreen)
+      postProcessRenderingOn.classList.toggle('active', currentSettings.postProcessRendering)
+      postProcessRenderingOff.classList.toggle('active', !currentSettings.postProcessRendering)
+      postProcessDebugOn.classList.toggle('active', currentSettings.postProcessDebug)
+      postProcessDebugOff.classList.toggle('active', !currentSettings.postProcessDebug)
+
+      fullscreenOption.setAttribute('aria-pressed', String(currentSettings.fullscreen))
+      postProcessRenderingOption.setAttribute('aria-pressed', String(currentSettings.postProcessRendering))
+      postProcessDebugOption.setAttribute('aria-pressed', String(currentSettings.postProcessDebug))
+
       // Fullscreen toggle
       if (currentSettings.fullscreen) {
         fullscreenOn.style.border = '2px solid #00FF00'
@@ -831,7 +842,6 @@ export class OptionsScreen {
     })
     backButton.addEventListener('click', () => {
       if (audioManager) audioManager.playButtonPressSound()
-      OptionsScreen.cleanup()
       onBack()
     })
 
@@ -862,7 +872,6 @@ export class OptionsScreen {
           togglePostProcessDebug()
         } else if (OptionsScreen.selectedOptionIndex === 3) {
           if (audioManager) audioManager.playButtonPressSound()
-          OptionsScreen.cleanup()
           onBack()
         }
       }
@@ -881,7 +890,6 @@ export class OptionsScreen {
       else if (key === 'escape') {
         e.preventDefault()
         if (audioManager) audioManager.playButtonPressSound()
-        OptionsScreen.cleanup()
         onBack()
       }
     }
@@ -943,7 +951,6 @@ export class OptionsScreen {
           togglePostProcessDebug()
         } else {
           if (audioManager) audioManager.playButtonPressSound()
-          OptionsScreen.cleanup()
           onBack()
         }
         OptionsScreen.lastGamepadInput = now
@@ -953,7 +960,6 @@ export class OptionsScreen {
       const bButton = gamepad.buttons[1]?.pressed
       if (bButton) {
         if (audioManager) audioManager.playButtonPressSound()
-        OptionsScreen.cleanup()
         onBack()
         OptionsScreen.lastGamepadInput = now
       }

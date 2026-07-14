@@ -83,14 +83,7 @@ export class ScoreManager {
    */
   static async getHighScores(gameMode?: GameMode): Promise<HighScoreEntry[]> {
     const service = HighScoreServiceFactory.getService()
-    const allScores = await service.getHighScores()
-    
-    // Filter by game mode if specified
-    if (gameMode) {
-      return allScores.filter(score => score.gameMode === gameMode)
-    }
-    
-    return allScores
+    return await service.getHighScores(gameMode)
   }
 
   /**
@@ -98,9 +91,14 @@ export class ScoreManager {
    * @param gameMode Check against specific game mode leaderboard
    */
   static async isHighScore(score: number, gameMode: GameMode): Promise<boolean> {
-    const highScores = await this.getHighScores(gameMode)
-    if (highScores.length < this.MAX_HIGH_SCORES) return true
-    return score > highScores[highScores.length - 1].score
+    try {
+      const highScores = await this.getHighScores(gameMode)
+      if (highScores.length < this.MAX_HIGH_SCORES) return true
+      return score > highScores[highScores.length - 1].score
+    } catch (error) {
+      console.error('❌ Unable to check the online leaderboard:', error)
+      return false
+    }
   }
 
   static formatTime(seconds: number): string {

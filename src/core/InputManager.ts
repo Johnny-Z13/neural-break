@@ -15,6 +15,7 @@
  */
 export class InputManager {
   private keys: Set<string> = new Set()
+  private keyPresses: Set<string> = new Set()
   private mousePosition = { x: 0, y: 0 }
   private isMouseDown = false
   
@@ -50,6 +51,7 @@ export class InputManager {
 
   private onKeyDown(event: KeyboardEvent): void {
     const code = event.code.toLowerCase()
+    if (!this.keys.has(code)) this.keyPresses.add(code)
     this.keys.add(code)
   }
 
@@ -319,5 +321,17 @@ export class InputManager {
   // 🔍 KEY CHECKING - Check if a specific key is currently pressed
   isKeyPressed(keyCode: string): boolean {
     return this.keys.has(keyCode.toLowerCase())
+  }
+
+  consumeKeyPress(keyCode: string): boolean {
+    const code = keyCode.toLowerCase()
+    if (!this.keyPresses.has(code)) return false
+
+    this.keyPresses.delete(code)
+    return true
+  }
+
+  clearKeyPresses(): void {
+    this.keyPresses.clear()
   }
 }

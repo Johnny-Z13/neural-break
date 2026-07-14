@@ -30,6 +30,7 @@ export interface PostProcessConfig {
   scanlines: {
     enabled: boolean
     density: number // How many lines (higher = more lines)
+    opacity: number // Blend strength (0 = invisible, 1 = full strength)
   }
   glitch: {
     enabled: boolean // Whether glitch CAN trigger on damage
@@ -40,9 +41,9 @@ export interface PostProcessConfig {
 export const DEFAULT_POST_PROCESS_CONFIG: PostProcessConfig = {
   bloom: {
     enabled: true, // Neon glow - essential for cyberpunk look
-    intensity: 0.5,
-    threshold: 0.8,
-    smoothing: 0.3
+    intensity: 0.35,
+    threshold: 0.85,
+    smoothing: 0.2
   },
   chromaticAberration: {
     enabled: false, // OFF by default - subtle effect, can enable if wanted
@@ -51,14 +52,25 @@ export const DEFAULT_POST_PROCESS_CONFIG: PostProcessConfig = {
   vignette: {
     enabled: true, // Focus attention to center
     offset: 0.4,
-    darkness: 0.35
+    darkness: 0.22
   },
   scanlines: {
     enabled: true, // CRT arcade monitor look - ON by default
-    density: 1.5 // Subtle but visible
+    density: 1.25,
+    opacity: 0.18 // Texture rather than a darkening layer
   },
   glitch: {
     enabled: true // Damage effect - ON by default
+  }
+}
+
+function cloneDefaultConfig(): PostProcessConfig {
+  return {
+    bloom: { ...DEFAULT_POST_PROCESS_CONFIG.bloom },
+    chromaticAberration: { ...DEFAULT_POST_PROCESS_CONFIG.chromaticAberration },
+    vignette: { ...DEFAULT_POST_PROCESS_CONFIG.vignette },
+    scanlines: { ...DEFAULT_POST_PROCESS_CONFIG.scanlines },
+    glitch: { ...DEFAULT_POST_PROCESS_CONFIG.glitch }
   }
 }
 
@@ -83,7 +95,7 @@ export class PostProcessSettings {
     } catch (e) {
       console.warn('⚠️ Could not load post-processing settings:', e)
     }
-    return { ...DEFAULT_POST_PROCESS_CONFIG }
+    return cloneDefaultConfig()
   }
 
   /**
@@ -102,7 +114,7 @@ export class PostProcessSettings {
    * Reset to defaults
    */
   static reset(): PostProcessConfig {
-    const defaults = { ...DEFAULT_POST_PROCESS_CONFIG }
+    const defaults = cloneDefaultConfig()
     PostProcessSettings.save(defaults)
     return defaults
   }

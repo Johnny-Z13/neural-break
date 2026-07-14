@@ -1,6 +1,7 @@
 import { GameMode, GameStats, HighScoreEntry, ScoreManager } from '../../core/GameState'
 import { AudioManager } from '../../audio/AudioManager'
 import { StarfieldManager } from '../../graphics/StarfieldManager'
+import { escapeHtml } from '../../utils/escapeHtml'
 
 /**
  * NEURAL BREAK - Game Over Screen
@@ -17,16 +18,14 @@ export class GameOverScreen {
   private static lastGamepadInput: number = 0
   private static inputCooldown: number = 200 // ms
   private static gamepadDeadzone: number = 0.5
-  private static currentGameMode: GameMode = GameMode.ORIGINAL // Store current game mode
 
   static async create(
     stats: GameStats,
-    gameMode: import('../../core/GameState').GameMode,
+    gameMode: GameMode,
     audioManager: AudioManager | null,
-    onRestart: () => void
+    onRestart: () => void,
+    onScoreSaved: () => void
   ): Promise<HTMLElement> {
-    // Store game mode for later use
-    GameOverScreen.currentGameMode = gameMode
     // Start the starfield for menu consistency
     StarfieldManager.getInstance().start()
     
@@ -170,7 +169,7 @@ export class GameOverScreen {
         <div class="title-section" style="position: relative; margin-bottom: var(--space-lg, 1.5rem);">
           ${stats.gameCompleted ? `
           <!-- Victory Banner -->
-          <div style="
+          <div class="status-banner status-banner--success" style="
             margin-bottom: var(--space-sm, 0.8rem);
             font-size: clamp(0.7rem, 1.8vw, 1.1rem);
             color: #FFD700;
@@ -179,12 +178,12 @@ export class GameOverScreen {
             animation: victoryBlink 0.5s step-end infinite;
             font-weight: bold;
           ">
-            🏆 NEURAL BREAK COMPLETE 🏆
+            NEURAL BREAK COMPLETE
           </div>
 
           <!-- Victory Title (Clean, No RGB Split) -->
           <div style="position: relative; margin-bottom: var(--space-sm, 0.8rem);">
-            <h1 style="
+            <h1 class="end-title end-title--victory" style="
               position: relative;
               font-size: clamp(2.5rem, 6vw, 4.5rem);
               margin: 0;
@@ -199,12 +198,12 @@ export class GameOverScreen {
               font-weight: bold;
               animation: gameOverGlitch 5s ease-in-out infinite, gameOverPulse 1s step-end infinite;
             ">
-              VICTORY!
+              VICTORY
             </h1>
           </div>
 
           <!-- Congratulations Message -->
-          <div style="
+          <div class="victory-copy" style="
             font-size: clamp(0.65rem, 1.6vw, 1.0rem);
             margin-top: var(--space-md, 1rem);
             margin-bottom: var(--space-md, 1rem);
@@ -213,15 +212,13 @@ export class GameOverScreen {
             letter-spacing: 0.2em;
             line-height: 1.6;
           ">
-            ═══════════════════════════════════<br/>
-            CONGRATULATIONS!<br/>
-            YOU HAVE BEATEN ALL 99 LEVELS<br/>
-            OF NEURAL BREAK!<br/>
-            ═══════════════════════════════════
+            CONGRATULATIONS<br/>
+            ALL 99 LEVELS CLEARED<br/>
+            NEURAL BREAK COMPLETE
           </div>
           ` : `
           <!-- Warning Banner -->
-          <div style="
+          <div class="status-banner status-banner--danger" style="
             margin-bottom: var(--space-sm, 0.8rem);
             font-size: clamp(0.7rem, 1.8vw, 1.1rem);
             color: #FF0000;
@@ -230,12 +227,12 @@ export class GameOverScreen {
             animation: dangerBlink 0.5s step-end infinite;
             font-weight: bold;
           ">
-            ⚠ SYSTEM FAILURE ⚠
+            SYSTEM FAILURE
           </div>
 
           <!-- Game Over Title (Clean, No RGB Split) -->
           <div style="position: relative; margin-bottom: var(--space-sm, 0.8rem);">
-            <h1 style="
+            <h1 class="end-title end-title--danger" style="
               position: relative;
               font-size: clamp(2.5rem, 6vw, 4.5rem);
               margin: 0;
@@ -256,7 +253,7 @@ export class GameOverScreen {
           `}
 
           <!-- Subtitle with glitch -->
-          <p style="
+          <p class="end-subtitle" style="
             font-size: clamp(0.6rem, 1.5vw, 0.9rem);
             margin-bottom: var(--space-xs, 0.5rem);
             color: #FF6600;
@@ -268,7 +265,7 @@ export class GameOverScreen {
           </p>
 
           <!-- Error Code -->
-          <div style="
+          <div class="end-code" style="
             font-size: clamp(0.5rem, 1.2vw, 0.75rem);
             color: #FF4444;
             text-shadow: 0 0 10px #FF4444;
@@ -279,7 +276,7 @@ export class GameOverScreen {
           </div>
 
           <!-- Decorative danger lines -->
-          <div style="
+          <div class="end-divider" style="
             margin: var(--space-sm, 0.8rem) auto;
             width: 90%;
             height: 3px;
@@ -305,7 +302,7 @@ export class GameOverScreen {
             text-shadow: 0 0 30px var(--color-yellow, #FFFF00), 4px 4px 0 var(--color-yellow-dark, #886600);
             letter-spacing: 0.1em;
           ">
-            ★ NEW HIGH SCORE! ★
+            NEW HIGH SCORE
           </div>
         ` : ''}
         
@@ -445,7 +442,7 @@ export class GameOverScreen {
               6px 6px 0 var(--color-yellow-dark, #886600);
             transition: all 0.1s step-end;
           ">
-            ▶ PLAY AGAIN
+            RETURN TO MENU
           </button>
         </div>
         
@@ -469,7 +466,7 @@ export class GameOverScreen {
             font-size: clamp(0.9rem, 2vw, 1.2rem);
             text-shadow: 0 0 15px var(--color-magenta, #FF00FF);
             letter-spacing: 0.1em;
-          ">◆ TOP SCORES ◆</h3>
+          ">TOP SCORES</h3>
           <div id="gameOverHighScoresList"></div>
         </div>
       </div>
@@ -653,12 +650,15 @@ export class GameOverScreen {
       
       nameInput.focus()
       
+      let saveInFlight = false
+
       const saveScore = async () => {
+        if (saveInFlight) return
+        saveInFlight = true
+
         const playerName = nameInput.value.trim() || 'ANON'
         
-        // Get location and format date
-        const { LocationService } = await import('../../utils/LocationService')
-        const location = await LocationService.getLocation()
+        // The API derives coarse location and submission time server-side.
         const date = ScoreManager.formatDate()
         
         const entry: HighScoreEntry = {
@@ -667,7 +667,7 @@ export class GameOverScreen {
           survivedTime: stats.survivedTime,
           level: stats.level,
           date: date,
-          location: location,
+          location: 'ONLINE',
           gameMode: gameMode
         }
         
@@ -680,53 +680,13 @@ export class GameOverScreen {
           const saved = await ScoreManager.saveHighScore(entry)
           
           if (saved) {
-            saveButton.textContent = 'OK!'
+            saveButton.textContent = 'SAVED'
             saveButton.style.background = '#003300'
             saveButton.style.borderColor = 'var(--color-green, #00FF00)'
-            
-            await GameOverScreen.displayHighScores('gameOverHighScoresList', GameOverScreen.currentGameMode)
-            
-            const successMsg = document.createElement('div')
-            successMsg.textContent = `★ ${playerName.toUpperCase()} SAVED ★`
-            successMsg.style.cssText = `
-              position: fixed;
-              top: 20%;
-              left: 50%;
-              transform: translateX(-50%);
-              font-size: clamp(1rem, 2.5vw, 1.5rem);
-              color: var(--color-green, #00FF00);
-              text-shadow: 0 0 25px var(--color-green, #00FF00), 4px 4px 0 var(--color-green-dark, #006600);
-              pointer-events: none;
-              z-index: 10001;
-              animation: fadeInOut 2s ease-in-out;
-              font-family: inherit;
-            `
-            gameOverScreen.appendChild(successMsg)
-            
-            // Auto-scroll to high scores section after 2 seconds
-            setTimeout(() => {
-              if (nameInput.parentElement) {
-                nameInput.parentElement.style.opacity = '0'
-                nameInput.parentElement.style.transition = 'opacity 0.3s step-end'
-                setTimeout(() => {
-                  nameInput.parentElement?.remove()
-                }, 300)
-              }
-              successMsg.remove()
-              
-              // Scroll to high scores section smoothly
-              const highScoresSection = gameOverScreen.querySelector('#gameOverHighScores') as HTMLElement
-              if (highScoresSection) {
-                highScoresSection.scrollIntoView({ behavior: 'smooth', block: 'center' })
-                
-                // Add a highlight pulse effect
-                highScoresSection.style.animation = 'highlightPulse 1s ease-in-out 3'
-                setTimeout(() => {
-                  highScoresSection.style.animation = ''
-                }, 3000)
-              }
-            }, 2000)
+
+            onScoreSaved()
           } else {
+            saveInFlight = false
             saveButton.textContent = 'FAIL'
             saveButton.style.background = '#330000'
             saveButton.style.borderColor = 'var(--color-red, #FF0000)'
@@ -741,6 +701,7 @@ export class GameOverScreen {
             }, 2000)
           }
         } catch (error) {
+          saveInFlight = false
           console.error('❌ Error saving high score:', error)
           saveButton.textContent = 'ERR'
           saveButton.style.background = '#330000'
@@ -758,12 +719,6 @@ export class GameOverScreen {
         if (audioManager) audioManager.playButtonPressSound()
         saveScore()
       })
-      nameInput.addEventListener('keypress', (e) => {
-        if (e.key === 'Enter') {
-          if (audioManager) audioManager.playButtonPressSound()
-          saveScore()
-        }
-      })
     }
 
     // Handle restart with audio
@@ -773,7 +728,6 @@ export class GameOverScreen {
     })
     restartButton.addEventListener('click', () => {
       if (audioManager) audioManager.playButtonPressSound()
-      GameOverScreen.cleanup()
       onRestart()
     })
 
@@ -912,7 +866,7 @@ export class GameOverScreen {
     const labelShadow = highlight ? `0 0 8px ${labelColor}, 1px 1px 0 ${labelColor}44` : `0 0 5px ${labelColor}`
     
     return `
-      <div style="
+      <div class="stat-row" style="
         color: ${labelColor}; 
         display: flex; 
         justify-content: space-between; 
@@ -975,7 +929,7 @@ export class GameOverScreen {
             transition: all 0.15s ease;
           ">
             <span style="font-weight: bold; text-shadow: 0 0 8px ${rankColor}88;">${index + 1}.</span>
-            <span style="overflow: hidden; text-overflow: ellipsis; white-space: nowrap; text-align: left; text-shadow: 0 0 6px ${rankColor}66;">${entry.name.toUpperCase()}</span>
+            <span style="overflow: hidden; text-overflow: ellipsis; white-space: nowrap; text-align: left; text-shadow: 0 0 6px ${rankColor}66;">${escapeHtml(entry.name.toUpperCase())}</span>
             <span style="text-align: right; color: var(--color-green, #00FF00); text-shadow: 0 0 12px rgba(0, 255, 0, 0.6), 0 0 6px rgba(0, 255, 0, 0.4); font-weight: bold;">${ScoreManager.formatScore(entry.score)}</span>
           </div>
         `

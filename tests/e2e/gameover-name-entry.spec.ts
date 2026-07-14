@@ -32,6 +32,7 @@ const EMPTY_SCORES: unknown[] = []
 /** Mock every endpoint the client can hit under /api/highscores (scores + stats + POST). */
 async function mockHighScoresApi(page: Page): Promise<{ postCalled: () => boolean }> {
   let postCalled = false
+  let storedScores = [...EMPTY_SCORES]
   await page.route('**/api/highscores*', async (route) => {
     const url = new URL(route.request().url())
     if (url.searchParams.get('stats') === 'true') {
@@ -44,6 +45,7 @@ async function mockHighScoresApi(page: Page): Promise<{ postCalled: () => boolea
     }
     if (route.request().method() === 'POST') {
       postCalled = true
+      storedScores = [route.request().postDataJSON(), ...storedScores]
       await route.fulfill({
         status: 200,
         contentType: 'application/json',
@@ -51,11 +53,11 @@ async function mockHighScoresApi(page: Page): Promise<{ postCalled: () => boolea
       })
       return
     }
-    // Empty scores list guarantees isNewHighScore === true regardless of MAX_HIGH_SCORES.
+    // Empty initially, then return the submitted entry on the leaderboard fetch.
     await route.fulfill({
       status: 200,
       contentType: 'application/json',
-      body: JSON.stringify(EMPTY_SCORES),
+      body: JSON.stringify(storedScores),
     })
   })
   return { postCalled: () => postCalled }
@@ -96,14 +98,14 @@ async function showGameOverScreen(page: Page): Promise<void> {
     }
     await gameScreensModule.GameScreens.showGameOverScreen(
       stats,
-      gameStateModule.GameMode.TEST,
-      () => {}
+      gameStateModule.GameMode.ORIGINAL,
+      () => gameScreensModule.GameScreens.showStartScreen(() => {}, () => {})
     )
   })
 }
 
 test.describe('GameOverScreen high-score name entry', () => {
-  test('typing into the name input and pressing Enter saves the score', async ({ page }) => {
+  test('pressing Enter saves, opens the leaderboard, and returns to the front screen', async ({ page }) => {
     const api = await mockHighScoresApi(page)
 
     await page.goto('/')
@@ -127,6 +129,12 @@ test.describe('GameOverScreen high-score name entry', () => {
     await page.keyboard.press('Enter')
 
     await expect.poll(() => api.postCalled()).toBe(true)
+    await expect(page.locator('#leaderboardScreen')).toBeVisible({ timeout: 10_000 })
+    await expect(page.locator('#leaderboardScoresList')).toContainText('WASD')
+    await expect(page.locator('#backButton')).toBeVisible()
+
+    await page.locator('#backButton').click()
+    await expect(page.locator('#startScreen')).toBeVisible({ timeout: 10_000 })
   })
 
   test('clicking save also works (baseline, not keyboard-dependent)', async ({ page }) => {
@@ -144,5 +152,7 @@ test.describe('GameOverScreen high-score name entry', () => {
     await page.locator('#saveScoreButton').click()
 
     await expect.poll(() => api.postCalled()).toBe(true)
+    await expect(page.locator('#leaderboardScreen')).toBeVisible({ timeout: 10_000 })
+    await expect(page.locator('#leaderboardScoresList')).toContainText('ZZZZ')
   })
 })

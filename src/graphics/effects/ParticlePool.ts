@@ -81,9 +81,11 @@ export class ParticlePool {
   private sizes: Float32Array
   private activeCount: number = 0
   private poolSize: number
+  private colorIntensity: number
 
   constructor(poolSize: number, effectType: string) {
     this.poolSize = poolSize
+    this.colorIntensity = this.getColorIntensity(effectType)
     
     // Initialize geometry
     this.positions = new Float32Array(poolSize * 3)
@@ -101,12 +103,16 @@ export class ParticlePool {
       size: this.getBaseSize(effectType),
       vertexColors: true,
       transparent: true,
-      opacity: 0.75,
+      opacity: this.getBaseOpacity(effectType),
       blending: THREE.AdditiveBlending,
       sizeAttenuation: false
     })
     
     this.particleSystem = new THREE.Points(this.geometry, this.material)
+    // Particle vertices move independently across the arena, so the geometry's
+    // initial bounds at the origin are not meaningful for culling.
+    this.particleSystem.frustumCulled = false
+    this.geometry.setDrawRange(0, 0)
     
     // Initialize particles
     for (let i = 0; i < poolSize; i++) {
@@ -117,14 +123,26 @@ export class ParticlePool {
   private getBaseSize(effectType: string): number {
     // 🔥 BIGGER, MORE VISIBLE PARTICLES! (explosion/death 2x for player death visibility) 🔥
     switch (effectType) {
-      case 'explosion': return 1.2  // 2x bigger for player death explosions!
+      case 'explosion': return 1.26 // Tiny lift while keeping the pixel-scale burst
       case 'spark': return 0.35
       case 'trail': return 0.2
-      case 'death': return 1.6      // 2x bigger for death particles!
+      case 'death': return 1.7      // Slightly clearer enemy-death fragments
       case 'impact': return 0.4
       case 'electric': return 0.5
       default: return 0.4
     }
+  }
+
+  private getBaseOpacity(effectType: string): number {
+    if (effectType === 'death') return 0.82
+    if (effectType === 'explosion') return 0.8
+    return 0.75
+  }
+
+  private getColorIntensity(effectType: string): number {
+    if (effectType === 'death') return 1.12
+    if (effectType === 'explosion') return 1.08
+    return 1
   }
 
   emit(position: THREE.Vector3, velocity: THREE.Vector3, color: THREE.Color, life: number): void {
@@ -136,10 +154,34 @@ export class ParticlePool {
         if (i >= this.activeCount) {
           this.activeCount = i + 1
         }
+        this.syncParticleToGeometry(i)
         return // Exit early when found
       }
     }
     // If pool is exhausted, silently fail (don't spawn particle)
+  }
+
+  /**
+   * Make a newly emitted particle drawable in the current frame. Effects are
+   * commonly emitted after the normal pool update (for example on collision),
+   * so waiting for the following frame can lose short-lived/cold-start bursts.
+   */
+  private syncParticleToGeometry(index: number): void {
+    const particle = this.particles[index]
+    const i3 = index * 3
+
+    this.positions[i3] = particle.position.x
+    this.positions[i3 + 1] = particle.position.y
+    this.positions[i3 + 2] = particle.position.z
+    this.colors[i3] = particle.color.r * this.colorIntensity
+    this.colors[i3 + 1] = particle.color.g * this.colorIntensity
+    this.colors[i3 + 2] = particle.color.b * this.colorIntensity
+    this.sizes[index] = particle.size
+
+    this.geometry.attributes.position.needsUpdate = true
+    this.geometry.attributes.color.needsUpdate = true
+    this.geometry.attributes.size.needsUpdate = true
+    this.geometry.setDrawRange(0, this.activeCount)
   }
 
   update(deltaTime: number): void {
@@ -150,15 +192,24 @@ export class ParticlePool {
       
       if (particle.active) {
         particle.update(deltaTime)
+
+        if (!particle.active) {
+          this.sizes[i] = 0
+          continue
+        }
         
         const i3 = i * 3
         this.positions[i3] = particle.position.x
         this.positions[i3 + 1] = particle.position.y
         this.positions[i3 + 2] = particle.position.z
-        
-        this.colors[i3] = particle.color.r
-        this.colors[i3 + 1] = particle.color.g
-        this.colors[i3 + 2] = particle.color.b
+
+        // PointsMaterial has one shared alpha, so fade each particle through
+        // its vertex colour. Smoothstep removes the bright final-frame pop.
+        const fade = particle.opacity * particle.opacity * (3 - 2 * particle.opacity)
+        const intensity = this.colorIntensity * fade
+        this.colors[i3] = particle.color.r * intensity
+        this.colors[i3 + 1] = particle.color.g * intensity
+        this.colors[i3 + 2] = particle.color.b * intensity
         
         this.sizes[i] = particle.size * particle.opacity
         
@@ -183,5 +234,20 @@ export class ParticlePool {
   getParticleSystem(): THREE.Points {
     return this.particleSystem
   }
-}
 
+  reset(): void {
+    for (const particle of this.particles) {
+      particle.active = false
+      particle.life = 0
+    }
+
+    this.activeCount = 0
+    this.positions.fill(0)
+    this.colors.fill(0)
+    this.sizes.fill(0)
+    this.geometry.attributes.position.needsUpdate = true
+    this.geometry.attributes.color.needsUpdate = true
+    this.geometry.attributes.size.needsUpdate = true
+    this.geometry.setDrawRange(0, 0)
+  }
+}

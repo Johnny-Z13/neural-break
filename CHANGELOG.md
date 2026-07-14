@@ -6,7 +6,25 @@ All notable changes to Neural Break will be documented in this file.
 
 ## [Unreleased]
 
-_Nothing pending._
+### Added
+- Persistent Neon Postgres leaderboard schema and migration command.
+- End-to-end coverage for name submission, leaderboard display, and menu return.
+- Regression coverage ensuring the first enemy deaths emit particles immediately.
+- Adjustable scanline opacity in the post-process debug controls.
+
+### Changed
+- Refreshed the shared menu/HUD styling and transition system.
+- Reduced bloom, vignette, and scanline strength for a crisper in-game image.
+- Brightened the player ship slightly without changing its design.
+- Made enemy death particles subtly larger, brighter, and progressively fading.
+- Converted gameplay alerts to compact coloured text without opaque boxes.
+- Moved leaderboard persistence from Redis/Vercel KV to Neon Postgres.
+
+### Fixed
+- First-kill particle bursts no longer disappear because of stale GPU draw state.
+- Escape now resumes from pause without immediately reopening the pause screen.
+- Enter on the game-over name field now saves and opens the high-score table.
+- Leaderboard text is escaped before being inserted into generated markup.
 
 ---
 

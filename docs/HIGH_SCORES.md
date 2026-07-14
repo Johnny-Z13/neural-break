@@ -1,323 +1,94 @@
-# 🏆 High Score System
+# High-score system
 
-Complete guide to leaderboards in Neural Break.
+Neural Break stores a global top ten for each game mode in Neon Postgres through
+the server-only `/api/highscores` Vercel Function.
 
----
+## Player flow
 
-## Overview
+1. When the game ends, the client checks whether the score reaches the current
+   top ten for that mode.
+2. A qualifying player enters a name and presses Enter or selects Save.
+3. The API validates and normalizes the submission, writes it, and atomically
+   trims the mode back to ten entries.
+4. The game opens the leaderboard. `BACK TO MENU` returns to the start screen.
 
-Neural Break features a **single global leaderboard** for Arcade mode, tracking the **Top 10** high scores.
+## Ranking
 
----
+Entries are ranked by:
 
-## How It Works
+1. Score (highest first)
+2. Level (highest first)
+3. Survival time (longest first)
+4. Submission time (newest first)
 
-### Scoring a High Score
+Arcade and test-mode entries are stored separately.
 
-1. **Play the game** in Arcade mode
-2. **Game Over** screen appears
-3. If your score is in top 10, you see: **"★ NEW HIGH SCORE! ★"**
-4. **Enter your name** (3 letters, arcade style)
-5. **Save** - Score is added to leaderboard
-6. See your rank!
+## API
 
-### Name Entry
+### Read scores
 
-**Arcade-Style Input:**
-- Each letter shown with up/down to change
-- Navigate left/right between letters
-- Classic 3-letter format (e.g., ACE, MAX, JON)
-
-**Controls:**
-- **Keyboard**: `↑`/`↓` change letter, `→` next letter, `Enter` submit
-- **Gamepad**: D-Pad change letter, `→` next, `A` submit
-
-**Features:**
-- ✅ Remembers your last name
-- ✅ Auto-filled for convenience
-- ✅ A-Z and 0-9 supported
-
----
-
-## Viewing Leaderboards
-
-### From Main Menu
-
-1. Click **"HIGH SCORES"**
-2. See full top 10 with stats
-
-### From Game Over Screen
-
-- Top 5 shown
-- Automatically shown after game
-- Updates after saving score
-
----
-
-## Leaderboard Details
-
-### Information Shown
-
-| Column | Description |
-|--------|-------------|
-| **RANK** | Position (1ST, 2ND, 3RD, 4-10) |
-| **NAME** | Player name (3 letters) |
-| **LVL** | Level reached |
-| **SCORE** | Final score |
-| **TIME** | Survival time (HH:MM:SS) |
-| **LOC** | Location (ONLINE, city name) |
-| **DATE** | Date achieved |
-
-### Rank Colors
-
-- **1st Place** - 🥇 Gold
-- **2nd Place** - 🥈 Silver
-- **3rd Place** - 🥉 Bronze
-- **4-10** - Gray
-
----
-
-## Online vs Local Scores
-
-### Local Development
-
-**Storage:** Browser localStorage  
-**Visibility:** Only you (per browser/device)  
-**Persistence:** Until browser data cleared  
-**Best for:** Testing, offline play  
-
-### Vercel Deployment
-
-**Storage:** Global API endpoint  
-**Visibility:** All players worldwide 🌐  
-**Persistence:** In-memory (resets on deploy) or KV (permanent)  
-**Best for:** Competition, leaderboards  
-
-**The game automatically detects the environment!**
-
----
-
-## Qualifying for Leaderboard
-
-### Requirements
-
-✅ Complete a full game (no quitting early)  
-✅ Score higher than 10th place (if board is full)  
-✅ Enter a valid name  
-
-### What Counts
-
-✅ All enemy kills  
-✅ Multiplier bonuses  
-✅ Combo bonuses  
-✅ Survival time bonuses  
-✅ Level completion bonuses  
-
-### What Doesn't Count
-
-❌ Test mode scores (not shown)  
-❌ Paused time  
-❌ Cheated scores (validation in place)  
-
----
-
-## Score Calculation
-
-### Base Score
-
-- **Enemy Kills**: Points per enemy type
-  - DataMite: 100 pts
-  - ScanDrone: 200 pts
-  - ChaosWorm: 300 pts
-  - VoidSphere: 250 pts
-  - Crystal Swarm: 150 pts each
-  - Fizzer: 500 pts (bonus enemy!)
-  - UFO: 400 pts
-  - Boss: 1000 pts
-
-### Multiplier System
-
-**Builds with consecutive kills:**
-- No hits taken → Multiplier increases
-- Hit taken → Multiplier resets to 1x
-
-**Maximum:** 10x multiplier
-
-**Score Calculation:**
-```
-Kill Score = Base Points × Current Multiplier
+```http
+GET /api/highscores?mode=original
+GET /api/highscores?mode=test
 ```
 
-### Combo Bonuses
+Without `mode`, the API returns the top ten from both modes. Responses are never
+cached.
 
-**Quick consecutive kills:**
-- 3+ kills within 1 second = Combo!
-- Each combo kill adds bonus
-- Higher combos = bigger bonuses
+### Save a score
 
-### Survival Bonus
+```http
+POST /api/highscores
+Content-Type: application/json
 
-**Time-based scoring:**
-- +100 pts per 10 seconds survived
-- Encourages aggressive play
-- Rewards risky strategies
+{
+  "name": "ACE",
+  "score": 150000,
+  "survivedTime": 1800,
+  "level": 10,
+  "gameMode": "original"
+}
+```
 
-### Level Bonuses
+The server supplies the date and country code. Client-provided date and location
+values are ignored.
 
-**Completing objectives:**
-- Level 1-3: +500 pts each
-- Level 4-6: +1000 pts each
-- Level 7-9: +2000 pts each
-- Level 10+: +5000 pts each
+## Persistence and security
 
----
+- `DATABASE_URL` is server-only and must never use a `VITE_` prefix.
+- SQL values are parameterized by the Neon serverless driver.
+- The database enforces name, score, time, level, location, and mode constraints.
+- Same-origin POST requests are required unless an origin is explicitly listed
+  in `ALLOWED_SCORE_ORIGINS`.
+- Each derived client identifier is rate-limited to five submissions per minute.
+  The identifier is an HMAC; raw IP addresses are not stored.
+- Per-mode advisory locks make insert-and-prune operations deterministic under
+  concurrent submissions.
+- Player names are escaped again before rendering in the game UI.
 
-## Leaderboard Strategy
+This protects the database and prevents casual request tampering. It does not
+make a browser-generated score mathematically cheat-proof: the gameplay and
+final score still run on the client. Strong anti-cheat would require
+server-authoritative simulation or server-verifiable run telemetry.
 
-### Maximize Your Score
+## Database setup
 
-**Multiplier Management:**
-- Don't get hit!
-- Chain kills rapidly
-- Use dash to avoid damage
-- Collect shields before boss fights
+The schema is in `database/highscores.sql` and is applied with:
 
-**Combo Chains:**
-- Group enemies together
-- Use explosive attacks
-- Clear swarms quickly
-- Plan enemy routes
+```bash
+DATABASE_URL='postgresql://...' npm run db:migrate
+```
 
-**Risk vs Reward:**
-- Fizzers are worth it (500 pts + high multiplier)
-- Don't chase low-value targets
-- Sometimes retreat to maintain streak
+The migration is idempotent.
 
-**Level Strategy:**
-- Complete objectives fast for time bonus
-- Farm enemies in safe areas
-- Save power-ups for bosses
-- Don't waste time on stragglers
+## Environment variables
 
----
+| Variable | Required | Purpose |
+| --- | --- | --- |
+| `DATABASE_URL` | Yes | Neon Postgres connection string used only by the API |
+| `ALLOWED_SCORE_ORIGINS` | No | Comma-separated extra web origins |
+| `RATE_LIMIT_SALT` | No | Dedicated HMAC salt; `DATABASE_URL` is the fallback |
 
-## Tie-Breaking
-
-If two scores are equal:
-1. **Higher Level** wins
-2. If level equal: **Longer Survival Time** wins
-3. If time equal: **Newer Entry** wins
-
----
-
-## Data Privacy
-
-### What's Stored
-
-✅ Name (3 letters only)  
-✅ Score, level, time  
-✅ Date played  
-✅ General location (city)  
-✅ Game mode  
-
-### What's NOT Stored
-
-❌ Email or personal info  
-❌ IP address  
-❌ Precise GPS location  
-❌ Browser fingerprint  
-
-**Location:** Uses browser's geolocation API (city-level only), with your permission. Shows "ONLINE" if location disabled.
-
----
-
-## Leaderboard Etiquette
-
-### Do:
-✅ Use appropriate names  
-✅ Play fair  
-✅ Celebrate good scores  
-✅ Learn from top players  
-
-### Don't:
-❌ Use offensive names  
-❌ Spam submissions  
-❌ Cheat or exploit  
-❌ Submit fake scores  
-
----
-
-## Troubleshooting
-
-### Score Not Saving
-
-**Check:**
-1. Completed full game (didn't quit early)
-2. Score high enough for top 10
-3. Entered valid name
-4. Internet connection (if online)
-
-**Try:**
-- Refresh page and play again
-- Check browser console for errors
-- Verify localStorage not disabled
-
-### Different Scores on Different Devices
-
-**Cause:** Using localStorage (local mode)
-
-**Solution:** Deploy to Vercel for global scores
-
-### Scores Reset After Deployment
-
-**Cause:** Using in-memory storage
-
-**Solution:** Upgrade to Vercel KV for permanent storage
-
-See: [`DEPLOYMENT.md`](DEPLOYMENT.md)
-
----
-
-## Future Features
-
-**Planned:**
-- [ ] Monthly leaderboards
-- [ ] Weekly challenges
-- [ ] Friend leaderboards
-- [ ] Achievement tracking
-- [ ] Score replays
-- [ ] Social sharing
-
----
-
-## Tips for High Scores
-
-### Original Mode
-
-**Focus on:**
-- Maintaining multiplier
-- Level speed completion
-- Enemy priority (Fizzers > UFOs > Bosses)
-- Power-up efficiency
-
-**Avoid:**
-- Getting hit early (breaks streak)
-- Wasting time on low-value enemies
-- Ignoring power-ups
-- Poor positioning
-
----
-
-## Records to Beat
-
-**Challenge yourself!**
-
-**Original Mode Goals:**
-- 🥉 Bronze: 50,000 pts
-- 🥈 Silver: 100,000 pts
-- 🥇 Gold: 200,000 pts
-- 🏆 Legend: 500,000 pts
-
----
-
-**Climb the leaderboards and prove you're the best Neural Hacker!** 🎮🏆🌐
+Local Vite development does not serve Vercel Functions. Use `vercel dev` when
+testing the real API locally; the existing Playwright tests mock the endpoint to
+exercise the screen flow deterministically.

@@ -10,6 +10,7 @@ import { AudioManager } from '../audio/AudioManager'
 import { GameStateType, GameStats, ScoreManager, GameMode } from './GameState'
 import { GameScreens } from '../ui/GameScreens'
 import { PauseScreen } from '../ui/screens/PauseScreen'
+import { ScreenTransitions } from '../ui/screens/ScreenTransitions'
 import { Enemy, DataMite, ScanDrone, ChaosWorm, VoidSphere, CrystalShardSwarm, Fizzer, UFO, Boss } from '../entities'
 import { LevelManager } from './LevelManager'
 import { PowerUpManager } from './PowerUpManager'
@@ -91,9 +92,6 @@ export class Game {
     
     // Connect audio manager to UI screens
     GameScreens.setAudioManager(this.audioManager)
-
-    // Connect scene manager for transitions
-    GameScreens.setSceneManager(this.sceneManager)
 
     // Connect callback to hide player ship on menu screens
     GameScreens.setHidePlayerCallback(() => this.hidePlayerShip())
@@ -273,18 +271,35 @@ export class Game {
     // Stop game loop to freeze gameplay
     this.isRunning = false
     
-    const pauseScreen = PauseScreen.create(
+    let pauseScreen: HTMLElement
+    pauseScreen = PauseScreen.create(
       this.audioManager,
-      () => this.resumeGame(),
-      () => this.endGame()
+      () => this.closePauseMenu(pauseScreen, () => this.resumeGame()),
+      () => this.closePauseMenu(pauseScreen, () => this.endGame())
     )
     
     document.body.appendChild(pauseScreen)
+    void ScreenTransitions.animateOverlayIn(pauseScreen)
+  }
+
+  private closePauseMenu(pauseScreen: HTMLElement, onClosed: () => void): void {
+    if (pauseScreen.dataset.closing === 'true') return
+    pauseScreen.dataset.closing = 'true'
+
+    void (async () => {
+      await ScreenTransitions.animateOverlayOut(pauseScreen)
+      PauseScreen.cleanup()
+      onClosed()
+    })()
   }
   
   private resumeGame(): void {
     if (DEBUG_MODE) console.log('▶️ Game resumed')
     this.isPaused = false
+    // The Escape press used to close the overlay is also observed by the
+    // gameplay InputManager. Discard it before restarting the loop so the
+    // same physical press cannot immediately open a second pause screen.
+    this.inputManager.clearKeyPresses()
     
     // Restart game loop
     this.start()
@@ -325,6 +340,8 @@ export class Game {
   
   private initializeTestMode(): void {
     if (DEBUG_MODE) console.log('🧪 Starting test mode...')
+
+    this.inputManager.clearKeyPresses()
 
     // Reset game state - CRITICAL: Must be PLAYING for updates to work!
     this.gameState = GameStateType.PLAYING
@@ -544,7 +561,9 @@ export class Game {
 
   private initializeNewGame(): void {
     if (DEBUG_MODE) console.log('🎮 Starting new game...')
-    
+
+    this.inputManager.clearKeyPresses()
+
     // Reset game state - CRITICAL: Must be PLAYING for updates to work!
     this.gameState = GameStateType.PLAYING
     if (DEBUG_MODE) console.log('✅ Game state set to PLAYING (NORMAL MODE):', this.gameState)
@@ -929,7 +948,7 @@ export class Game {
     
     // 🛑 CHECK FOR PAUSE (ESC key) - Only during active gameplay
     if (this.gameState === GameStateType.PLAYING && !this.isPaused && !this.isDeathAnimationPlaying && !this.isLevelTransitioning) {
-      if (this.inputManager.isKeyPressed('escape')) {
+      if (this.inputManager.consumeKeyPress('escape')) {
         this.showPauseMenu()
         return
       }
