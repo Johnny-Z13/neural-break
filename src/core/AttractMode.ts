@@ -38,6 +38,8 @@ interface Exhibit {
 }
 
 export class AttractMode {
+  private static readonly EXHIBIT_FILL_RATIO = 0.82
+
   private scene: THREE.Scene
   private isActive: boolean = false
 
@@ -47,11 +49,11 @@ export class AttractMode {
     datamite: { create: () => new DataMite(0, 0), visualRadius: 0.7 },
     scandrone: { create: () => new ScanDrone(0, 0), visualRadius: 1.6 },
     chaosworm: { create: () => new ChaosWorm(0, 0), visualRadius: 1.3 },
-    crystalswarm: { create: () => new CrystalShardSwarm(0, 0), visualRadius: 5.0 },
-    voidsphere: { create: () => new VoidSphere(0, 0), visualRadius: 4.0 },
+    crystalswarm: { create: () => new CrystalShardSwarm(0, 0), visualRadius: 5.8 },
+    voidsphere: { create: () => new VoidSphere(0, 0), visualRadius: 4.8 },
     fizzer: { create: () => new Fizzer(0, 0), visualRadius: 0.4 },
     ufo: { create: () => new UFO(0, 0), visualRadius: 1.25 },
-    boss: { create: () => new Boss(0, 0), visualRadius: 3.0 },
+    boss: { create: () => new Boss(0, 0), visualRadius: 3.6 },
   }
 
   private exhibits: Exhibit[] = []
@@ -189,10 +191,15 @@ export class AttractMode {
     mesh.position.set(world.x, world.y, 0)
 
     const worldPerPx = (this.camera.top - this.camera.bottom) / window.innerHeight
-    const desiredRadius = (Math.min(rect.width, rect.height) / 2) * 0.95 * worldPerPx
+    const desiredRadius =
+      (Math.min(rect.width, rect.height) / 2) * AttractMode.EXHIBIT_FILL_RATIO * worldPerPx
     // Cap at 1: a specimen never renders larger than its true in-game size
     const scale = exhibit.displayScale ?? Math.min(1, desiredRadius / exhibit.visualRadius)
-    mesh.scale.set(scale, scale, 1)
+    const startScreen = exhibit.element.closest<HTMLElement>('#startScreen')
+    const screenOpacity = startScreen ? Number.parseFloat(getComputedStyle(startScreen).opacity) : 1
+    const transitionScale = Math.max(0, Math.min(1, screenOpacity))
+    mesh.visible = transitionScale > 0.02
+    mesh.scale.set(scale * transitionScale, scale * transitionScale, 1)
 
     // Clip to the window rect (world space): +x, -x, +y, -y bounds
     const left = world.x - (rect.width / 2) * worldPerPx

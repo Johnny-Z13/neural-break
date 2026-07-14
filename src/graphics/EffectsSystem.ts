@@ -360,27 +360,13 @@ export class EffectsSystem {
 
   // 🧹 CLEANUP - Clear all particles and effects for fresh start! 🧹
   cleanup(): void {
-    // Deactivate all particles in all pools
+    // Reset CPU particles and GPU draw state together so the first burst after
+    // a menu/game/level transition cannot inherit a stale draw range.
     this.particlePools.forEach(pool => {
-      const particles = (pool as any).particles
-      if (particles) {
-        particles.forEach((particle: any) => {
-          particle.active = false
-          particle.life = 0
-        })
-      }
+      pool.reset()
     })
     
-    // Deactivate vector particles
-    if (this.vectorParticlePool) {
-      const particles = (this.vectorParticlePool as any).particles
-      if (particles) {
-        particles.forEach((particle: any) => {
-          particle.active = false
-          particle.life = 0
-        })
-      }
-    }
+    this.vectorParticlePool?.reset()
     
     // Deactivate specialized particle pools
     const specializedPools = [
@@ -392,15 +378,7 @@ export class EffectsSystem {
     ]
     
     specializedPools.forEach(pool => {
-      if (pool) {
-        const particles = (pool as any).particles
-        if (particles) {
-          particles.forEach((particle: any) => {
-            particle.active = false
-            particle.life = 0
-          })
-        }
-      }
+      pool?.reset()
     })
     
     // Clear active effects

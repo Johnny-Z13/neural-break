@@ -112,7 +112,7 @@ export class PauseScreen {
       </div>
 
       <!-- MAIN CONTENT -->
-      <div style="position: relative; z-index: 2; text-align: center;">
+      <div class="pause-content" style="position: relative; z-index: 2; text-align: center;">
         <!-- PAUSED TITLE -->
         <h1 id="pauseTitle" style="
           font-size: clamp(2rem, 5vw, 3.5rem);
@@ -128,7 +128,7 @@ export class PauseScreen {
           animation: pauseTitlePulse 2s ease-in-out infinite;
           font-weight: bold;
         ">
-          ⏸ PAUSED
+          PAUSED
         </h1>
 
         <!-- BUTTON CONTAINER -->
@@ -142,7 +142,7 @@ export class PauseScreen {
         </div>
 
         <!-- INSTRUCTIONS -->
-        <div style="
+        <div class="pause-instructions" style="
           margin-top: clamp(2rem, 5vw, 3rem);
           font-size: clamp(0.5rem, 1.2vw, 0.7rem);
           color: #FFFF00;
@@ -150,7 +150,7 @@ export class PauseScreen {
           letter-spacing: 0.15em;
           opacity: 0.8;
         ">
-          ARROWS/WASD/🎮 • SPACE/ENTER • ESC TO CONTINUE
+          ARROWS / WASD TO MOVE<br>ENTER TO SELECT / ESC TO CONTINUE
         </div>
       </div>
     `
@@ -186,7 +186,7 @@ export class PauseScreen {
 
     // Continue button
     const continueButton = document.createElement('button')
-    continueButton.textContent = '► CONTINUE'
+    continueButton.textContent = 'CONTINUE'
     continueButton.id = 'continueButton'
     continueButton.style.cssText = this.getButtonStyle()
     continueButton.addEventListener('mouseenter', () => {
@@ -195,14 +195,13 @@ export class PauseScreen {
     })
     continueButton.addEventListener('click', () => {
       if (audioManager) audioManager.playButtonPressSound()
-      PauseScreen.cleanup()
       onContinue()
     })
     buttonContainer.appendChild(continueButton)
 
     // End Game button
     const endGameButton = document.createElement('button')
-    endGameButton.textContent = '✕ END GAME'
+    endGameButton.textContent = 'END SESSION'
     endGameButton.id = 'endGameButton'
     endGameButton.style.cssText = this.getButtonStyle()
     endGameButton.addEventListener('mouseenter', () => {
@@ -211,7 +210,6 @@ export class PauseScreen {
     })
     endGameButton.addEventListener('click', () => {
       if (audioManager) audioManager.playButtonPressSound()
-      PauseScreen.cleanup()
       onEndGame()
     })
     buttonContainer.appendChild(endGameButton)
@@ -239,10 +237,8 @@ export class PauseScreen {
         if (audioManager) audioManager.playButtonPressSound()
         
         if (PauseScreen.selectedButtonIndex === 0) {
-          PauseScreen.cleanup()
           onContinue()
         } else if (PauseScreen.selectedButtonIndex === 1) {
-          PauseScreen.cleanup()
           onEndGame()
         }
       }
@@ -250,7 +246,6 @@ export class PauseScreen {
       else if (key === 'escape') {
         e.preventDefault()
         if (audioManager) audioManager.playButtonPressSound()
-        PauseScreen.cleanup()
         onContinue()
       }
     }
@@ -292,10 +287,8 @@ export class PauseScreen {
         if (audioManager) audioManager.playButtonPressSound()
         
         if (PauseScreen.selectedButtonIndex === 0) {
-          PauseScreen.cleanup()
           onContinue()
         } else if (PauseScreen.selectedButtonIndex === 1) {
-          PauseScreen.cleanup()
           onEndGame()
         }
         
@@ -304,7 +297,6 @@ export class PauseScreen {
         if (now - PauseScreen.lastGamepadInput < PauseScreen.inputCooldown) return
         
         if (audioManager) audioManager.playButtonPressSound()
-        PauseScreen.cleanup()
         onContinue()
         
         PauseScreen.lastGamepadInput = now

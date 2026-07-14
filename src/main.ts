@@ -1,5 +1,6 @@
 import { Game } from './core/Game'
 import { OptionsScreen } from './ui/screens/OptionsScreen'
+import './ui/ui-overhaul.css'
 
 // Initialize the game when DOM is loaded
 document.addEventListener('DOMContentLoaded', () => {

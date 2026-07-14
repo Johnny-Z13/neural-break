@@ -21,6 +21,18 @@ Creates optimized production build with Three.js chunking
 npm run preview
 ```
 
+**Run Verification:**
+```bash
+npm run typecheck
+npm run build
+npm test
+```
+
+**Apply Leaderboard Schema:**
+```bash
+DATABASE_URL='postgresql://...' npm run db:migrate
+```
+
 
 ## Development Configuration
 
@@ -132,7 +144,7 @@ src/
 │   ├── GameScreens.ts     # Screen manager with transitions
 │   └── screens/           # Individual screen components
 │       ├── StartScreen.ts      # VHS cyberpunk arcade menu
-│       ├── LeaderboardScreen.ts # Hall of Fame with Vercel KV
+│       ├── LeaderboardScreen.ts # Hall of Fame with Neon Postgres
 │       ├── GameOverScreen.ts   # End game stats screen
 │       ├── PauseScreen.ts      # In-game pause overlay
 │       └── ScreenTransitions.ts # Fade/slide/zoom effects
@@ -187,7 +199,7 @@ Neural Break features a distinctive retro-futuristic UI inspired by 80s arcade c
 
 **Screen Components:**
 - **StartScreen**: Main menu with enemy database, INSERT COIN banner, vertical menu
-- **LeaderboardScreen**: Golden theme "HALL OF FAME" with Vercel KV integration
+- **LeaderboardScreen**: Golden theme "HALL OF FAME" with Neon Postgres integration
 - **GameOverScreen**: Red danger theme with glitch overlay and RGB-split title
 - **PauseScreen**: Translucent overlay with dimmed effects, ESC to unpause
 
@@ -199,35 +211,47 @@ Neural Break features a distinctive retro-futuristic UI inspired by 80s arcade c
 
 **Key Files:**
 - `index.html`: Unified design system CSS variables
+- `src/ui/ui-overhaul.css`: Current shared menu/HUD styling
 - `src/ui/screens/*.ts`: Individual screen implementations
 - `src/ui/screens/ScreenTransitions.ts`: Animation orchestration
 
+### In-game visual baseline
+- Crispness is the priority: restrained bloom, vignette, and scanline opacity.
+- Chromatic aberration is off by default; damage glitch remains event-driven.
+- Defaults and local persistence live in `src/config/PostProcessSettings.ts`.
+- The Options post-process debug panel exposes the important parameters live.
+- Enemy death particles must be drawable on the first kill after every reset;
+  keep CPU state, GPU buffers, and draw ranges synchronized.
+
 ### Cloud Infrastructure
 
-**Vercel KV (Redis) Integration:**
+**Neon Postgres Integration:**
 - High score leaderboard persistence
 - Play count tracking across sessions
-- Environment variables via Vercel CLI
+- Server-only environment variables via Vercel CLI
 - API routes: `/api/highscores` (GET/POST)
+- Neon project: `Neural Break High Scores`
 
 **Setup Commands:**
 ```bash
 vercel link --yes              # Link to Vercel project
-vercel env pull .env.local     # Pull environment variables
+vercel env pull .env.local     # Pull development environment variables
 ```
 
 **Environment Variables:**
-- `REDIS_URL`: Vercel KV connection string
-- `VERCEL_OIDC_TOKEN`: Authentication token
+- `DATABASE_URL`: Neon Postgres connection string (server-only)
+- `ALLOWED_SCORE_ORIGINS`: Optional comma-separated extra origins
 
 ### Testing Strategy
 
 **Current Testing:**
-- Manual test page at `tests/test_highscore.html` for localStorage high score system validation
-- Open in browser, use buttons to test save/load/clear operations
+- Chromium Playwright regression suite in `tests/e2e/`
+- Coverage includes menus, pause/resume, leaderboard states, name submission,
+  and first-kill death particles
+- `tests/test_highscore.html` remains a legacy manual localStorage utility; it
+  does not exercise the production Neon path
 
 **Planned Testing:**
-- Playwright smoke suite to be added at `tests/e2e/` (Task 0.3) with chromium-only config
 - Future Vitest unit tests for game logic (collision detection, scoring, spawning)
 - Future Testing Library tests for UI components
 

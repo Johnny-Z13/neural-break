@@ -250,7 +250,7 @@ export class LocalStorageHighScoreService implements IHighScoreService {
 }
 
 /**
- * API High Score Service (for Vercel deployment with online persistence)
+ * API High Score Service (for Vercel deployment with Neon Postgres persistence)
  * Uses serverless function at /api/highscores
  */
 export class APIHighScoreService implements IHighScoreService {
@@ -313,7 +313,7 @@ export class APIHighScoreService implements IHighScoreService {
       return Array.isArray(data) ? data : []
     } catch (error) {
       console.error('❌ Error loading high scores from API:', error)
-      return []
+      throw error
     }
   }
 
@@ -339,7 +339,7 @@ export class APIHighScoreService implements IHighScoreService {
  * Always attempts to use API first (works both locally and in production)
  * Only localStorage is used for remembering the last player name (convenience feature)
  *
- * NOTE: No fallback to localStorage for scores - all scores should go to Vercel KV
+ * NOTE: No fallback to localStorage for scores - all scores go to the server-side Neon leaderboard
  * This ensures consistency across all players and makes testing easier
  */
 export class SimplifiedHighScoreService implements IHighScoreService {
@@ -349,12 +349,12 @@ export class SimplifiedHighScoreService implements IHighScoreService {
   constructor() {
     this.apiService = new APIHighScoreService()
     console.log('🌐 High Score Service: Always using API endpoint (/api/highscores)')
-    console.log('   → Scores will persist to Vercel KV when deployed')
-    console.log('   → Development: API will handle gracefully if KV unavailable')
+    console.log('   → Scores persist to Neon Postgres when the API is deployed')
+    console.log('   → Development: mock the API or run through Vercel dev')
   }
 
   async saveHighScore(entry: HighScoreEntry): Promise<boolean> {
-    // Always try to save to API (Vercel KV)
+    // Always try to save to the server-side API
     const success = await this.apiService.saveHighScore(entry)
 
     if (success) {
@@ -412,4 +412,3 @@ export class HighScoreServiceFactory {
     this.instance = service
   }
 }
-

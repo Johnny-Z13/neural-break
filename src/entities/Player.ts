@@ -109,8 +109,8 @@ export class Player {
     
     // Silver/metallic hull material
     const hullMaterial = new THREE.MeshLambertMaterial({
-      color: 0xB8C4D0,       // Silver-blue metallic
-      emissive: 0x334455,    // Subtle metallic glow
+      color: 0xD2DEE9,       // Brighter silver-blue metallic
+      emissive: 0x425A70,    // Clearer metallic glow against the dark arena
       transparent: true,     // Required for death animation fade-out
       opacity: 1.0
     })
@@ -283,9 +283,9 @@ export class Player {
     
     const glowGeometry = new THREE.ShapeGeometry(glowShape)
     const glowMaterial = new THREE.MeshBasicMaterial({
-      color: 0x6688AA,        // Blue-silver glow
+      color: 0x7AA8CC,        // Blue-silver glow
       transparent: true,
-      opacity: 0.3,
+      opacity: 0.4,
       side: THREE.DoubleSide,
       blending: THREE.AdditiveBlending,
       wireframe: true
@@ -508,8 +508,8 @@ export class Player {
     // Note: Scale is now handled in updateVisualEffects with zoom compensation
     // Reset material after dash
     setTimeout(() => {
-      material.emissive.setHex(0x334455) // Back to metallic glow
-      material.color.setHex(0xB8C4D0)   // Back to silver
+      material.emissive.setHex(0x425A70) // Back to metallic glow
+      material.color.setHex(0xD2DEE9)   // Back to silver
       this.isInvulnerable = false // End invulnerability
     }, 400)
   }
@@ -729,14 +729,14 @@ export class Player {
       this.mesh.scale.setScalar(1 * zoomCompensation)
       const material = this.mesh.material as THREE.MeshLambertMaterial
       material.emissiveIntensity = 1.0
-      material.emissive.setHex(0x334455) // Normal metallic glow
+      material.emissive.setHex(0x425A70) // Normal metallic glow
       
       // Reset edge glow
       if (this.mesh.children[9]) {
         const edgeGlow = this.mesh.children[9] as THREE.Mesh
         const glowMaterial = edgeGlow.material as THREE.MeshBasicMaterial
-        glowMaterial.opacity = 0.3
-        glowMaterial.color.setHex(0x6688AA)
+        glowMaterial.opacity = 0.4
+        glowMaterial.color.setHex(0x7AA8CC)
       }
       
       // Reset flame colors

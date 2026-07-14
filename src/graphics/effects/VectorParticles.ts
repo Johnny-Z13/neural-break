@@ -59,6 +59,8 @@ export class VectorParticlePool {
     })
     
     this.lineSystem = new THREE.LineSegments(this.lineGeometry, this.lineMaterial)
+    this.lineSystem.frustumCulled = false
+    this.lineGeometry.setDrawRange(0, 0)
     
     // Initialize particles
     for (let i = 0; i < poolSize; i++) {
@@ -75,10 +77,75 @@ export class VectorParticlePool {
         if (i >= this.activeCount) {
           this.activeCount = i + 1
         }
+        this.syncParticleToGeometry(i)
         return // Exit early when found
       }
     }
     // If pool is exhausted, silently fail (don't spawn particle)
+  }
+
+  private syncParticleToGeometry(index: number, updateDrawState: boolean = true): void {
+    const particle = this.particles[index]
+    const i6 = index * 6
+
+    if (particle.shapeType === 0) {
+      const size = 0.2 * particle.opacity
+      const angle = particle.rotation
+
+      this.positions[i6] = particle.position.x + Math.cos(angle) * size
+      this.positions[i6 + 1] = particle.position.y + Math.sin(angle) * size
+      this.positions[i6 + 2] = particle.position.z
+      this.positions[i6 + 3] = particle.position.x + Math.cos(angle + Math.PI * 2/3) * size
+      this.positions[i6 + 4] = particle.position.y + Math.sin(angle + Math.PI * 2/3) * size
+      this.positions[i6 + 5] = particle.position.z
+
+      this.colors[i6] = particle.color.r
+      this.colors[i6 + 1] = particle.color.g
+      this.colors[i6 + 2] = particle.color.b
+      this.colors[i6 + 3] = particle.color.r
+      this.colors[i6 + 4] = particle.color.g
+      this.colors[i6 + 5] = particle.color.b
+    } else if (particle.shapeType === 1) {
+      const size = 0.3 * particle.opacity
+      const angle = particle.rotation
+
+      this.positions[i6] = particle.position.x - Math.cos(angle) * size * 0.5
+      this.positions[i6 + 1] = particle.position.y - Math.sin(angle) * size * 0.5
+      this.positions[i6 + 2] = particle.position.z
+      this.positions[i6 + 3] = particle.position.x + Math.cos(angle) * size * 0.5
+      this.positions[i6 + 4] = particle.position.y + Math.sin(angle) * size * 0.5
+      this.positions[i6 + 5] = particle.position.z
+
+      this.colors[i6] = particle.color.r * 0.5
+      this.colors[i6 + 1] = particle.color.g * 0.5
+      this.colors[i6 + 2] = particle.color.b * 0.5
+      this.colors[i6 + 3] = particle.color.r
+      this.colors[i6 + 4] = particle.color.g
+      this.colors[i6 + 5] = particle.color.b
+    } else {
+      const size = 0.15 * particle.opacity
+      const angle = particle.rotation
+
+      this.positions[i6] = particle.position.x + Math.cos(angle) * size
+      this.positions[i6 + 1] = particle.position.y + Math.sin(angle) * size
+      this.positions[i6 + 2] = particle.position.z
+      this.positions[i6 + 3] = particle.position.x + Math.cos(angle + Math.PI/2) * size
+      this.positions[i6 + 4] = particle.position.y + Math.sin(angle + Math.PI/2) * size
+      this.positions[i6 + 5] = particle.position.z
+
+      this.colors[i6] = particle.color.r
+      this.colors[i6 + 1] = particle.color.g
+      this.colors[i6 + 2] = particle.color.b
+      this.colors[i6 + 3] = particle.color.r
+      this.colors[i6 + 4] = particle.color.g
+      this.colors[i6 + 5] = particle.color.b
+    }
+
+    if (updateDrawState) {
+      this.lineGeometry.attributes.position.needsUpdate = true
+      this.lineGeometry.attributes.color.needsUpdate = true
+      this.lineGeometry.setDrawRange(0, this.activeCount * 2)
+    }
   }
 
   update(deltaTime: number): void {
@@ -89,76 +156,14 @@ export class VectorParticlePool {
       
       if (particle.active) {
         particle.update(deltaTime)
-        
-        const i6 = i * 6 // 2 points * 3 coords
-        
-        // Create vector shape based on type
-        if (particle.shapeType === 0) {
-          // Triangle - 3 points forming a triangle
-          const size = 0.2 * particle.opacity
-          const angle = particle.rotation
-          
-          // Point 1
-          this.positions[i6] = particle.position.x + Math.cos(angle) * size
-          this.positions[i6 + 1] = particle.position.y + Math.sin(angle) * size
-          this.positions[i6 + 2] = particle.position.z
-          
-          // Point 2
-          this.positions[i6 + 3] = particle.position.x + Math.cos(angle + Math.PI * 2/3) * size
-          this.positions[i6 + 4] = particle.position.y + Math.sin(angle + Math.PI * 2/3) * size
-          this.positions[i6 + 5] = particle.position.z
-          
-          // Colors
-          this.colors[i6] = particle.color.r
-          this.colors[i6 + 1] = particle.color.g
-          this.colors[i6 + 2] = particle.color.b
-          this.colors[i6 + 3] = particle.color.r
-          this.colors[i6 + 4] = particle.color.g
-          this.colors[i6 + 5] = particle.color.b
-        } else if (particle.shapeType === 1) {
-          // Line - 2 points
-          const size = 0.3 * particle.opacity
-          const angle = particle.rotation
-          
-          // Start point
-          this.positions[i6] = particle.position.x - Math.cos(angle) * size * 0.5
-          this.positions[i6 + 1] = particle.position.y - Math.sin(angle) * size * 0.5
-          this.positions[i6 + 2] = particle.position.z
-          
-          // End point
-          this.positions[i6 + 3] = particle.position.x + Math.cos(angle) * size * 0.5
-          this.positions[i6 + 4] = particle.position.y + Math.sin(angle) * size * 0.5
-          this.positions[i6 + 5] = particle.position.z
-          
-          // Colors (fade at ends)
-          this.colors[i6] = particle.color.r * 0.5
-          this.colors[i6 + 1] = particle.color.g * 0.5
-          this.colors[i6 + 2] = particle.color.b * 0.5
-          this.colors[i6 + 3] = particle.color.r
-          this.colors[i6 + 4] = particle.color.g
-          this.colors[i6 + 5] = particle.color.b
-        } else {
-          // Square - 4 points (we'll use 2 lines to form a square)
-          const size = 0.15 * particle.opacity
-          const angle = particle.rotation
-          
-          // First line of square
-          this.positions[i6] = particle.position.x + Math.cos(angle) * size
-          this.positions[i6 + 1] = particle.position.y + Math.sin(angle) * size
-          this.positions[i6 + 2] = particle.position.z
-          
-          this.positions[i6 + 3] = particle.position.x + Math.cos(angle + Math.PI/2) * size
-          this.positions[i6 + 4] = particle.position.y + Math.sin(angle + Math.PI/2) * size
-          this.positions[i6 + 5] = particle.position.z
-          
-          // Colors
-          this.colors[i6] = particle.color.r
-          this.colors[i6 + 1] = particle.color.g
-          this.colors[i6 + 2] = particle.color.b
-          this.colors[i6 + 3] = particle.color.r
-          this.colors[i6 + 4] = particle.color.g
-          this.colors[i6 + 5] = particle.color.b
+
+        if (!particle.active) {
+          const i6 = i * 6
+          this.positions.fill(0, i6, i6 + 6)
+          continue
         }
+
+        this.syncParticleToGeometry(i, false)
         
         newActiveCount = Math.max(newActiveCount, i + 1)
       } else {
@@ -186,5 +191,18 @@ export class VectorParticlePool {
   getParticleSystem(): THREE.LineSegments {
     return this.lineSystem
   }
-}
 
+  reset(): void {
+    for (const particle of this.particles) {
+      particle.active = false
+      particle.life = 0
+    }
+
+    this.activeCount = 0
+    this.positions.fill(0)
+    this.colors.fill(0)
+    this.lineGeometry.attributes.position.needsUpdate = true
+    this.lineGeometry.attributes.color.needsUpdate = true
+    this.lineGeometry.setDrawRange(0, 0)
+  }
+}

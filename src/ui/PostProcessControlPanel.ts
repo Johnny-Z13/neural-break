@@ -99,14 +99,14 @@ export class PostProcessControlPanel {
   private buildHTML(): string {
     return `
       <!-- TITLE -->
-      <div style="
+      <div class="pp-title" style="
         text-align: center;
         color: #00FFFF;
         font-size: 11px;
         text-shadow: 0 0 10px #00FFFF;
         letter-spacing: 0.1em;
       ">
-        🎨 POST-PROCESS 🎨
+        POST-PROCESS
       </div>
 
       <!-- FPS COUNTER -->
@@ -124,13 +124,13 @@ export class PostProcessControlPanel {
         FPS: --
       </div>
 
-      <div style="width: 100%; height: 2px; background: linear-gradient(90deg, transparent, #00FFFF, transparent);"></div>
+      <div class="pp-divider" style="width: 100%; height: 2px; background: linear-gradient(90deg, transparent, #00FFFF, transparent);"></div>
 
       <!-- BLOOM EFFECT -->
       <div class="control-group">
         <label class="control-label">
           <input type="checkbox" id="bloom-enabled" ${this.currentConfig.bloom.enabled ? 'checked' : ''}>
-          <span style="color: #FF00FF;">💫 BLOOM</span>
+          <span style="color: #FF00FF;">BLOOM</span>
         </label>
         <div class="slider-group">
           <label>Intensity: <span id="bloom-intensity-val">${this.currentConfig.bloom.intensity.toFixed(2)}</span></label>
@@ -146,13 +146,13 @@ export class PostProcessControlPanel {
         </div>
       </div>
 
-      <div style="width: 100%; height: 1px; background: rgba(0, 255, 255, 0.3);"></div>
+      <div class="pp-divider" style="width: 100%; height: 1px; background: rgba(0, 255, 255, 0.3);"></div>
 
       <!-- CHROMATIC ABERRATION -->
       <div class="control-group">
         <label class="control-label">
           <input type="checkbox" id="chroma-enabled" ${this.currentConfig.chromaticAberration.enabled ? 'checked' : ''}>
-          <span style="color: #FF00FF;">🌈 CHROMATIC</span>
+          <span style="color: #FF00FF;">CHROMATIC</span>
         </label>
         <div class="slider-group">
           <label>Intensity: <span id="chroma-intensity-val">${(this.currentConfig.chromaticAberration.intensity * 1000).toFixed(1)}</span></label>
@@ -160,13 +160,13 @@ export class PostProcessControlPanel {
         </div>
       </div>
 
-      <div style="width: 100%; height: 1px; background: rgba(0, 255, 255, 0.3);"></div>
+      <div class="pp-divider" style="width: 100%; height: 1px; background: rgba(0, 255, 255, 0.3);"></div>
 
       <!-- VIGNETTE -->
       <div class="control-group">
         <label class="control-label">
           <input type="checkbox" id="vignette-enabled" ${this.currentConfig.vignette.enabled ? 'checked' : ''}>
-          <span style="color: #FF00FF;">🎭 VIGNETTE</span>
+          <span style="color: #FF00FF;">VIGNETTE</span>
         </label>
         <div class="slider-group">
           <label>Offset: <span id="vignette-offset-val">${this.currentConfig.vignette.offset.toFixed(2)}</span></label>
@@ -178,32 +178,36 @@ export class PostProcessControlPanel {
         </div>
       </div>
 
-      <div style="width: 100%; height: 1px; background: rgba(0, 255, 255, 0.3);"></div>
+      <div class="pp-divider" style="width: 100%; height: 1px; background: rgba(0, 255, 255, 0.3);"></div>
 
       <!-- SCANLINES -->
       <div class="control-group">
         <label class="control-label">
           <input type="checkbox" id="scanlines-enabled" ${this.currentConfig.scanlines.enabled ? 'checked' : ''}>
-          <span style="color: #FF00FF;">📺 SCANLINES</span>
+          <span style="color: #FF00FF;">SCANLINES</span>
         </label>
         <div class="slider-group">
           <label>Density: <span id="scanlines-density-val">${this.currentConfig.scanlines.density.toFixed(1)}</span></label>
           <input type="range" id="scanlines-density" min="0.5" max="3" step="0.1" value="${this.currentConfig.scanlines.density}">
         </div>
+        <div class="slider-group">
+          <label>Opacity: <span id="scanlines-opacity-val">${this.currentConfig.scanlines.opacity.toFixed(2)}</span></label>
+          <input type="range" id="scanlines-opacity" min="0" max="1" step="0.05" value="${this.currentConfig.scanlines.opacity}">
+        </div>
       </div>
 
-      <div style="width: 100%; height: 1px; background: rgba(0, 255, 255, 0.3);"></div>
+      <div class="pp-divider" style="width: 100%; height: 1px; background: rgba(0, 255, 255, 0.3);"></div>
 
       <!-- GLITCH -->
       <div class="control-group">
         <label class="control-label">
           <input type="checkbox" id="glitch-enabled" ${this.currentConfig.glitch.enabled ? 'checked' : ''}>
-          <span style="color: #FF00FF;">⚡ GLITCH (DMG)</span>
+          <span style="color: #FF00FF;">GLITCH / DAMAGE</span>
         </label>
         <div style="font-size: 8px; color: #888; padding-left: 24px;">Triggers on player damage</div>
       </div>
 
-      <div style="width: 100%; height: 2px; background: linear-gradient(90deg, transparent, #FF00FF, transparent);"></div>
+      <div class="pp-divider" style="width: 100%; height: 2px; background: linear-gradient(90deg, transparent, #FF00FF, transparent);"></div>
 
       <!-- ACTION BUTTONS -->
       <div style="display: flex; flex-direction: column; gap: 6px;">
@@ -217,7 +221,7 @@ export class PostProcessControlPanel {
           cursor: pointer;
           text-shadow: 0 0 8px #00FF00;
           box-shadow: 0 0 10px rgba(0, 255, 0, 0.3);
-        ">💾 SAVE SETTINGS</button>
+        ">SAVE SETTINGS</button>
 
         <button id="pp-reset" style="
           background: rgba(255, 255, 0, 0.2);
@@ -229,7 +233,7 @@ export class PostProcessControlPanel {
           cursor: pointer;
           text-shadow: 0 0 8px #FFFF00;
           box-shadow: 0 0 10px rgba(255, 255, 0, 0.3);
-        ">🔄 RESET DEFAULTS</button>
+        ">RESET DEFAULTS</button>
 
         <button id="pp-test-glitch" style="
           background: rgba(255, 0, 255, 0.2);
@@ -241,7 +245,7 @@ export class PostProcessControlPanel {
           cursor: pointer;
           text-shadow: 0 0 8px #FF00FF;
           box-shadow: 0 0 10px rgba(255, 0, 255, 0.3);
-        ">⚡ TEST GLITCH</button>
+        ">TEST GLITCH</button>
 
         <button id="pp-test-shockwave" style="
           background: rgba(0, 255, 255, 0.2);
@@ -253,7 +257,7 @@ export class PostProcessControlPanel {
           cursor: pointer;
           text-shadow: 0 0 8px #00FFFF;
           box-shadow: 0 0 10px rgba(0, 255, 255, 0.3);
-        ">💥 TEST SHOCK WAVE</button>
+        ">TEST SHOCK WAVE</button>
       </div>
 
       <style>
@@ -368,6 +372,10 @@ export class PostProcessControlPanel {
       this.currentConfig.scanlines.density = value
       this.applySettings()
     }, 1) // 1 decimal place
+    this.addSliderListener('scanlines-opacity', 'scanlines-opacity-val', (value) => {
+      this.currentConfig.scanlines.opacity = value
+      this.applySettings()
+    })
 
     // Glitch
     this.addListener('glitch-enabled', 'change', (e) => {
@@ -378,7 +386,7 @@ export class PostProcessControlPanel {
     // Save button
     this.addListener('pp-save', 'click', () => {
       PostProcessSettings.save(this.currentConfig)
-      this.showNotification('💾 Settings saved!', '#00FF00')
+      this.showNotification('SETTINGS SAVED', '#78D99A')
     })
 
     // Reset button
@@ -386,20 +394,20 @@ export class PostProcessControlPanel {
       this.currentConfig = PostProcessSettings.reset()
       this.updateUI()
       this.applySettings()
-      this.showNotification('🔄 Reset to defaults!', '#FFFF00')
+      this.showNotification('DEFAULTS RESTORED', '#F2B56A')
     })
 
     // Test glitch button
     this.addListener('pp-test-glitch', 'click', () => {
       this.postProcessing.triggerGlitch(0.8, 0.5)
-      this.showNotification('⚡ Glitch triggered!', '#FF00FF')
+      this.showNotification('GLITCH TRIGGERED', '#F2B56A')
     })
 
     // Test shock wave button
     this.addListener('pp-test-shockwave', 'click', () => {
       // Trigger at center of screen (0, 0, 0)
       this.postProcessing.triggerShockWave(new THREE.Vector3(0, 0, 0))
-      this.showNotification('💥 Shock wave triggered!', '#00FFFF')
+      this.showNotification('SHOCK WAVE TRIGGERED', '#43DFF2')
     })
   }
 
@@ -457,6 +465,7 @@ export class PostProcessControlPanel {
     this.setSlider('vignette-offset', 'vignette-offset-val', this.currentConfig.vignette.offset)
     this.setSlider('vignette-darkness', 'vignette-darkness-val', this.currentConfig.vignette.darkness)
     this.setSlider('scanlines-density', 'scanlines-density-val', this.currentConfig.scanlines.density, 1)
+    this.setSlider('scanlines-opacity', 'scanlines-opacity-val', this.currentConfig.scanlines.opacity)
   }
 
   /**

@@ -1,17 +1,14 @@
 # 🎮 Neural Break
 
-A cyberpunk survival shooter built with Three.js and TypeScript. Battle through 30 minutes of escalating intensity in a neural network environment.
+A cyberpunk survival shooter built with Three.js and TypeScript. Clear 99 escalating arcade levels inside a hostile neural network.
 
-[![Deploy with Vercel](https://vercel.com/button)](https://vercel.com/new/clone?repository-url=https://github.com/yourusername/neural-break)
+[![Deploy with Vercel](https://vercel.com/button)](https://vercel.com/new/clone?repository-url=https://github.com/Johnny-Z13/Neural-Break)
 
 ---
 
 ## 🚀 Quick Start
 
 ```bash
-# Clone and install
-git clone <repository-url>
-cd neural-break
 npm install
 
 # Start development server
@@ -20,9 +17,8 @@ npm run dev
 # Build for production
 npm run build
 
-# Deploy to Vercel
-npm install -g vercel
-vercel
+# Run the Playwright regression suite
+npm test
 ```
 
 **First time deploying?** See [📖 Deployment Guide](#-deployment)
@@ -39,7 +35,8 @@ vercel
 
 ### 🏆 Global Leaderboards
 - Separate top 10 for each game mode
-- Online persistence (Vercel deployment)
+- Persistent Neon Postgres storage through a Vercel Function
+- Server-side validation, same-origin writes, rate limiting, and atomic ranking
 - Real-time competition
 - Victory badges for 99-level completions
 
@@ -97,6 +94,10 @@ src/
 
 api/                     # Serverless functions (Vercel)
 └── highscores.ts        # Global leaderboard API
+
+database/                # Idempotent Neon schema
+scripts/                 # Database migration utilities
+tests/e2e/               # Playwright gameplay and UI regressions
 ```
 
 ---
@@ -135,38 +136,45 @@ Want to add a new mode? See [`docs/HOW_TO_ADD_NEW_GAME_MODES.md`](docs/HOW_TO_AD
 - **Entity Pooling**: Efficient memory management
 - **Centralized Config**: Easy balance tuning
 
+### Visual tuning
+
+The crisp in-game baseline lives in `src/config/PostProcessSettings.ts`.
+Bloom, vignette, and scanlines are intentionally restrained; chromatic
+aberration remains off by default. Enable **Post-process debug** in Options to
+adjust bloom, vignette, scanline density, and scanline opacity live.
+
+### Verification
+
+```bash
+npm run typecheck
+npm run build
+npm test
+```
+
+The browser suite covers menu navigation, pause/resume, leaderboard states,
+game-over name submission, and first-kill death-particle emission.
+
 ---
 
 ## 🌐 Deployment
 
-### Quick Deploy to Vercel
+### Neon-backed deployment
 
 ```bash
-# 1. Install dependencies
 npm install
-
-# 2. Deploy
-vercel
-
-# 3. Set environment variable
-# In Vercel Dashboard: Settings → Environment Variables
-# Add: VITE_USE_API_HIGHSCORES = true
-
-# 4. Go to production
+DATABASE_URL='postgresql://...' npm run db:migrate
+vercel env add DATABASE_URL production,preview --sensitive
 vercel --prod
 ```
 
-### Features After Deployment
+The current Neon project is named **Neural Break High Scores**. `DATABASE_URL`
+must remain server-only; never expose it with a `VITE_` prefix. The client does
+not silently fall back to a private local leaderboard because that would make
+global qualification and ranking inconsistent.
 
-✅ **Global Leaderboards**: All players see same scores  
-✅ **Automatic Fallback**: Uses localStorage if API fails  
-✅ **Mode Separation**: Original and Test have own top 10  
-✅ **Free Hosting**: Vercel free tier is perfect for indie games  
-
-### Storage Options
-
-**Current**: In-memory (resets on deployment) - great for testing  
-**Upgrade**: Vercel KV (permanent storage) - see deployment guide
+The API prevents casual request tampering but the game simulation remains in
+the browser. A fully cheat-proof leaderboard would require server-authoritative
+gameplay or server-verifiable run telemetry.
 
 **See**: [`docs/DEPLOYMENT.md`](docs/DEPLOYMENT.md) for complete guide
 
@@ -189,6 +197,7 @@ vercel --prod
 - [`docs/BALANCE_QUICK_REFERENCE.md`](docs/BALANCE_QUICK_REFERENCE.md) - Quick balance reference
 - [`docs/HOW_TO_ADD_NEW_GAME_MODES.md`](docs/HOW_TO_ADD_NEW_GAME_MODES.md) - Extend the game
 - [`docs/LEVEL_SYSTEM.md`](docs/LEVEL_SYSTEM.md) - Level progression details
+- [`design-qa.md`](design-qa.md) - UI and transition review evidence
 
 ### 📝 Reference
 - [`CHANGELOG.md`](CHANGELOG.md) - Version history
@@ -205,6 +214,7 @@ vercel --prod
 | **TypeScript** | Type-safe development |
 | **Vite** | Fast dev server & builds |
 | **Vercel** | Serverless deployment |
+| **Neon Postgres** | Persistent high-score storage |
 | **TWEEN.js** | Smooth animations |
 | **Web Audio API** | Sound system |
 
@@ -212,11 +222,12 @@ vercel --prod
 
 ## 🎨 Recent Updates
 
-### January 2026 - Online Leaderboards 🌐
-- ✅ Global high scores via Vercel API
-- ✅ Separate leaderboards per game mode
-- ✅ Automatic environment detection
-- ✅ Smart localStorage fallback
+### July 2026 - Visual and leaderboard reliability
+- ✅ Crisper CRT/post-process defaults and a brighter player ship
+- ✅ Subtle emissive death particles with reliable first-kill bursts
+- ✅ Gameplay alerts presented as unobtrusive text
+- ✅ End-to-end name entry → leaderboard → menu flow
+- ✅ Persistent Neon Postgres leaderboard with server-side safeguards
 
 ### January 2026 - Code Cleanup 🧹
 - ✅ Removed ~700 lines of legacy code

@@ -1,6 +1,7 @@
 import { ScoreManager, GameMode } from '../../core/GameState'
 import { AudioManager } from '../../audio/AudioManager'
 import { StarfieldManager } from '../../graphics/StarfieldManager'
+import { escapeHtml } from '../../utils/escapeHtml'
 
 /**
  * NEURAL BREAK - Leaderboard Screen
@@ -152,7 +153,7 @@ export class LeaderboardScreen {
           font-weight: bold;
           text-align: center;
         ">
-          ◆◆◆ HALL OF FAME ◆◆◆
+          HALL OF FAME
         </div>
 
         <!-- TITLE WITH GLOW -->
@@ -172,7 +173,7 @@ export class LeaderboardScreen {
           font-weight: bold;
           position: relative;
         ">
-          ★ ARCADE HIGH SCORES ★
+          ARCADE HIGH SCORES
         </h1>
 
         <!-- Subtitle -->
@@ -248,7 +249,7 @@ export class LeaderboardScreen {
               var(--shadow-pixel, 4px 4px 0) var(--color-red-dark, #662222);
             transition: all 0.1s step-end;
           ">
-            ◀ BACK TO MENU
+            BACK TO MENU
           </button>
         </div>
       </div>
@@ -266,7 +267,7 @@ export class LeaderboardScreen {
         z-index: 1;
         text-align: center;
       ">
-        <div class="lb-hint-title" style="margin-bottom: 0.3rem;">▲ TOP NEURAL HACKERS ▲</div>
+        <div class="lb-hint-title" style="margin-bottom: 0.3rem;">TOP NEURAL HACKERS</div>
         <div style="font-size: 0.6em; color: var(--color-cyan, #00FFFF); text-shadow: 0 0 8px var(--color-cyan, #00FFFF);">
           SPACE/ESC TO RETURN
         </div>
@@ -472,7 +473,6 @@ export class LeaderboardScreen {
     backButton.addEventListener('click', () => {
       if (audioManager) audioManager.playButtonPressSound()
       cleanupFullscreen()
-      LeaderboardScreen.cleanup()
       onBack()
     })
 
@@ -485,7 +485,6 @@ export class LeaderboardScreen {
         e.preventDefault()
         if (audioManager) audioManager.playButtonPressSound()
         cleanupFullscreen()
-        LeaderboardScreen.cleanup()
         onBack()
       }
     }
@@ -509,7 +508,6 @@ export class LeaderboardScreen {
       if (aButton || bButton) {
         if (audioManager) audioManager.playButtonPressSound()
         cleanupFullscreen()
-        LeaderboardScreen.cleanup()
         onBack()
         LeaderboardScreen.lastGamepadInput = now
       }
@@ -611,10 +609,10 @@ export class LeaderboardScreen {
 
         // Location and date cells (only shown in expanded view)
         const locationCell = expanded 
-          ? `<span style="color: var(--color-magenta, #FF00FF); text-shadow: 0 0 8px var(--color-magenta, #FF00FF);">${(entry.location || 'LOCAL').toUpperCase()}</span>`
+          ? `<span style="color: var(--color-magenta, #FF00FF); text-shadow: 0 0 8px var(--color-magenta, #FF00FF);">${escapeHtml((entry.location || 'LOCAL').toUpperCase())}</span>`
           : ''
         const dateCell = expanded
-          ? `<span style="color: var(--color-yellow, #FFFF00); text-shadow: 0 0 8px var(--color-yellow, #FFFF00);">${entry.date || 'N/A'}</span>`
+          ? `<span style="color: var(--color-yellow, #FFFF00); text-shadow: 0 0 8px var(--color-yellow, #FFFF00);">${escapeHtml(entry.date || 'N/A')}</span>`
           : ''
 
         return `
@@ -632,7 +630,7 @@ export class LeaderboardScreen {
             transition: all 0.15s ease;
           ">
             <span style="font-weight: bold; text-shadow: 0 0 8px ${rankColor};">${rankIcon}</span>
-            <span style="overflow: hidden; text-overflow: ellipsis; white-space: nowrap; text-shadow: 0 0 6px ${rankColor}66;">${entry.name.toUpperCase()}</span>
+            <span style="overflow: hidden; text-overflow: ellipsis; white-space: nowrap; text-shadow: 0 0 6px ${rankColor}66;">${escapeHtml(entry.name.toUpperCase())}</span>
             <span style="text-shadow: 0 0 6px ${rankColor}66;">${entry.level}</span>
             <span style="font-weight: bold; color: var(--color-green, #00FF00); text-shadow: 0 0 12px var(--color-green, #00FF00), 0 0 6px rgba(0, 255, 0, 0.5);">
               ${ScoreManager.formatScore(entry.score)}

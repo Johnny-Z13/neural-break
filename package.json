@@ -6,6 +6,7 @@
   "scripts": {
     "dev": "vite",
     "build": "tsc --noEmit && vite build",
+    "db:migrate": "node scripts/migrate-highscores.mjs",
     "preview": "vite preview",
     "vercel-build": "vite build",
     "typecheck": "tsc --noEmit",
@@ -14,6 +15,9 @@
   "keywords": [],
   "author": "",
   "license": "ISC",
+  "engines": {
+    "node": ">=20.0.0"
+  },
   "devDependencies": {
     "@playwright/test": "^1.57.0",
     "@types/three": "^0.179.0",
@@ -22,9 +26,9 @@
     "typescript": "^5.9.2"
   },
   "dependencies": {
+    "@neondatabase/serverless": "^1.1.0",
     "@tweenjs/tween.js": "^23.1.1",
     "@vercel/analytics": "^1.6.1",
-    "@vercel/kv": "^3.0.0",
     "postprocessing": "^6.38.2",
     "three": "^0.179.1",
     "three.quarks": "^0.16.0",

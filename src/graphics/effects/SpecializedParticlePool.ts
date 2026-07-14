@@ -184,6 +184,8 @@ export class SpecializedParticlePool<T extends SpecializedParticle> {
     })
     
     this.particleSystem = new THREE.Points(this.geometry, this.material)
+    this.particleSystem.frustumCulled = false
+    this.geometry.setDrawRange(0, 0)
     
     // Initialize particles using the factory function
     for (let i = 0; i < config.poolSize; i++) {
@@ -199,9 +201,30 @@ export class SpecializedParticlePool<T extends SpecializedParticle> {
         if (i >= this.activeCount) {
           this.activeCount = i + 1
         }
+        this.syncParticleToGeometry(i)
         return
       }
     }
+  }
+
+  private syncParticleToGeometry(index: number): void {
+    const particle = this.particles[index]
+    const i3 = index * 3
+    const colorMultiplier = this.config.calculateColorMultiplier?.(particle) ?? 1
+    const sizeMultiplier = this.config.calculateSizeMultiplier?.(particle) ?? 1
+
+    this.positions[i3] = particle.position.x
+    this.positions[i3 + 1] = particle.position.y
+    this.positions[i3 + 2] = particle.position.z
+    this.colors[i3] = particle.color.r * colorMultiplier
+    this.colors[i3 + 1] = particle.color.g * colorMultiplier
+    this.colors[i3 + 2] = particle.color.b * colorMultiplier
+    this.sizes[index] = particle.size * sizeMultiplier
+
+    this.geometry.attributes.position.needsUpdate = true
+    this.geometry.attributes.color.needsUpdate = true
+    this.geometry.attributes.size.needsUpdate = true
+    this.geometry.setDrawRange(0, this.activeCount)
   }
 
   update(deltaTime: number): void {
@@ -216,21 +239,28 @@ export class SpecializedParticlePool<T extends SpecializedParticle> {
       
       if (particle.active) {
         particle.update(deltaTime)
+
+        if (!particle.active) {
+          this.sizes[i] = 0
+          continue
+        }
         
         this.positions[i3] = particle.position.x
         this.positions[i3 + 1] = particle.position.y
         this.positions[i3 + 2] = particle.position.z
+
+        const fade = particle.opacity * particle.opacity * (3 - 2 * particle.opacity)
         
         // Apply color multiplier if defined
         if (colorMultiplier) {
-          const mult = colorMultiplier(particle)
+          const mult = colorMultiplier(particle) * fade
           this.colors[i3] = particle.color.r * mult
           this.colors[i3 + 1] = particle.color.g * mult
           this.colors[i3 + 2] = particle.color.b * mult
         } else {
-          this.colors[i3] = particle.color.r
-          this.colors[i3 + 1] = particle.color.g
-          this.colors[i3 + 2] = particle.color.b
+          this.colors[i3] = particle.color.r * fade
+          this.colors[i3 + 1] = particle.color.g * fade
+          this.colors[i3 + 2] = particle.color.b * fade
         }
         
         // Apply size multiplier if defined
@@ -256,6 +286,22 @@ export class SpecializedParticlePool<T extends SpecializedParticle> {
 
   getParticleSystem(): THREE.Points {
     return this.particleSystem
+  }
+
+  reset(): void {
+    for (const particle of this.particles) {
+      particle.active = false
+      particle.life = 0
+    }
+
+    this.activeCount = 0
+    this.positions.fill(0)
+    this.colors.fill(0)
+    this.sizes.fill(0)
+    this.geometry.attributes.position.needsUpdate = true
+    this.geometry.attributes.color.needsUpdate = true
+    this.geometry.attributes.size.needsUpdate = true
+    this.geometry.setDrawRange(0, 0)
   }
 }
 
