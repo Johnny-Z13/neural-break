@@ -18,6 +18,7 @@ export class EnemyManager {
   private chaosWormTimer: number = 0
   private voidSphereTimer: number = 0
   private crystalSwarmTimer: number = 0
+  private fizzerTimer: number = 0
   private bossTimer: number = 0
   private ufoTimer: number = 0
   private effectsSystem: EffectsSystem | null = null
@@ -82,8 +83,9 @@ export class EnemyManager {
       this.chaosWormTimer += deltaTime
       this.voidSphereTimer += deltaTime
       this.crystalSwarmTimer += deltaTime
-    this.bossTimer += deltaTime
-    this.ufoTimer += deltaTime
+      this.fizzerTimer += deltaTime
+      this.bossTimer += deltaTime
+      this.ufoTimer += deltaTime
 
     // Get level-based spawn rates
     if (!this.levelManager) {
@@ -138,6 +140,14 @@ export class EnemyManager {
     if (levelConfig.crystalSpawnRate !== Infinity && this.crystalSwarmTimer >= crystalRate) {
       this.spawnCrystalShardSwarm()
       this.crystalSwarmTimer = 0
+    }
+
+    // Spawn scheduled Fizzers required by level objectives. Multiplier reward
+    // Fizzers use a separate streak-limited path below.
+    const fizzerRate = this.getRandomizedSpawnRate(levelConfig.fizzerSpawnRate)
+    if (levelConfig.fizzerSpawnRate !== Infinity && this.fizzerTimer >= fizzerRate) {
+      this.spawnScheduledFizzer()
+      this.fizzerTimer = 0
     }
 
     // Spawn BOSS (🎲 with randomness)
@@ -510,6 +520,20 @@ export class EnemyManager {
     if (this.fizzersSpawnedThisStreak >= this.maxFizzersPerStreak) {
       return // Don't spawn more than max per streak
     }
+
+    this.createFizzer()
+    this.fizzersSpawnedThisStreak++
+
+    if (DEBUG_MODE) console.log('⚡ BONUS FIZZER SPAWNED! Total this streak:', this.fizzersSpawnedThisStreak, '⚡')
+  }
+
+  private spawnScheduledFizzer(): void {
+    this.createFizzer()
+
+    if (DEBUG_MODE) console.log('⚡ OBJECTIVE FIZZER SPAWNED! ⚡')
+  }
+
+  private createFizzer(): void {
     
     const spawnPos = this.getSpawnPosition()
     const fizzer = new Fizzer(spawnPos.x, spawnPos.y)
@@ -534,9 +558,6 @@ export class EnemyManager {
     
     this.enemies.push(fizzer)
     this.sceneManager.addToScene(fizzer.getMesh())
-    this.fizzersSpawnedThisStreak++
-    
-    if (DEBUG_MODE) console.log('⚡ FIZZER SPAWNED! Total this streak:', this.fizzersSpawnedThisStreak, '⚡')
   }
 
   // Called when player takes damage - reset Fizzer streak counter
@@ -685,7 +706,7 @@ export class EnemyManager {
         const finalDamage = Math.floor(damageAmount * damageMultiplier)
         
         if (DEBUG_MODE) {
-          console.log(`💥 Chain damage: ${finalDamage} to ${enemy.constructor.name} at distance ${distance.toFixed(2)}`)
+          console.log(`💥 Chain damage: ${finalDamage} to ${enemy.getType()} at distance ${distance.toFixed(2)}`)
         }
         
         enemy.takeDamage(finalDamage)
@@ -745,7 +766,7 @@ export class EnemyManager {
             const finalDamage = Math.floor(damageAmount * damageMultiplier)
             
             if (DEBUG_MODE) {
-              console.log(`🐛 Worm segment chain damage: ${finalDamage} to ${enemy.constructor.name} at distance ${distance.toFixed(2)}`)
+              console.log(`🐛 Worm segment chain damage: ${finalDamage} to ${enemy.getType()} at distance ${distance.toFixed(2)}`)
             }
             
             enemy.takeDamage(finalDamage)
@@ -791,6 +812,7 @@ export class EnemyManager {
     
     // 🔫 ALSO CLEAR ORPHANED PROJECTILES! 🔫
     this.clearOrphanedProjectiles()
+    this.resetSpawnTimers()
   }
 
   getEnemies(): Enemy[] {
@@ -812,12 +834,16 @@ export class EnemyManager {
     // 🔫 CLEAR ORPHANED PROJECTILES TOO! 🔫
     this.clearOrphanedProjectiles()
     
-    // Reset spawn timers
+    this.resetSpawnTimers()
+  }
+
+  private resetSpawnTimers(): void {
     this.spawnTimer = 0
     this.scanDroneTimer = 0
     this.chaosWormTimer = 0
     this.voidSphereTimer = 0
     this.crystalSwarmTimer = 0
+    this.fizzerTimer = 0
     this.bossTimer = 0
     this.ufoTimer = 0
     this.fizzersSpawnedThisStreak = 0

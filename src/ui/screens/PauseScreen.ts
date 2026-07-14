@@ -10,6 +10,7 @@ export class PauseScreen {
   private static inputCooldown: number = 200 // ms
   private static gamepadDeadzone: number = 0.5
   private static keyboardListener: ((e: KeyboardEvent) => void) | null = null
+  private static resumeAudioListener: (() => void) | null = null
 
   static create(
     audioManager: AudioManager | null,
@@ -307,15 +308,15 @@ export class PauseScreen {
     PauseScreen.updateButtonSelection(buttons, audioManager, true)
 
     // 🎵 RESUME AUDIO CONTEXT ON FIRST INTERACTION 🎵
-    const resumeAudioOnce = () => {
+    PauseScreen.resumeAudioListener = () => {
       if (audioManager) {
         audioManager.resumeAudio().catch(e => console.warn('Audio resume failed:', e))
       }
     }
     
-    pauseScreen.addEventListener('click', resumeAudioOnce, { once: true })
-    pauseScreen.addEventListener('keydown', resumeAudioOnce, { once: true })
-    window.addEventListener('gamepadbuttondown', resumeAudioOnce, { once: true })
+    pauseScreen.addEventListener('click', PauseScreen.resumeAudioListener, { once: true })
+    pauseScreen.addEventListener('keydown', PauseScreen.resumeAudioListener, { once: true })
+    window.addEventListener('gamepadbuttondown', PauseScreen.resumeAudioListener, { once: true })
 
     return pauseScreen
   }
@@ -389,6 +390,11 @@ export class PauseScreen {
     if (PauseScreen.gamepadInterval !== null) {
       clearInterval(PauseScreen.gamepadInterval)
       PauseScreen.gamepadInterval = null
+    }
+
+    if (PauseScreen.resumeAudioListener) {
+      window.removeEventListener('gamepadbuttondown', PauseScreen.resumeAudioListener)
+      PauseScreen.resumeAudioListener = null
     }
 
     // Remove the pause screen from DOM

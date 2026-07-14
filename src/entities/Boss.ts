@@ -30,7 +30,7 @@ export class Boss extends Enemy {
   private colorPhase: number = 0
 
   constructor(x: number, y: number) {
-    super(x, y)
+    super(x, y, 'Boss')
     
     // 🎮 LOAD STATS FROM BALANCE CONFIG 🎮
     const stats = BALANCE_CONFIG.BOSS
@@ -989,4 +989,3 @@ export class Boss extends Enemy {
     super.destroy()
   }
 }
-

@@ -1,28 +1,21 @@
 # Tests
 
-This directory contains test files and utilities for Neural Break.
+Neural Break uses Playwright for automated browser regression coverage.
 
-## Manual Tests
+```bash
+npm test
+```
 
-### test_highscore.html
-Simple HTML page for manually testing the localStorage high score system.
+The suite covers:
 
-**How to use:**
-1. Open `test_highscore.html` in a browser
-2. Use buttons to test save/load/clear operations
-3. Verify scores are persisted correctly
+- boot, menu navigation, pause, and resume
+- leaderboard populated and empty states
+- game-over name submission by keyboard and pointer
+- first-use and post-reset enemy death particles
+- stable enemy identity and scoring under production minification
+- objective reachability and advancement across Levels 1-99
+- scheduled Fizzer spawning for objective-based levels
+- the live Level 1 completion transition into Level 2
 
-## Future Test Setup
-
-Consider adding automated tests with:
-- **Vitest** - Unit tests for game logic
-- **Playwright** - E2E tests for gameplay
-- **Testing Library** - UI component tests
-
-### Recommended Test Coverage
-- Collision detection (spatial grid)
-- Scoring system (combos, multipliers)
-- Enemy spawning logic
-- Weapon upgrades
-- Level progression
-- High score persistence
+`test_highscore.html` is a legacy localStorage utility. It does not exercise the
+production Neon-backed leaderboard path.

@@ -50,7 +50,7 @@ export class CrystalShardSwarm extends Enemy {
   private prismFragments: THREE.Mesh[] = []
 
   constructor(x: number, y: number) {
-    super(x, y)
+    super(x, y, 'CrystalShardSwarm')
     
     // 🎮 LOAD STATS FROM BALANCE CONFIG 🎮
     const stats = BALANCE_CONFIG.CRYSTAL_SWARM

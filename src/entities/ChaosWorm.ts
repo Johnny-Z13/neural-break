@@ -45,7 +45,7 @@ export class ChaosWorm extends Enemy {
   private originalColors: THREE.Color[] = []
 
   constructor(x: number, y: number) {
-    super(x, y)
+    super(x, y, 'ChaosWorm')
     
     // 🎮 LOAD STATS FROM BALANCE CONFIG 🎮
     const stats = BALANCE_CONFIG.CHAOS_WORM

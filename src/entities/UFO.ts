@@ -64,7 +64,7 @@ export class UFO extends Enemy {
   private debrisFragments: THREE.Mesh[] = []
 
   constructor(x: number, y: number) {
-    super(x, y)
+    super(x, y, 'UFO')
     
     // 🎮 LOAD STATS FROM BALANCE CONFIG 🎮
     const stats = BALANCE_CONFIG.UFO
@@ -1037,4 +1037,3 @@ export class UFO extends Enemy {
     console.log('🧹 UFO visuals cleaned up')
   }
 }
-

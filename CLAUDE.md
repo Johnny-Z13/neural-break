@@ -127,7 +127,6 @@ src/
 ├── core/                   # Core game systems
 │   ├── Game.ts            # Main game coordinator
 │   ├── GameState.ts       # State management and scoring
-│   ├── GameTimer.ts       # Timer system
 │   ├── InputManager.ts    # Input handling
 │   └── EnemyManager.ts    # Enemy spawning/management
 ├── entities/               # Game entities

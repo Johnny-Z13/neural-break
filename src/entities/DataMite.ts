@@ -10,7 +10,7 @@ export class DataMite extends Enemy {
   private swaySpeed: number = 3.0 // Speed of sway oscillation
   
   constructor(x: number, y: number) {
-    super(x, y)
+    super(x, y, 'DataMite')
     
     // 🎮 LOAD STATS FROM BALANCE CONFIG 🎮
     const stats = BALANCE_CONFIG.DATA_MITE
@@ -260,4 +260,3 @@ export class DataMite extends Enemy {
     }
   }
 }
-

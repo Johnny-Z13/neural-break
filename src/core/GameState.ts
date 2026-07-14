@@ -39,7 +39,8 @@ export interface HighScoreEntry {
   gameMode: GameMode // Track which mode the score was achieved in
 }
 
-import { HighScoreServiceFactory, LocalStorageHighScoreService } from '../data/HighScoreService'
+import { HighScoreServiceFactory } from '../data/HighScoreService'
+import type { EnemyType } from '../entities/Enemy'
 
 // 🎯 ARCADE-STYLE POINT VALUES - Only for SHOOTING enemies! 🎯
 export const KILL_POINTS = {
@@ -57,8 +58,8 @@ export class ScoreManager {
   private static readonly MAX_HIGH_SCORES = 10
 
   // 🎮 GET BASE POINTS FOR ENEMY TYPE 🎮
-  static getKillPoints(enemyType: string): number {
-    return (KILL_POINTS as any)[enemyType] || 100
+  static getKillPoints(enemyType: EnemyType): number {
+    return KILL_POINTS[enemyType]
   }
 
   // Score is now tracked directly via addKillScore - this just returns the current score
@@ -148,9 +149,6 @@ export class ScoreManager {
   // 💾 GET LAST PLAYER NAME - For convenience! 💾
   static getLastPlayerName(): string {
     const service = HighScoreServiceFactory.getService()
-    if (service instanceof LocalStorageHighScoreService) {
-      return (service as any).getLastPlayerName()
-    }
-    return ''
+    return service.getLastPlayerName?.() ?? ''
   }
 }

@@ -152,7 +152,9 @@ npm test
 ```
 
 The browser suite covers menu navigation, pause/resume, leaderboard states,
-game-over name submission, and first-kill death-particle emission.
+game-over name submission, first-kill death-particle emission, stable enemy
+identity, scheduled objective spawns, every Level 1-99 configuration, and the
+live Level 1-to-2 transition.
 
 ---
 

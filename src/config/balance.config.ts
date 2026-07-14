@@ -313,7 +313,7 @@ export const BALANCE_CONFIG = {
     COMBO_TIMER: 3.0,              // Time to maintain combo (seconds)
     KILL_CHAIN_WINDOW: 1.5,        // Time window for multiplier increase
     MULTIPLIER_DECAY_TIME: 2.0,    // Time before multiplier decays
-    MAX_MULTIPLIER: 10,            // Maximum score multiplier
+    MAX_MULTIPLIER: 15,            // Maximum score multiplier
     
     // Bonus Points
     LEVEL_COMPLETE_BONUS: 1000,    // Bonus for completing a level
@@ -416,4 +416,3 @@ export function getEnemyStatsForLevel(enemyType: keyof typeof BALANCE_CONFIG, le
   
   return scaledStats
 }
-

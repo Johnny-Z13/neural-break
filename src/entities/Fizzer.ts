@@ -48,7 +48,7 @@ export class Fizzer extends Enemy {
   private electricBolts: THREE.Line[] = []
 
   constructor(x: number, y: number) {
-    super(x, y)
+    super(x, y, 'Fizzer')
     
     // 🎮 LOAD STATS FROM BALANCE CONFIG 🎮
     const stats = BALANCE_CONFIG.FIZZER
@@ -679,4 +679,3 @@ export class Fizzer extends Enemy {
     this.trailParticles.geometry.attributes.color.needsUpdate = true
   }
 }
-

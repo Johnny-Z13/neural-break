@@ -5,7 +5,6 @@ import { Player } from '../entities/Player'
 import { EnemyManager } from './EnemyManager'
 import { WeaponSystem, WeaponType } from '../weapons/WeaponSystem'
 import { UIManager } from '../ui/UIManager'
-import { GameTimer } from './GameTimer'
 import { AudioManager } from '../audio/AudioManager'
 import { GameStateType, GameStats, ScoreManager, GameMode } from './GameState'
 import { GameScreens } from '../ui/GameScreens'
@@ -21,7 +20,7 @@ import { InvulnerableManager } from './InvulnerableManager'
 import { GameModeManager } from './GameModeManager'
 import { AttractMode } from './AttractMode'
 import { StarfieldManager } from '../graphics/StarfieldManager'
-import { DEBUG_MODE } from '../config'
+import { BALANCE_CONFIG, DEBUG_MODE } from '../config'
 import { PostProcessControlPanel } from '../ui/PostProcessControlPanel'
 import { PostProcessSettings } from '../config/PostProcessSettings'
 
@@ -37,7 +36,6 @@ export class Game {
   private shieldManager: ShieldManager
   private invulnerableManager: InvulnerableManager
   private uiManager: UIManager
-  private gameTimer: GameTimer
   private levelManager: LevelManager
   private audioManager: AudioManager
   private postProcessControlPanel: PostProcessControlPanel | null = null
@@ -70,9 +68,9 @@ export class Game {
   // 🎯 ARCADE-STYLE MULTIPLIER SYSTEM! 🎯
   private scoreMultiplier: number = 1
   private multiplierTimer: number = 0
-  private multiplierDecayTime: number = 2.0 // Multiplier decays after 2 seconds without kill
+  private multiplierDecayTime: number = BALANCE_CONFIG.SCORING.MULTIPLIER_DECAY_TIME
   private lastKillTime: number = 0
-  private killChainWindow: number = 1.5 // Time window to chain kills for multiplier increase
+  private killChainWindow: number = BALANCE_CONFIG.SCORING.KILL_CHAIN_WINDOW
   private lastMultiplierShown: number = 0 // Prevent spam of multiplier notifications
   
   // Legacy - kept for compatibility
@@ -106,8 +104,6 @@ export class Game {
     this.shieldManager = new ShieldManager()
     this.invulnerableManager = new InvulnerableManager()
     
-    // Timer will be initialized per-level
-    this.gameTimer = new GameTimer(30) // Placeholder, will be updated per level
   }
 
   private hidePlayerShip(): void {
@@ -199,6 +195,15 @@ export class Game {
       // Show start screen
       if (DEBUG_MODE) console.log('📺 Showing start screen...')
       this.showStartScreen()
+
+      if (import.meta.env.DEV) {
+        const { installE2ETestHook } = await import('../debug/installE2ETestHook')
+        installE2ETestHook({
+          getLevelManager: () => this.levelManager,
+          getStatsLevel: () => this.gameStats.level,
+          isTransitioning: () => this.isLevelTransitioning,
+        })
+      }
       
       if (DEBUG_MODE) console.log('✅ Game initialization complete!')
       
@@ -263,7 +268,7 @@ export class Game {
     )
     console.log('🎮 GameScreens.showStartScreen returned')
   }
-  
+
   private showPauseMenu(): void {
     if (DEBUG_MODE) console.log('🛑 Game paused')
     this.isPaused = true
@@ -520,18 +525,14 @@ export class Game {
     }
     if (DEBUG_MODE) console.log('✅ Applied +20 speed-ups (max speed)')
     
-    // Initialize timer with a long time for TEST mode
-    this.gameTimer = new GameTimer(999999)
-    
     // Show HUD with initial values
     this.uiManager.setHUDVisibility(true)
     
     // Start ambient soundscape
-    this.audioManager.startAmbientSoundscape();
+    this.audioManager.startAmbientSoundscape()
     
     // Start the game loop
-    (this as any).lastFrameTime = performance.now();
-    this.start();
+    this.start()
     
     // Start scene transition
     this.sceneManager.startTransition('zoom');
@@ -1107,7 +1108,7 @@ export class Game {
     this.updateGameStats()
     
     // Update UI
-    if (this.uiManager && this.player && this.gameTimer) {
+    if (this.uiManager && this.player) {
       this.uiManager.update(this.player, this.gameStats, this.combo, this.levelManager)
     }
   }
@@ -1118,7 +1119,7 @@ export class Game {
     }
     
     this.gameStats.survivedTime = this.levelManager.getTotalElapsedTime()
-    this.gameStats.level = this.player.getLevel()
+    this.gameStats.level = this.levelManager.getCurrentLevel()
     this.gameStats.totalXP = this.calculateTotalXP()
     this.gameStats.highestCombo = Math.max(this.gameStats.highestCombo, this.combo)
     // Score is now tracked directly via kills - don't recalculate
@@ -1310,13 +1311,16 @@ export class Game {
             // 🎯 ARCADE MULTIPLIER SYSTEM! 🎯
             const currentTime = this.levelManager.getTotalElapsedTime()
             const timeSinceLastKill = currentTime - this.lastKillTime
-            const enemyType = enemy.constructor.name
+            const enemyType = enemy.getType()
             
             // Check if kill is within chain window
             if (timeSinceLastKill <= this.killChainWindow && this.lastKillTime > 0) {
               // Increase multiplier!
               const oldMultiplier = this.scoreMultiplier
-              this.scoreMultiplier = Math.min(this.scoreMultiplier + 1, 15) // Cap at x15
+              this.scoreMultiplier = Math.min(
+                this.scoreMultiplier + 1,
+                BALANCE_CONFIG.SCORING.MAX_MULTIPLIER
+              )
               
               // Show multiplier increase notification (throttled)
               if (this.scoreMultiplier > oldMultiplier && 
@@ -1353,7 +1357,7 @@ export class Game {
             
             // Add combo (legacy)
             this.combo++
-            this.comboTimer = 3.0
+            this.comboTimer = BALANCE_CONFIG.SCORING.COMBO_TIMER
             
             this.player.addXP(enemy.getXPValue())
             
@@ -1551,7 +1555,7 @@ export class Game {
   private trackEnemyKill(enemy: Enemy): void {
     this.gameStats.enemiesKilled++
     
-    const enemyType = enemy.constructor.name
+    const enemyType = enemy.getType()
     
     // 🎯 REGISTER KILL WITH LEVEL MANAGER FOR OBJECTIVES
     this.levelManager.registerKill(enemyType)
@@ -1815,7 +1819,7 @@ export class Game {
           )
           
           // Play special transition sound
-          this.audioManager.playEnemyDeathSound(enemy.constructor.name)
+          this.audioManager.playEnemyDeathSound(enemy.getType())
         }
       }, randomDelay)
     })

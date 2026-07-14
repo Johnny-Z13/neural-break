@@ -4,8 +4,11 @@
  * Each level has specific kill objectives that must be completed.
  * When objectives are met, all enemies are cleared and level transition plays.
  * 
- * Example: Level 1 = Kill 10 DataMites + 5 ScanDrones
+ * Example: Level 1 = Kill 22 DataMites + 5 ScanDrones
  */
+
+import type { EnemyType } from '../entities/Enemy'
+import { BALANCE_CONFIG } from '../config'
 
 export interface LevelObjectives {
   dataMites: number
@@ -44,7 +47,7 @@ export interface LevelProgress {
 }
 
 export class LevelManager {
-  private static readonly TOTAL_LEVELS = 99
+  private static readonly TOTAL_LEVELS = BALANCE_CONFIG.LEVELS.TOTAL_LEVELS
   private currentLevel: number = 1
   private totalElapsedTime: number = 0
   private currentProgress: LevelProgress
@@ -57,7 +60,7 @@ export class LevelManager {
    * - Spawn rates (how often enemies spawn)
    * 
    * ⏱️ TARGET: 60-120 seconds per level
-   * 🎯 ALL ENEMY TYPES BY LEVEL 5 (compressed progression)
+   * 🎯 ALL ENEMY TYPES BY LEVEL 6 (compressed progression)
    * 🎲 SURPRISE LEVELS EVERY 5 LEVELS!
    * 📈 DIFFICULTY RAMPS CONTINUOUSLY
    */
@@ -449,7 +452,7 @@ export class LevelManager {
   /**
    * Register an enemy kill for objective tracking
    */
-  registerKill(enemyType: string): void {
+  registerKill(enemyType: EnemyType): void {
     if (this.objectivesComplete) return
 
     switch (enemyType) {
@@ -653,22 +656,4 @@ export class LevelManager {
     }
   }
 
-  // ═══════════════════════════════════════════════════════
-  // 🎮 LEGACY COMPATIBILITY (for timer-based systems)
-  // ═══════════════════════════════════════════════════════
-
-  /**
-   * Legacy method - returns 0 since we're objective-based now
-   */
-  getLevelElapsedTime(): number {
-    return 0
-  }
-
-  /**
-   * Legacy method - objectives-based system doesn't use time
-   * This always returns false now - use checkObjectivesComplete() instead
-   */
-  checkLevelComplete(): boolean {
-    return false
-  }
 }

@@ -12,6 +12,7 @@ import { escapeHtml } from '../../utils/escapeHtml'
  */
 export class LeaderboardScreen {
   private static keyboardListener: ((e: KeyboardEvent) => void) | null = null
+  private static resumeAudioListener: (() => void) | null = null
   private static gamepadInterval: number | null = null
   private static lastGamepadInput = 0
   private static inputCooldown = 200 // ms between inputs
@@ -517,15 +518,15 @@ export class LeaderboardScreen {
     backButton.classList.add('selected')
 
     // 🎵 RESUME AUDIO CONTEXT ON FIRST INTERACTION 🎵
-    const resumeAudioOnce = () => {
+    LeaderboardScreen.resumeAudioListener = () => {
       if (audioManager) {
         audioManager.resumeAudio().catch(e => console.warn('Audio resume failed:', e))
       }
     }
     
-    leaderboardScreen.addEventListener('click', resumeAudioOnce, { once: true })
-    leaderboardScreen.addEventListener('keydown', resumeAudioOnce, { once: true })
-    window.addEventListener('gamepadbuttondown', resumeAudioOnce, { once: true })
+    leaderboardScreen.addEventListener('click', LeaderboardScreen.resumeAudioListener, { once: true })
+    leaderboardScreen.addEventListener('keydown', LeaderboardScreen.resumeAudioListener, { once: true })
+    window.addEventListener('gamepadbuttondown', LeaderboardScreen.resumeAudioListener, { once: true })
 
     return leaderboardScreen
   }
@@ -675,6 +676,11 @@ export class LeaderboardScreen {
     if (LeaderboardScreen.gamepadInterval !== null) {
       clearInterval(LeaderboardScreen.gamepadInterval)
       LeaderboardScreen.gamepadInterval = null
+    }
+
+    if (LeaderboardScreen.resumeAudioListener) {
+      window.removeEventListener('gamepadbuttondown', LeaderboardScreen.resumeAudioListener)
+      LeaderboardScreen.resumeAudioListener = null
     }
 
     // Reset state
