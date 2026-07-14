@@ -31,7 +31,7 @@ export class ScanDrone extends Enemy {
   private electricArcs: THREE.Line[] = []
 
   constructor(x: number, y: number) {
-    super(x, y)
+    super(x, y, 'ScanDrone')
     
     // 🎮 LOAD STATS FROM BALANCE CONFIG 🎮
     const stats = BALANCE_CONFIG.SCAN_DRONE
@@ -845,4 +845,3 @@ export class ScanDrone extends Enemy {
     }
   }
 }
-

@@ -11,6 +11,16 @@ export enum EnemyState {
   DEAD = 'dead'
 }
 
+export type EnemyType =
+  | 'DataMite'
+  | 'ScanDrone'
+  | 'ChaosWorm'
+  | 'VoidSphere'
+  | 'CrystalShardSwarm'
+  | 'Fizzer'
+  | 'UFO'
+  | 'Boss'
+
 // 🎬 ANIMATION CONFIGURATION INTERFACES 🎬
 export interface SpawnConfig {
   duration: number
@@ -51,6 +61,7 @@ export interface DeathConfig {
 }
 
 export abstract class Enemy {
+  private readonly enemyType: EnemyType
   protected mesh!: THREE.Mesh
   protected position: THREE.Vector3
   protected velocity: THREE.Vector3
@@ -66,6 +77,14 @@ export abstract class Enemy {
   protected lastPosition: THREE.Vector3 = new THREE.Vector3()
   protected trailTimer: number = 0
   protected trailInterval: number = 0.05 // Trail every 50ms
+
+  // 🔴 UPDATE-DRIVEN HIT FLASH - avoids timers retaining disposed materials
+  private hitFlashTimer: number = 0
+  private readonly hitFlashDuration: number = 0.2
+  private hitFlashMaterial: (THREE.Material & { color?: THREE.Color; emissive?: THREE.Color }) | null = null
+  private hitFlashOriginalColor: THREE.Color | null = null
+  private hitFlashOriginalEmissive: THREE.Color | null = null
+  private hitFlashOriginalScale: THREE.Vector3 | null = null
   
   // 📊 KILL TRACKING - Separate from alive flag for enemies with death animations! 📊
   private killTracked: boolean = false
@@ -80,9 +99,14 @@ export abstract class Enemy {
   private spawnSoundPlayed: boolean = false
   private deathSoundPlayed: boolean = false
 
-  constructor(x: number, y: number) {
+  constructor(x: number, y: number, enemyType: EnemyType) {
+    this.enemyType = enemyType
     this.position = new THREE.Vector3(x, y, 0)
     this.velocity = new THREE.Vector3(0, 0, 0)
+  }
+
+  getType(): EnemyType {
+    return this.enemyType
   }
 
   abstract initialize(): void
@@ -175,6 +199,7 @@ export abstract class Enemy {
 
     // Update visual effects
     this.updateVisuals(deltaTime)
+    this.updateHitFlash(deltaTime)
   }
 
   // 🌟 SPAWN ANIMATION HANDLER 🌟
@@ -265,6 +290,7 @@ export abstract class Enemy {
   
   // 💀 START DEATH SEQUENCE 💀
   private startDeathSequence(): void {
+    this.resetHitFlash()
     this.state = EnemyState.DYING
     this.animTimer = 0
     this.deathSoundPlayed = false
@@ -274,7 +300,7 @@ export abstract class Enemy {
     // Play death sound
     if (!this.deathSoundPlayed && this.audioManager) {
       this.deathSoundPlayed = true
-      const enemyType = this.constructor.name
+      const enemyType = this.getType()
       this.audioManager.playEnemyDeathSound(enemyType)
     }
     
@@ -316,7 +342,7 @@ export abstract class Enemy {
       }
       
       // Vector death particles
-      const enemyType = this.constructor.name
+      const enemyType = this.getType()
       const deathColor = config.explosion 
         ? new THREE.Color(config.explosion.color)
         : new THREE.Color(0xFF4400)
@@ -354,55 +380,73 @@ export abstract class Enemy {
   
   // 🔴 RED FLASH - Clear visual feedback that enemy was hit! 🔴
   private flashRed(): void {
+    this.resetHitFlash()
+
     const material = this.mesh.material as THREE.Material & { color?: THREE.Color; emissive?: THREE.Color }
     
     // Safety check - ensure material has color property
     if (!material || !material.color) return
 
-    const color = material.color
-    const originalColor = color.clone()
-    const originalEmissive = material.emissive?.clone() // May be undefined for BasicMaterial
-    const originalScale = this.mesh.scale.clone()
+    this.hitFlashTimer = this.hitFlashDuration
+    this.hitFlashMaterial = material
+    this.hitFlashOriginalColor = material.color.clone()
+    this.hitFlashOriginalEmissive = material.emissive?.clone() ?? null
+    this.hitFlashOriginalScale = this.mesh.scale.clone()
 
     // BRIGHT RED FLASH! (same as player)
     if (material.emissive) {
       material.emissive.setHex(0xFF0000) // Pure red glow (if material supports it)
     }
-    color.setHex(0xFF0000)    // Full red
+    material.color.setHex(0xFF0000) // Full red
 
     // Scale up for impact effect
     this.mesh.scale.multiplyScalar(1.3)
 
-    // Flash sequence: Red → White → Red → Normal
-    setTimeout(() => {
-      if (material.emissive) {
-        material.emissive.setHex(0xFFFFFF) // White flash
-      }
-      color.setHex(0xFFAAAA)    // Light red
-    }, 50)
+  }
 
-    setTimeout(() => {
-      if (material.emissive) {
-        material.emissive.setHex(0xFF0000) // Back to red
-      }
+  private updateHitFlash(deltaTime: number): void {
+    if (this.hitFlashTimer <= 0 || !this.hitFlashMaterial || !this.hitFlashMaterial.color) return
+
+    this.hitFlashTimer = Math.max(0, this.hitFlashTimer - deltaTime)
+    const elapsed = this.hitFlashDuration - this.hitFlashTimer
+    const material = this.hitFlashMaterial
+    const color = material.color
+    if (!color) return
+
+    if (elapsed < 0.05) {
+      material.emissive?.setHex(0xFF0000)
+      color.setHex(0xFF0000)
+    } else if (elapsed < 0.1) {
+      material.emissive?.setHex(0xFFFFFF)
+      color.setHex(0xFFAAAA)
+    } else if (elapsed < 0.15) {
+      material.emissive?.setHex(0xFF0000)
       color.setHex(0xFF4444)
-      this.mesh.scale.copy(originalScale) // Reset scale
-    }, 100)
-
-    setTimeout(() => {
-      if (material.emissive) {
-        material.emissive.setHex(0xFF6666) // Fading red
-      }
+      if (this.hitFlashOriginalScale) this.mesh.scale.copy(this.hitFlashOriginalScale)
+    } else if (this.hitFlashTimer > 0) {
+      material.emissive?.setHex(0xFF6666)
       color.setHex(0xFF8888)
-    }, 150)
+    } else {
+      this.resetHitFlash()
+    }
+  }
 
-    setTimeout(() => {
-      // Restore original colors
-      if (material.emissive && originalEmissive) {
-        material.emissive.copy(originalEmissive)
-      }
-      color.copy(originalColor)
-    }, 200)
+  private resetHitFlash(): void {
+    if (this.hitFlashMaterial?.color && this.hitFlashOriginalColor) {
+      this.hitFlashMaterial.color.copy(this.hitFlashOriginalColor)
+    }
+    if (this.hitFlashMaterial?.emissive && this.hitFlashOriginalEmissive) {
+      this.hitFlashMaterial.emissive.copy(this.hitFlashOriginalEmissive)
+    }
+    if (this.hitFlashOriginalScale && this.mesh) {
+      this.mesh.scale.copy(this.hitFlashOriginalScale)
+    }
+
+    this.hitFlashTimer = 0
+    this.hitFlashMaterial = null
+    this.hitFlashOriginalColor = null
+    this.hitFlashOriginalEmissive = null
+    this.hitFlashOriginalScale = null
   }
 
   // 💀 DEPRECATED - Death effects now handled by lifecycle system 💀
@@ -420,13 +464,14 @@ export abstract class Enemy {
     // Only create trails if moving and enough time has passed
     const movement = this.position.distanceTo(this.lastPosition)
     if (movement > 0.1 && this.trailTimer >= this.trailInterval) {
-      const enemyType = this.constructor.name
+      const enemyType = this.getType()
       this.effectsSystem.createEnemyTrail(this.position, this.velocity, enemyType)
       this.trailTimer = 0
     }
   }
 
   destroy(): void {
+    this.resetHitFlash()
     this.alive = false
 
     // 🧹 DISPOSE GPU RESOURCES - Prevent VRAM leak on every restart/level-clear! 🧹

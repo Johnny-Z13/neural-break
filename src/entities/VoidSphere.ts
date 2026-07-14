@@ -47,7 +47,7 @@ export class VoidSphere extends Enemy {
   private deathInitialized: boolean = false
 
   constructor(x: number, y: number) {
-    super(x, y)
+    super(x, y, 'VoidSphere')
     
     // 🎮 LOAD STATS FROM BALANCE CONFIG 🎮
     const stats = BALANCE_CONFIG.VOID_SPHERE

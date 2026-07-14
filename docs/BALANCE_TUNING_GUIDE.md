@@ -291,7 +291,7 @@ BASE_KILL_POINTS: 100      // Points per enemy
 COMBO_TIMER: 3.0           // Combo maintenance time
 KILL_CHAIN_WINDOW: 1.5     // Multiplier increase window
 MULTIPLIER_DECAY_TIME: 2.0
-MAX_MULTIPLIER: 10
+MAX_MULTIPLIER: 15
 
 LEVEL_COMPLETE_BONUS: 1000
 BOSS_KILL_MULTIPLIER: 2.0  // Bosses worth 2x
@@ -305,13 +305,13 @@ PERFECT_LEVEL_BONUS: 500   // No damage bonus
 Location: `BALANCE_CONFIG.LEVELS`
 
 ```typescript
-TOTAL_LEVELS: 10
+TOTAL_LEVELS: 99
 
 // Per-level scaling
-ENEMY_HEALTH_SCALE: 1.1    // +10% health per level
-ENEMY_SPEED_SCALE: 1.05    // +5% speed per level
-ENEMY_DAMAGE_SCALE: 1.1    // +10% damage per level
-SPAWN_RATE_SCALE: 0.9      // -10% spawn time (faster)
+ENEMY_HEALTH_SCALE: 1.025  // +2.5% health per level
+ENEMY_SPEED_SCALE: 1.012   // +1.2% speed per level
+ENEMY_DAMAGE_SCALE: 1.02   // +2% damage per level
+SPAWN_RATE_SCALE: 0.992    // -0.8% spawn time per level
 
 LEVEL_DURATION: 120        // 2 minutes per level
 BOSS_APPEARS_AT: 100       // Boss spawns at 100 seconds
@@ -497,4 +497,3 @@ HELTH: 100  // Property 'HELTH' does not exist
 ---
 
 **Happy balancing! 🎮**
-

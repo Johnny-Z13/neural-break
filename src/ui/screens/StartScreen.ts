@@ -11,6 +11,7 @@ import { StarfieldManager } from '../../graphics/StarfieldManager'
 export class StartScreen {
   private static selectedButtonIndex = 0
   private static keyboardListener: ((event: KeyboardEvent) => void) | null = null
+  private static resumeAudioListener: (() => void) | null = null
   private static gamepadInterval: number | null = null
   private static lastGamepadInput = 0
   private static readonly gamepadDeadzone = 0.5
@@ -208,7 +209,7 @@ export class StartScreen {
 
       #startScreen .threat-database {
         width: min(100%, 880px);
-        margin: 0 0 clamp(1.5rem, 3.5vh, 2.5rem);
+        margin: 0 0 clamp(-1rem, -1.8vh, -0.5rem);
         pointer-events: none;
       }
 
@@ -446,10 +447,6 @@ export class StartScreen {
           font-size: 0.62rem;
         }
 
-        #startScreen .threat-database {
-          margin-bottom: 2.65rem;
-        }
-
         #startScreen .threat-database h2 {
           margin-bottom: 0.6rem;
           font-size: 1.1rem;
@@ -565,10 +562,6 @@ export class StartScreen {
 
         #startScreen .game-subtitle {
           display: none;
-        }
-
-        #startScreen .threat-database {
-          margin-bottom: 0.65rem;
         }
 
         #startScreen .threat-database h2 {
@@ -725,12 +718,12 @@ export class StartScreen {
 
     StartScreen.updateButtonSelection(buttons, audioManager, true)
 
-    const resumeAudioOnce = () => {
+    StartScreen.resumeAudioListener = () => {
       audioManager?.resumeAudio().catch(error => console.warn('Audio resume failed:', error))
     }
-    startScreen.addEventListener('click', resumeAudioOnce, { once: true })
-    startScreen.addEventListener('keydown', resumeAudioOnce, { once: true })
-    window.addEventListener('gamepadbuttondown', resumeAudioOnce, { once: true })
+    startScreen.addEventListener('click', StartScreen.resumeAudioListener, { once: true })
+    startScreen.addEventListener('keydown', StartScreen.resumeAudioListener, { once: true })
+    window.addEventListener('gamepadbuttondown', StartScreen.resumeAudioListener, { once: true })
 
     return startScreen
   }
@@ -783,6 +776,11 @@ export class StartScreen {
     if (StartScreen.gamepadInterval !== null) {
       clearInterval(StartScreen.gamepadInterval)
       StartScreen.gamepadInterval = null
+    }
+
+    if (StartScreen.resumeAudioListener) {
+      window.removeEventListener('gamepadbuttondown', StartScreen.resumeAudioListener)
+      StartScreen.resumeAudioListener = null
     }
 
     StartScreen.selectedButtonIndex = 0

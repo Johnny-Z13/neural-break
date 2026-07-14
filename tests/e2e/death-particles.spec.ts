@@ -1,4 +1,5 @@
 import { test, expect } from '@playwright/test'
+import type * as THREE from 'three'
 
 test.describe('enemy death particles', () => {
   test.beforeEach(async ({ page }) => {
@@ -12,7 +13,8 @@ test.describe('enemy death particles', () => {
       const system = pool.getParticleSystem()
       const position = system.position.clone().set(7, -3, 0.5)
       const velocity = system.position.clone().set(1, 0, 0)
-      const color = system.material.color.clone().setRGB(1, 0.25, 0.1)
+      const material = system.material as THREE.PointsMaterial
+      const color = material.color.clone().setRGB(1, 0.25, 0.1)
 
       const snapshot = () => {
         const positions = system.geometry.attributes.position.array as Float32Array
